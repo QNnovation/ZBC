@@ -13,10 +13,10 @@ HEADERS += \
 
 SOURCES += \
     zbcmainwindow.cpp \
-    zebestcommander_02.cpp \
     zbcpushbutton.cpp \
     zbcnewfolder.cpp \
     zbcsideframe.cpp \
     zbccentralwidget.cpp \
     wgttextview.cpp \
-    wgtcopy.cpp
+    wgtcopy.cpp \
+    main.cpp
