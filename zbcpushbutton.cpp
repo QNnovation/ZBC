@@ -15,6 +15,7 @@ zbcPushButton::zbcPushButton(const QString& str) : QPushButton(str)
 {
     Q_UNUSED(pe)
     this->setFlat(false);
+    QPushButton::enterEvent(pe);
 }
 
 
@@ -23,4 +24,5 @@ zbcPushButton::zbcPushButton(const QString& str) : QPushButton(str)
 {
     Q_UNUSED(pe)
     this->setFlat(true);
+    QPushButton::leaveEvent(pe);
 }

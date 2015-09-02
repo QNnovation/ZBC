@@ -5,12 +5,13 @@
 
 class zbcPushButton : public QPushButton
 {
+    Q_OBJECT
 public:
     explicit zbcPushButton(const QString&);
 
 protected:
-    virtual void enterEvent(QEvent* pe);
-    virtual void leaveEvent(QEvent* pe);
+    virtual void enterEvent(QEvent* pe) override;
+    virtual void leaveEvent(QEvent* pe) override;
 };
 
 #endif // ZBCPUSHBUTTON_H
