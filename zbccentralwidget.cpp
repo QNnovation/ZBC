@@ -2,6 +2,7 @@
 
 #include "zbccentralwidget.h"
 #include "zbcnewfolder.h"
+#include "zbc_newfolder.h"
 #include "zbcsideframe.h"
 #include "zbcpushbutton.h"
 #include "wgtcopy.h"
@@ -264,6 +265,7 @@ void zbcCentralWidget::runMove()
 //New Folder Button Pressed
 void zbcCentralWidget::runNewFolder()
 {
+/*
     zbcNewFolder* pwgtNewFolder     = new zbcNewFolder(this);
     pwgtNewFolder->setModal(true);
     pwgtNewFolder->show();
@@ -276,6 +278,11 @@ void zbcCentralWidget::runNewFolder()
 
     connect(m_psfwActive, SIGNAL(dirNotCreated()),
             pwgtNewFolder, SLOT(dirNotCreated()));
+*/
+    ZBC_NewFolder*  pwgtNewFolder   = new ZBC_NewFolder(this);
+//    pwgtNewFolder->setModal(true);
+//    pwgtNewFolder->show();
+    pwgtNewFolder->exec();
 }
 
 
