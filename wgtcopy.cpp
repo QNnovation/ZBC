@@ -262,25 +262,21 @@ void FileOperations::copyDirs(const QDir &dir)
             fullPath.push_back(it.filePath());
     }
     //Get path to the create dirs
-    for (int i = 0; i < fullPath.size(); ++i)
-    {
-        if (QFileInfo(fullPath.at(i)).isDir())
-        {
+    for (int i = 0; i < fullPath.size(); ++i) {
+        if (QFileInfo(fullPath.at(i)).isDir()) {
             fullPath[i].remove(0, QString(dir.path()).size() - QString(dir.dirName()).size());
             dirCreate.push_back(fileDestination + fullPath.at(i));
         }
     }
     //Create folders;
-    for (int i = 0; i < dirCreate.size(); ++i)
-    {
-        if (!QDir().exists(dirCreate.at(i)))
+    for (int i = 0; i < dirCreate.size(); ++i) {
+        if (!QDir().exists(dirCreate.at(i))) {
             QDir().mkdir(dirCreate.at(i));
+        }
     }
     // !Add files;
-    for (int i = 0; i < fullPath.size(); ++i)
-    {
-        if (QFileInfo(fullPath.at(i)).isFile())
-        {
+    for (int i = 0; i < fullPath.size(); ++i) {
+        if (QFileInfo(fullPath.at(i)).isFile()) {
             filesPath.append(fullPath.at(i));
             filesDestination.append(fileDestination + fullPath[i].remove(0, QString(dir.path()).size() - QString(dir.dirName()).size()));
         }
@@ -292,13 +288,11 @@ void FileOperations::loadFiles(QStringList files_Path, const QString files_Desti
     //qDebug() << "Load files operation detected!";
     //checking copy file to self
     QString checkPath;
-    for (int i = 0; i < files_Path.size(); ++i)
-    {
+    for (int i = 0; i < files_Path.size(); ++i) {
         checkPath = files_Path.at(i);
         checkPath = checkPath.left(checkPath.lastIndexOf('/')) + "/";
         //qDebug() << "Copy to itself check Destination:" << files_Destination << "Checkpath: " << checkPath;
-        if (checkPath == files_Destination)
-        {
+        if (checkPath == files_Destination) {
             QMessageBox::warning(0, "Abort", "You can not copy a file to itself!");
             files_Path.clear();
         }
@@ -323,16 +317,12 @@ void FileOperations::loadFiles(QStringList files_Path, const QString files_Desti
 
     fileDestination = files_Destination;
 
-    for (int i = 0; i < files_Path.size(); ++i)
-    {
+    for (int i = 0; i < files_Path.size(); ++i) {
         //qDebug() << "Input files:"<<files_Path.at(i);
-        if (QFileInfo(files_Path.at(i)).isFile())
-        {
+        if (QFileInfo(files_Path.at(i)).isFile()) {
             filesPath.push_back(files_Path.at(i));
             filesDestination.push_back(files_Destination + QFileInfo(files_Path.at(i)).fileName());
-        }
-        else
-        {
+        } else {
             filesPath.push_back(files_Path.at(i));
             filesDestination.push_back(files_Destination);
             deleteDirList.append(files_Path.at(i));
@@ -340,19 +330,16 @@ void FileOperations::loadFiles(QStringList files_Path, const QString files_Desti
     }
 
     //if dir, add files to array
-    for (int i = 0; i < filesPath.size(); ++i)
-    {
-        if (QFileInfo(filesPath.at(i)).isDir())
-        {
+    for (int i = 0; i < filesPath.size(); ++i) {
+        if (QFileInfo(filesPath.at(i)).isDir()) {
             copyDirs(QDir(filesPath.at(i)));
         }
     }
     //get the total size of files
     filesSize = 0;
     for (int j = 0; j < filesPath.size(); ++j)
-    {
         filesSize += QFileInfo(filesPath.at(j)).size();
-    }
+
 
     //check for free space
     QString path = fileDestination;
@@ -364,15 +351,12 @@ void FileOperations::loadFiles(QStringList files_Path, const QString files_Desti
         filesPath.clear();
     }
     //overwrite check
-    for(int i = 0; i < filesPath.size(); ++i)
-    {
+    for (int i = 0; i < filesPath.size(); ++i) {
         QFileInfo info(filesPath.at(i));
         QString checkFile = filesDestination.at(i);
         //qDebug() << "File overwrite:" << checkFile << filesPath.at(i);
-        if (info.isFile())
-        {
-            if (QFile::exists(checkFile))
-            {
+        if (info.isFile()) {
+            if (QFile::exists(checkFile)) {
                 QMessageBox msgBox;
                 msgBox.setText(filesPath.at(i));
                 msgBox.setWindowTitle("File exists");
@@ -385,33 +369,26 @@ void FileOperations::loadFiles(QStringList files_Path, const QString files_Desti
                 QPushButton *quit = msgBox.addButton(tr("Cancel"), QMessageBox::ActionRole);
                 msgBox.setDefaultButton(change);
                 msgBox.exec();
-                if(msgBox.clickedButton()== change)
-                {
+                if (msgBox.clickedButton()== change) {
 
                 }
-                else if(msgBox.clickedButton()== changeAll)
-                {
+                else if (msgBox.clickedButton()== changeAll) {
                     i = filesPath.size();
                 }
-
-                else if(msgBox.clickedButton()== skip)
-                {
+                else if (msgBox.clickedButton()== skip) {
                     filesPath.removeAt(i);
                     filesDestination.removeAt(i);
                     i = 0;
                 }
-                else if(msgBox.clickedButton()== skipAll)
-                {
-                    for (int j = i; j < filesPath.size(); ++j)
-                    {
+                else if (msgBox.clickedButton()== skipAll) {
+                    for (int j = i; j < filesPath.size(); ++j) {
                         filesPath.removeAt(j);
                         filesDestination.removeAt(j);
                     }
                     i = filesPath.size();
                     filesPath.clear();
                 }
-                else if(msgBox.clickedButton()== quit)
-                {
+                else if (msgBox.clickedButton()== quit) {
                     filesPath.clear();
                 }
             }
@@ -434,13 +411,11 @@ void FileOperations::process()
     quint64 sizeCopied = 0;
 
     wgtWorkTime.start();
-    for(int i = 0; i < filesPath.size(); ++i)
-    {
+    for (int i = 0; i < filesPath.size(); ++i) {
         QFileInfo fileInfo(filesPath.at(i));
         deleteFileList.append(filesPath.at(i));
 
-        if (!fileInfo.isDir())
-        {
+        if (!fileInfo.isDir()) {
             //input file;
             inputFile.setFileName(filesPath.at(i));
             if (!inputFile.open(QFile::ReadOnly))
@@ -468,14 +443,13 @@ void FileOperations::process()
                 QByteArray dataFromFile;
                 quint64 span = 0;
 
-                for (int i = 0; i < 100; ++i)
-                {
+                for (int i = 0; i < 100; ++i) {
                     //break thread
                     if (thread_Break)
                         break;
                     //pause or resume thread
                     sync.lock();
-                    if(thread_Pause)
+                    if (thread_Pause)
                         pauseCond.wait(&sync); // in this place, your thread will stop to execute until someone calls resume
                     sync.unlock();
 
@@ -485,9 +459,7 @@ void FileOperations::process()
                     {
                         dataFromFile = inputFile.readAll();
                         filesSizeCopyStatus += dataFromFile.size();
-                    }
-                    else
-                    {
+                    } else {
                         dataFromFile = inputFile.read(copyPart);
                         filesSizeCopyStatus += copyPart;
                     }
@@ -509,19 +481,15 @@ void FileOperations::process()
                     emit copyStatus(status); // !
                 }
                 status = 0;
-            }
-
-            //if file less then 100 megabytes
-            else
-            {
-                qDebug()<<i<<"Filepatch:"<<filesPath.at(i)<<"FilesDestination:"<<filesDestination.at(i)<<"Filesize: "<<fileInfo.size();
+                //if file less then 100 megabytes
+            } else {
+                //qDebug()<<i<<"Filepatch:"<<filesPath.at(i)<<"FilesDestination:"<<filesDestination.at(i)<<"Filesize: "<<fileInfo.size();
                 if (QFile::exists(destination))
                 {
                     QFile::remove(destination);
                 }
                 QFile::copy(filesPath.at(i),destination);
             }
-
             QString signalCopiedFiles = QString::number(i + 1) + " / " + QString::number(filesPath.size());
             emit copiedFiles(signalCopiedFiles);
             destination.clear();
@@ -542,15 +510,11 @@ void FileOperations::process()
 
 void FileOperations::remDirsFiles(const QStringList &sList)
 {
-    for (int i = 0; i < sList.size(); ++i)
-    {
-        if (QFileInfo(sList.at(i)).isFile())
-        {
+    for (int i = 0; i < sList.size(); ++i) {
+        if (QFileInfo(sList.at(i)).isFile()) {
             //qDebug() << i << "Files deleted:" <<sList.at(i);
             QFile(sList.at(i)).remove();
-        }
-        else
-        {
+        } else {
             //qDebug() << i << "Directories deleted:" <<sList.at(i);
             QDir(sList.at(i)).removeRecursively();
         }
