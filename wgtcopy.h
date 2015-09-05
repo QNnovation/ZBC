@@ -14,12 +14,13 @@ class QGridLayout;
 class QHBoxLayout;
 class QDir;
 
+class FileOperationsPrivate;
 class FileOperations : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit FileOperations();
+    explicit FileOperations(QObject *parent = 0);
     void loadFiles(QStringList files_Patch, const QString files_Destination, char act = 'c');
     void copyDirs(const QDir& dir);
     void remDirsFiles(const QStringList&);
@@ -32,7 +33,7 @@ public:
     bool Pause();
     bool Stop();
     bool spaceCheck(QString path, quint64 size);
-    int numFiles() { return filesPath.size(); }
+    int numFiles();
     ~FileOperations();
 
 public slots:
@@ -50,25 +51,14 @@ signals:
     void copiedTime(QString);
     void finished();
 
+protected:
+    FileOperationsPrivate *const d_ptr;
+    //QScopedPointer<FileOperationsPrivate> const d_ptr;
+    FileOperations(FileOperationsPrivate &dd, QObject *parent);
+
 private:
-    bool b_copyFileOperation;
-    bool b_moveFileOperation;
-    bool b_removeFileOperation;
+    Q_DECLARE_PRIVATE(FileOperations);
 
-    QFile inputFile;
-    QFile outputFile;
-
-    QString fileDestination;
-
-    QStringList filesDestination;
-    QStringList filesPath;
-    QStringList deleteFileList;
-    QStringList deleteDirList;
-
-    QMutex sync;
-    QWaitCondition pauseCond;
-
-    quint64 filesSize;
 };
 
 //GUI window

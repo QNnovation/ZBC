@@ -1,5 +1,6 @@
 #ifndef WGTCOPY_P
 #define WGTCOPY_P
+
 #include "wgtcopy.h"
 
 class FileOperationsPrivate
