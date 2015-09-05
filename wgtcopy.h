@@ -6,12 +6,7 @@
 #include <QFile>
 #include <QMutex>
 #include <QWaitCondition>
-class QThread;
-class QProgressBar;
-class QPushButton;
-class QLabel;
-class QGridLayout;
-class QHBoxLayout;
+
 class QDir;
 
 class FileOperationsPrivate;
@@ -24,7 +19,6 @@ public:
     void loadFiles(QStringList files_Patch, const QString files_Destination, char act = 'c');
     void copyDirs(const QDir& dir);
     void remDirsFiles(const QStringList&);
-
     //variables for thread control
     bool thread_Pause;
     bool thread_Break;
@@ -52,8 +46,7 @@ signals:
     void finished();
 
 protected:
-    FileOperationsPrivate *const d_ptr;
-    //QScopedPointer<FileOperationsPrivate> const d_ptr;
+    QScopedPointer<FileOperationsPrivate> const d_ptr;
     FileOperations(FileOperationsPrivate &dd, QObject *parent);
 
 private:
@@ -62,6 +55,7 @@ private:
 };
 
 //GUI window
+class FileOperationWgtPrivate;
 class FileOperationWgt : public QDialog
 {
     Q_OBJECT
@@ -69,26 +63,11 @@ class FileOperationWgt : public QDialog
 public:
     explicit FileOperationWgt(QWidget *parent = 0);
 
-    QProgressBar* fileCopyStatus;
-    QProgressBar* filesCopyStatus;
-    QPushButton* pauseStartBtn;
-    QPushButton* backgroundBtn;
-    QPushButton* quitBtn;
-    QLabel* copyStatusSpeed;
-    QLabel* numberOfFiles;
-    QLabel* copyFrom;
-    QLabel* copyTo;
-    QLabel* sizeOfFiles;
-
-    QGridLayout* mainLayout;
-    QHBoxLayout* hLayout;
-
     void copyFileOperation(const QStringList&, const QString&);
     void moveFileOperation(const QStringList&, const QString&);
     void removeFileOperation(const QStringList&);
 
     bool confirmOperation();
-
     ~FileOperationWgt();
 
 public slots:
@@ -98,18 +77,18 @@ public slots:
     //Toxa
     void currentFileName(QString);
 
-private:
-    QStringList inputFiles;
-    QThread* thread;
-    FileOperations* fileoperations;
-
 protected:
+    QScopedPointer<FileOperationWgtPrivate> const d_ptr;
+    FileOperationWgt(FileOperationWgtPrivate &dd, QWidget *parent);
     virtual void closeEvent(QCloseEvent *);
 
 signals:
     void finishOperation();
     //Toxa
     void curFile(QString);
+
+private:
+    Q_DECLARE_PRIVATE(FileOperationWgt);
 
 };
 

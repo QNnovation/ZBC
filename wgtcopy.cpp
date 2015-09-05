@@ -23,128 +23,94 @@ quint64 const megaByte = 1048576;
 quint32 const kiloByte = 1024;
 
 //FileOperationWgt class implementation***/
-
-FileOperationWgt::FileOperationWgt(QWidget *parent) : QDialog(parent)
+FileOperationWgt::FileOperationWgt(QWidget *parent)
+    : QDialog(parent)
+    ,d_ptr(new FileOperationWgtPrivate())
 {
+    Q_D(FileOperationWgt);
+    d->q_ptr = this;
+
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint & Qt::WindowMinimized);
     setWindowTitle("ZBC Copying");
     setFixedSize(450, 128); //125 175
 
-    thread = new QThread;
-    fileoperations = new FileOperations;
-    fileoperations->moveToThread(thread);
+    setLayout(d->mainLayout);
 
-    fileCopyStatus = new QProgressBar;
-    filesCopyStatus = new QProgressBar;
-    fileCopyStatus->setValue(0);
-    filesCopyStatus->setValue(0);
-    filesCopyStatus->setVisible(false);
-
-    pauseStartBtn = new QPushButton(tr("Pause"));
-    quitBtn = new QPushButton(tr("Cancel"));
-    backgroundBtn = new QPushButton(tr("Background"));
-
-    copyStatusSpeed = new QLabel(tr("Copying: "));
-
-    copyFrom = new QLabel(tr("From: "));
-    copyTo = new QLabel(tr("To: "));
-
-    numberOfFiles = new QLabel(tr("0/0"));
-    numberOfFiles->setVisible(false);
-
-    sizeOfFiles  = new QLabel(tr("Size:"));
-    sizeOfFiles->setVisible(false);
-
-    mainLayout = new QGridLayout(this);
-    mainLayout->addWidget(copyStatusSpeed, 0, 0, 1, 4);
-    mainLayout->addWidget(copyFrom, 1, 0, 1, 4);
-    mainLayout->addWidget(copyTo, 2, 0, 1, 4);
-    mainLayout->addWidget(fileCopyStatus, 3, 0, 1, 4); //first progressBar
-
-    //buttons layout
-    hLayout = new QHBoxLayout();
-    hLayout->addWidget(pauseStartBtn);
-    hLayout->addWidget(quitBtn);
-    hLayout->addWidget(backgroundBtn);
-
-    mainLayout->addWidget(filesCopyStatus, 4, 0, 1, 4); // second progressBar
-    mainLayout->addWidget(numberOfFiles, 5, 0, 1, 2);
-    mainLayout->addWidget(sizeOfFiles, 5, 3, 1, 1);
-    mainLayout->addLayout(hLayout, 6, 0, 1, 4); // three buttons
-    setLayout(mainLayout);
-
-    connect(quitBtn, SIGNAL(clicked()), this, SLOT(closeWgt()));
-    connect(pauseStartBtn, SIGNAL(clicked()), this, SLOT(threadPauseResume()));
-    connect(backgroundBtn, SIGNAL(clicked()), this, SLOT(toBackground()));
-    connect(fileoperations, SIGNAL(copyStatus(int)), fileCopyStatus, SLOT(setValue(int)));
-    connect(fileoperations, SIGNAL(copyFilesStatus(int)), filesCopyStatus, SLOT(setValue(int)));
-    connect(fileoperations, SIGNAL(copySpeed(QString)), copyStatusSpeed, SLOT(setText(QString)));
-    connect(fileoperations, SIGNAL(currentFile(QString)), copyFrom, SLOT(setText(QString)));
-    connect(fileoperations, SIGNAL(currentPath(QString)), copyTo, SLOT(setText(QString)));
-    connect(fileoperations, SIGNAL(copiedFiles(QString)), numberOfFiles, SLOT(setText(QString)));
-    connect(fileoperations, SIGNAL(copiedSize(QString)), sizeOfFiles, SLOT(setText(QString)));
+    connect(d->quitBtn, SIGNAL(clicked()), this, SLOT(closeWgt()));
+    connect(d->pauseStartBtn, SIGNAL(clicked()), this, SLOT(threadPauseResume()));
+    connect(d->backgroundBtn, SIGNAL(clicked()), this, SLOT(toBackground()));
+    connect(d->fileoperations, SIGNAL(copyStatus(int)), d->fileCopyStatus, SLOT(setValue(int)));
+    connect(d->fileoperations, SIGNAL(copyFilesStatus(int)), d->filesCopyStatus, SLOT(setValue(int)));
+    connect(d->fileoperations, SIGNAL(copySpeed(QString)), d->copyStatusSpeed, SLOT(setText(QString)));
+    connect(d->fileoperations, SIGNAL(currentFile(QString)), d->copyFrom, SLOT(setText(QString)));
+    connect(d->fileoperations, SIGNAL(currentPath(QString)), d->copyTo, SLOT(setText(QString)));
+    connect(d->fileoperations, SIGNAL(copiedFiles(QString)), d->numberOfFiles, SLOT(setText(QString)));
+    connect(d->fileoperations, SIGNAL(copiedSize(QString)), d->sizeOfFiles, SLOT(setText(QString)));
 
     //connect signals from copy to gui
-    connect(fileoperations, SIGNAL(finished()), this, SIGNAL(finishOperation()));
+    connect(d->fileoperations, SIGNAL(finished()), this, SIGNAL(finishOperation()));
 
     //mtoxa
-    connect(fileoperations, SIGNAL(currentPath(QString)), this, SLOT(currentFileName(QString)));
+    connect(d->fileoperations, SIGNAL(currentPath(QString)), this, SLOT(currentFileName(QString)));
 
     //connect thread start signal
-    connect(thread, SIGNAL(started()), fileoperations, SLOT(process()));
+    connect(d->thread, SIGNAL(started()), d->fileoperations, SLOT(process()));
     //Right thread exit
-    connect(fileoperations, SIGNAL(finished()), thread, SLOT(quit()));
-    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+    connect(d->fileoperations, SIGNAL(finished()), d->thread, SLOT(quit()));
+    connect(d->thread, SIGNAL(finished()), d->thread, SLOT(deleteLater()));
     //close widget window
     this->setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(fileoperations, SIGNAL(formClose(bool)), this, SLOT(closeWgt()));
+    connect(d->fileoperations, SIGNAL(formClose(bool)), this, SLOT(closeWgt()));
 }
 
 //copy files
 void FileOperationWgt::copyFileOperation(const QStringList& files, const QString& path)
 {
+    Q_D(const FileOperationWgt);
     if (confirmOperation())
     {
-        fileoperations->loadFiles(files, path, 'c');
-        if (fileoperations->numFiles() >  1)
+        d->fileoperations->loadFiles(files, path, 'c');
+        if (d->fileoperations->numFiles() >  1)
         {
             setFixedSize(450, 175);
-            filesCopyStatus->setVisible(true);
-            sizeOfFiles->setVisible(true);
-            numberOfFiles->setVisible(true);
+            d->filesCopyStatus->setVisible(true);
+            d->sizeOfFiles->setVisible(true);
+            d->numberOfFiles->setVisible(true);
         }
-        thread->start();
+        d->thread->start();
     }
 }
 
 //move files
 void FileOperationWgt::moveFileOperation(const QStringList& files, const QString& path)
 {
+    Q_D(const FileOperationWgt);
     if (confirmOperation())
     {
-        fileoperations->loadFiles(files, path, 'm');
-        if (fileoperations->numFiles() >  1)
+        d->fileoperations->loadFiles(files, path, 'm');
+        if (d->fileoperations->numFiles() >  1)
         {
             setFixedSize(450, 175);
-            filesCopyStatus->setVisible(true);
-            sizeOfFiles->setVisible(true);
-            numberOfFiles->setVisible(true);
+            d->filesCopyStatus->setVisible(true);
+            d->sizeOfFiles->setVisible(true);
+            d->numberOfFiles->setVisible(true);
         }
-        thread->start();
+        d->thread->start();
     }
 }
 
 //remove files
 void FileOperationWgt::removeFileOperation(const QStringList& files)
 {
+    Q_D(const FileOperationWgt);
     if (confirmOperation())
     {
-        copyStatusSpeed->setText(tr("Deleting"));
-        copyTo->setVisible(false);
-        numberOfFiles->setVisible(false);
-        sizeOfFiles->setVisible(false);
-        filesCopyStatus->setVisible(false);
-        fileoperations->remDirsFiles(files);
+        d->copyStatusSpeed->setText(tr("Deleting"));
+        d->copyTo->setVisible(false);
+        d->numberOfFiles->setVisible(false);
+        d->sizeOfFiles->setVisible(false);
+        d->filesCopyStatus->setVisible(false);
+        d->fileoperations->remDirsFiles(files);
     }
 }
 
@@ -162,15 +128,17 @@ bool FileOperationWgt::confirmOperation()
 
 void FileOperationWgt::threadPauseResume()
 {
-    if (!fileoperations->thread_Pause)
-        fileoperations->Pause();
+    Q_D(const FileOperationWgt);
+    if (!d->fileoperations->thread_Pause)
+        d->fileoperations->Pause();
     else
-        fileoperations->Resume();
+        d->fileoperations->Resume();
 }
 
 void FileOperationWgt::closeWgt()
 {
-    fileoperations->Stop();
+    Q_D(const FileOperationWgt);
+    d->fileoperations->Stop();
     this->close();
 }
 
@@ -179,9 +147,17 @@ void FileOperationWgt::currentFileName(QString filePath)
     emit curFile(filePath.remove(0, 4));
 }
 
+FileOperationWgt::FileOperationWgt(FileOperationWgtPrivate &dd, QWidget *parent)
+    : d_ptr(&dd)
+{
+    Q_D(FileOperationWgt);
+    d->q_ptr = this;
+}
+
 void FileOperationWgt::closeEvent(QCloseEvent *event)
 {
-    fileoperations->Stop();
+    Q_D(FileOperationWgt);
+    d->fileoperations->Stop();
 }
 
 void FileOperationWgt::toBackground()
@@ -530,6 +506,7 @@ FileOperations::~FileOperations()
 
 }
 
+//pimpl private sections
 FileOperationsPrivate::FileOperationsPrivate()
 {
     b_copyFileOperation = false;
@@ -538,6 +515,56 @@ FileOperationsPrivate::FileOperationsPrivate()
 }
 
 FileOperationsPrivate::~FileOperationsPrivate()
+{
+
+}
+
+FileOperationWgtPrivate::FileOperationWgtPrivate()
+{
+    thread = new QThread;
+    fileoperations = new FileOperations;
+    fileoperations->moveToThread(thread);
+
+    fileCopyStatus = new QProgressBar;
+    filesCopyStatus = new QProgressBar;
+    fileCopyStatus->setValue(0);
+    filesCopyStatus->setValue(0);
+    filesCopyStatus->setVisible(false);
+
+    pauseStartBtn = new QPushButton(QObject::tr("Pause"));
+    quitBtn = new QPushButton( QObject::tr("Cancel"));
+    backgroundBtn = new QPushButton(QObject::tr("Background"));
+
+    copyStatusSpeed = new QLabel(QObject::tr("Copying: "));
+
+    copyFrom = new QLabel(QObject::tr("From: "));
+    copyTo = new QLabel(QObject::tr("To: "));
+
+    numberOfFiles = new QLabel(QObject::tr("0/0"));
+    numberOfFiles->setVisible(false);
+
+    sizeOfFiles  = new QLabel(QObject::tr("Size:"));
+    sizeOfFiles->setVisible(false);
+
+    mainLayout = new QGridLayout();
+    mainLayout->addWidget(copyStatusSpeed, 0, 0, 1, 4);
+    mainLayout->addWidget(copyFrom, 1, 0, 1, 4);
+    mainLayout->addWidget(copyTo, 2, 0, 1, 4);
+    mainLayout->addWidget(fileCopyStatus, 3, 0, 1, 4); //first progressBar
+
+    //buttons layout
+    hLayout = new QHBoxLayout();
+    hLayout->addWidget(pauseStartBtn);
+    hLayout->addWidget(quitBtn);
+    hLayout->addWidget(backgroundBtn);
+
+    mainLayout->addWidget(filesCopyStatus, 4, 0, 1, 4); // second progressBar
+    mainLayout->addWidget(numberOfFiles, 5, 0, 1, 2);
+    mainLayout->addWidget(sizeOfFiles, 5, 3, 1, 1);
+    mainLayout->addLayout(hLayout, 6, 0, 1, 4); // three buttons
+}
+
+FileOperationWgtPrivate::~FileOperationWgtPrivate()
 {
 
 }

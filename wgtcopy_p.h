@@ -1,7 +1,13 @@
 #ifndef WGTCOPY_P
 #define WGTCOPY_P
-
 #include "wgtcopy.h"
+
+class QThread;
+class QProgressBar;
+class QPushButton;
+class QLabel;
+class QGridLayout;
+class QHBoxLayout;
 
 class FileOperationsPrivate
 {
@@ -9,7 +15,7 @@ class FileOperationsPrivate
 
 public:
     FileOperationsPrivate();
-    virtual ~FileOperationsPrivate();
+    ~FileOperationsPrivate();
 
     bool b_copyFileOperation;
     bool b_moveFileOperation;
@@ -30,7 +36,37 @@ public:
 
     quint64 filesSize;
     FileOperations *q_ptr;
-}
+
+};
+
+class FileOperationWgtPrivate
+{
+  Q_DECLARE_PUBLIC(FileOperationWgt);
+
+public:
+    FileOperationWgtPrivate();
+    ~FileOperationWgtPrivate();
+
+    QProgressBar *fileCopyStatus;
+    QProgressBar *filesCopyStatus;
+    QPushButton *pauseStartBtn;
+    QPushButton *backgroundBtn;
+    QPushButton *quitBtn;
+    QLabel *copyStatusSpeed;
+    QLabel *numberOfFiles;
+    QLabel *copyFrom;
+    QLabel *copyTo;
+    QLabel *sizeOfFiles;
+
+    QGridLayout *mainLayout;
+    QHBoxLayout *hLayout;
+
+    QStringList inputFiles;
+    QThread *thread;
+    FileOperations *fileoperations;
+
+    FileOperationWgt *q_ptr;
+};
 
 #endif // WGTCOPY_P
 
