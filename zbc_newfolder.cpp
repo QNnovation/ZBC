@@ -27,9 +27,9 @@ ZBC_NewFolder::ZBC_NewFolder(QWidget* pwgt) : QDialog(pwgt)
 }
 
 
-void ZBC_NewFolder::accepted()
+void ZBC_NewFolder::createFolder(/*const QString& _path*/)
 {
-
+    this->close();
 }
 
 

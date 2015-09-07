@@ -280,6 +280,8 @@ void zbcCentralWidget::runNewFolder()
             pwgtNewFolder, SLOT(dirNotCreated()));
 */
     ZBC_NewFolder*  pwgtNewFolder   = new ZBC_NewFolder(this);
+    connect(pwgtNewFolder, &ZBC_NewFolder::accepted, pwgtNewFolder, &ZBC_NewFolder::createFolder);
+
 //    pwgtNewFolder->setModal(true);
 //    pwgtNewFolder->show();
     pwgtNewFolder->exec();

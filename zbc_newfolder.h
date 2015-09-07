@@ -9,9 +9,14 @@ class ZBC_NewFolder : public QDialog
 public:
     explicit ZBC_NewFolder( QWidget* pwgt = 0 );
 
+public slots:
+    void createFolder(/*const QString&*/);
+
 private slots:
-    void accepted();
     void  rejected();
+
+signals:
+    void accepted();
 };
 
 #endif // ZBC_NEWFOLDER_H
