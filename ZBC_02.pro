@@ -11,6 +11,7 @@ HEADERS += \
     wgttextview.h \
     wgtcopy.h \
     wgtcopy_p.h
+    zbc_newfolder.h
 
 SOURCES += \
     zbcmainwindow.cpp \
@@ -20,4 +21,5 @@ SOURCES += \
     zbccentralwidget.cpp \
     wgttextview.cpp \
     wgtcopy.cpp \
-    main.cpp
+    main.cpp \
+    zbc_newfolder.cpp
