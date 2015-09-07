@@ -11,7 +11,8 @@ HEADERS += \
     wgttextview.h \
     wgtcopy.h \
     wgtcopy_p.h \
-    zbc_newfolder.h
+    zbc_newfolder.h \
+    wgttextview_p.h
     zbc_newfolder.h
 
 SOURCES += \
