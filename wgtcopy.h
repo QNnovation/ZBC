@@ -6,24 +6,19 @@
 #include <QFile>
 #include <QMutex>
 #include <QWaitCondition>
-class QThread;
-class QProgressBar;
-class QPushButton;
-class QLabel;
-class QGridLayout;
-class QHBoxLayout;
+
 class QDir;
 
+class FileOperationsPrivate;
 class FileOperations : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit FileOperations();
+    explicit FileOperations(QObject *parent = 0);
     void loadFiles(QStringList files_Patch, const QString files_Destination, char act = 'c');
     void copyDirs(const QDir& dir);
     void remDirsFiles(const QStringList&);
-
     //variables for thread control
     bool thread_Pause;
     bool thread_Break;
@@ -32,7 +27,7 @@ public:
     bool Pause();
     bool Stop();
     bool spaceCheck(QString path, quint64 size);
-    int numFiles() { return filesPath.size(); }
+    int numFiles();
     ~FileOperations();
 
 public slots:
@@ -50,28 +45,17 @@ signals:
     void copiedTime(QString);
     void finished();
 
+protected:
+    QScopedPointer<FileOperationsPrivate> const d_ptr;
+    FileOperations(FileOperationsPrivate &dd, QObject *parent);
+
 private:
-    bool b_copyFileOperation;
-    bool b_moveFileOperation;
-    bool b_removeFileOperation;
+    Q_DECLARE_PRIVATE(FileOperations);
 
-    QFile inputFile;
-    QFile outputFile;
-
-    QString fileDestination;
-
-    QStringList filesDestination;
-    QStringList filesPath;
-    QStringList deleteFileList;
-    QStringList deleteDirList;
-
-    QMutex sync;
-    QWaitCondition pauseCond;
-
-    quint64 filesSize;
 };
 
 //GUI window
+class FileOperationWgtPrivate;
 class FileOperationWgt : public QDialog
 {
     Q_OBJECT
@@ -79,26 +63,11 @@ class FileOperationWgt : public QDialog
 public:
     explicit FileOperationWgt(QWidget *parent = 0);
 
-    QProgressBar* fileCopyStatus;
-    QProgressBar* filesCopyStatus;
-    QPushButton* pauseStartBtn;
-    QPushButton* backgroundBtn;
-    QPushButton* quitBtn;
-    QLabel* copyStatusSpeed;
-    QLabel* numberOfFiles;
-    QLabel* copyFrom;
-    QLabel* copyTo;
-    QLabel* sizeOfFiles;
-
-    QGridLayout* mainLayout;
-    QHBoxLayout* hLayout;
-
     void copyFileOperation(const QStringList&, const QString&);
     void moveFileOperation(const QStringList&, const QString&);
     void removeFileOperation(const QStringList&);
 
     bool confirmOperation();
-
     ~FileOperationWgt();
 
 public slots:
@@ -108,18 +77,18 @@ public slots:
     //Toxa
     void currentFileName(QString);
 
-private:
-    QStringList inputFiles;
-    QThread* thread;
-    FileOperations* fileoperations;
-
 protected:
+    QScopedPointer<FileOperationWgtPrivate> const d_ptr;
+    FileOperationWgt(FileOperationWgtPrivate &dd, QWidget *parent);
     virtual void closeEvent(QCloseEvent *);
 
 signals:
     void finishOperation();
     //Toxa
     void curFile(QString);
+
+private:
+    Q_DECLARE_PRIVATE(FileOperationWgt);
 
 };
 

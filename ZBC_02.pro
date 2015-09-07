@@ -9,7 +9,8 @@ HEADERS += \
     zbcsideframe.h \
     zbccentralwidget.h \
     wgttextview.h \
-    wgtcopy.h
+    wgtcopy.h \
+    wgtcopy_p.h
 
 SOURCES += \
     zbcmainwindow.cpp \
