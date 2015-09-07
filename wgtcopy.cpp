@@ -494,9 +494,28 @@ void FileOperations::remDirsFiles(const QStringList &sList)
 {
     for (int i = 0; i < sList.size(); ++i) {
         if (QFileInfo(sList.at(i)).isFile())
+        {
             QFile(sList.at(i)).remove();
+        }
         else
-            QDir(sList.at(i)).removeRecursively();
+        {
+            QDir dir(sList.at(i));
+            QStringList listOfDirs = dir.entryList(QDir::Dirs |
+                                                   QDir::AllDirs |
+                                                   QDir::NoDotAndDotDot);
+            QStringList listOfFiles = dir.entryList(QDir::Files);
+            foreach (QString value, listOfFiles) {
+                QString valueAbsolutePath = dir.absolutePath() + "/" + value;
+                QFile::setPermissions(valueAbsolutePath, QFile::ReadOwner | QFile::WriteOwner);
+                QFile::remove(valueAbsolutePath);
+            }
+            foreach (QString value, listOfDirs) {
+                QStringList valueAbsolutePath;
+                valueAbsolutePath.push_back(dir.absolutePath() + "/" + value);
+                remDirsFiles(valueAbsolutePath);
+            }
+            QDir().rmdir(sList.at(i));
+        }
         emit formClose(true);
     }
 }
