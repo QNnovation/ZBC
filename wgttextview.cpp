@@ -6,6 +6,8 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QDebug>
+#include <QMenu>
+#include <QMenuBar>
 
 wgtTextView::wgtTextView(QWidget *parent)
     :QMainWindow(parent)
@@ -13,8 +15,10 @@ wgtTextView::wgtTextView(QWidget *parent)
 {
     Q_D(wgtTextView);
     d->q_ptr = this;
+    d->createMenu();
     resize(500, 500);
     setCentralWidget(d->textView);
+    setWindowTitle("ZBC viewer/editor");
 }
 
 wgtTextView::~wgtTextView()
@@ -63,5 +67,23 @@ void wgtTextViewPrivate::readFile()
 
 wgtTextViewPrivate::~wgtTextViewPrivate()
 {
+
+}
+
+void wgtTextViewPrivate::createActions()
+{
+    Q_Q(wgtTextView);
+    quitAct = new QAction(QObject::tr("&Quit"), q_ptr);
+    quitAct->setStatusTip(QObject::tr("Close window"));
+    quitAct->setShortcut(QKeySequence::Close);
+    QObject::connect(quitAct, SIGNAL(triggered(bool)), q_ptr, SLOT(close()));
+}
+
+void wgtTextViewPrivate::createMenu()
+{
+    Q_Q(wgtTextView);
+    menu = q_ptr->menuBar()->addMenu(QObject::tr("&File"));
+    menu->addAction(quitAct);
+
 
 }

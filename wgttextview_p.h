@@ -17,6 +17,14 @@ public:
 
     bool rwMode;
 
+    QMenu *menu;
+
+    QAction *quitAct;
+
+
+    void createMenu();
+    void createActions();
+
     QPlainTextEdit *textView;
     QString pathToFile;
 
