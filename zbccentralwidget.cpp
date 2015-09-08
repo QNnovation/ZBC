@@ -1,7 +1,6 @@
 #include <QDebug>
 
 #include "zbccentralwidget.h"
-#include "zbcnewfolder.h"
 #include "zbc_newfolder.h"
 #include "zbcsideframe.h"
 #include "zbcpushbutton.h"
