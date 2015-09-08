@@ -15,8 +15,12 @@ public:
     wgtTextViewPrivate();
     ~wgtTextViewPrivate();
 
+    bool rwMode;
+
     QPlainTextEdit *textView;
-    QString currentFile;
+    QString pathToFile;
+
+    void readFile();
 
     wgtTextView *q_ptr;
 };

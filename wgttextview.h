@@ -11,7 +11,7 @@ class wgtTextView : public QMainWindow
 public:
     explicit wgtTextView(QWidget *parent = 0);
     ~wgtTextView();
-    void loadFile(const QString&);
+    loadFile(const QString &, char mode = 'r');
 
 protected:
     QScopedPointer<wgtTextViewPrivate> const d_ptr;
