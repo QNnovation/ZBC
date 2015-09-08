@@ -21,7 +21,7 @@ public:
 
     QStringList getListOfSelectedItems() const;
     void clearListOfSelectedItems();
-    QString getCurrentPath() const;
+    QString getCurrentPath();
     const QFileSystemModel* getModel()const;
 
 private:

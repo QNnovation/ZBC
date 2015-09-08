@@ -1,6 +1,7 @@
 QT += widgets
 
-QMAKE_CXXFLAGS += -std=c++11
+#QMAKE_CXXFLAGS += -std=c++11
+CONFIG += c++11
 
 HEADERS += \
     zbcmainwindow.h \

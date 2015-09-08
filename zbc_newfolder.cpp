@@ -1,7 +1,5 @@
 #include "zbc_newfolder.h"
 
-#include <QDebug>
-
 #include <QDialogButtonBox>
 #include <QDir>
 #include <QLabel>
@@ -9,60 +7,54 @@
 #include <QMessageBox>
 #include <QVBoxLayout>
 
-ZBC_NewFolder::ZBC_NewFolder(QString _curPath, QWidget* pwgt) :
-                            QDialog(pwgt),
-                            sCurPath(_curPath)
+ZBC_NewFolder::ZBC_NewFolder(QString _curPath, QWidget* pwgt) : QDialog(pwgt)
 {
-    QLabel* plblText                = new QLabel("New folder(directory)");
+    QLabel* plblText                = new QLabel("New folder(directory)", this);
 
-    m_pledName                      = new QLineEdit;
-    m_pledName->setPlaceholderText("New Folder");
+    QLineEdit* pledName              = new QLineEdit(this);
+    pledName->setPlaceholderText("New Folder");
 
     QDialogButtonBox* pdbbButtons   = new QDialogButtonBox(QDialogButtonBox::Ok
-                                                           | QDialogButtonBox::Cancel);
+                                                           | QDialogButtonBox::Cancel,
+                                                           this);
 
-    QVBoxLayout* pLayout            = new QVBoxLayout;
+    QVBoxLayout* pLayout            = new QVBoxLayout(this);
     pLayout->addWidget(plblText);
-    pLayout->addWidget(m_pledName);
+    pLayout->addWidget(pledName);
     pLayout->addWidget(pdbbButtons);
     this->setLayout(pLayout);
     this->setAttribute(Qt::WA_DeleteOnClose);
+    this->setFixedSize(this->minimumSizeHint());
 
-    connect(pdbbButtons, &QDialogButtonBox::accepted, this, &ZBC_NewFolder::accepted);
-    connect(pdbbButtons, &QDialogButtonBox::rejected, this, &ZBC_NewFolder::rejected);
-}
+    connect(pdbbButtons, &QDialogButtonBox::accepted,
+            [this, _curPath, pledName](){
 
+                QString sNewFolder;
+                if(pledName->text().isEmpty())
+                    sNewFolder = _curPath + "New Folder";
+                else
+                    sNewFolder = _curPath + pledName->text();
 
-void ZBC_NewFolder::accepted()
-{
-    QString sNewFolder = m_pledName->text();
-    if(sNewFolder == "")
-        sNewFolder = sCurPath + "New Folder";
-    else
-        sNewFolder = sCurPath + sNewFolder;
+                if(!QDir(sNewFolder).exists()){
+                    if(!QDir("").mkdir(sNewFolder)){
+                        QMessageBox errorMsg(QMessageBox::Critical,
+                                             QString("ZBC"),
+                                             QString("Eror creation of " + sNewFolder),
+                                             QMessageBox::Ok);
+                        errorMsg.exec();
+                    }
+                }
+                else{
+                    QMessageBox errorMsg(QMessageBox::Critical,
+                                         QString("ZBC"),
+                                         QString("Directory " + sNewFolder + " exists"),
+                                         QMessageBox::Ok);
+                    errorMsg.exec();
+                }
 
-    if(!QDir(sNewFolder).exists()){
-        if(!QDir("").mkdir(sNewFolder)){
-            QMessageBox errorMsg(QMessageBox::Critical,
-                                 QString("ZBC"),
-                                 QString("Eror creation of " + sNewFolder),
-                                 QMessageBox::Ok);
-            errorMsg.exec();
-        }
-    }
-    else{
-        QMessageBox errorMsg(QMessageBox::Critical,
-                             QString("ZBC"),
-                             QString("Directory " + sNewFolder + " exists"),
-                             QMessageBox::Ok);
-        errorMsg.exec();
-    }
+                this->close();
+                }
+    );
 
-    this->close();
-}
-
-
-void ZBC_NewFolder::rejected()
-{
-    this->close();
+    connect(pdbbButtons, &QDialogButtonBox::rejected, [this](){ this->close(); });
 }

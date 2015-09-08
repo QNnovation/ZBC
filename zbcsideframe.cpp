@@ -108,7 +108,7 @@ void zbcSideFrame::clearListOfSelectedItems()
 
 
 //Return current path
-QString zbcSideFrame::getCurrentPath() const
+QString zbcSideFrame::getCurrentPath()
 {
     if(m_pstrCurPath->length() == 3)
         return *m_pstrCurPath;
