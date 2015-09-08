@@ -265,25 +265,7 @@ void zbcCentralWidget::runMove()
 //New Folder Button Pressed
 void zbcCentralWidget::runNewFolder()
 {
-/*
-    zbcNewFolder* pwgtNewFolder     = new zbcNewFolder(this);
-    pwgtNewFolder->setModal(true);
-    pwgtNewFolder->show();
-
-    connect(pwgtNewFolder, SIGNAL(sendName(QString*)),
-            m_psfwActive, SLOT(makeDir(QString*)));
-
-    connect(m_psfwActive, SIGNAL(dirCreated()),
-            pwgtNewFolder, SLOT(dirCreated()));
-
-    connect(m_psfwActive, SIGNAL(dirNotCreated()),
-            pwgtNewFolder, SLOT(dirNotCreated()));
-*/
-    ZBC_NewFolder*  pwgtNewFolder   = new ZBC_NewFolder(this);
-    connect(pwgtNewFolder, &ZBC_NewFolder::accepted, pwgtNewFolder, &ZBC_NewFolder::createFolder);
-
-//    pwgtNewFolder->setModal(true);
-//    pwgtNewFolder->show();
+    ZBC_NewFolder*  pwgtNewFolder   = new ZBC_NewFolder(m_psfwActive->getCurrentPath(), this);
     pwgtNewFolder->exec();
 }
 

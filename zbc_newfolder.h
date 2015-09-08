@@ -3,19 +3,20 @@
 
 #include <QDialog>
 
+class QLineEdit;
+
 class ZBC_NewFolder : public QDialog
 {
+private:
     Q_OBJECT
-public:
-    explicit ZBC_NewFolder( QWidget* pwgt = 0 );
+    QString         sCurPath;
+    QLineEdit*      m_pledName;
 
-public slots:
-    void createFolder(/*const QString&*/);
+public:
+    explicit ZBC_NewFolder( QString, QWidget* pwgt = 0 );
 
 private slots:
-    void  rejected();
-
-signals:
+    void rejected();
     void accepted();
 };
 
