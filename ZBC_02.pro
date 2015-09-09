@@ -12,7 +12,7 @@ HEADERS += \
     wgtcopy.h \
     wgtcopy_p.h \
     zbc_newfolder.h \
-    wgttextview_p.h
+    wgtfindreplacetext.h
     zbc_newfolder.h
 
 SOURCES += \
@@ -24,4 +24,5 @@ SOURCES += \
     wgttextview.cpp \
     wgtcopy.cpp \
     main.cpp \
-    zbc_newfolder.cpp
+    zbc_newfolder.cpp \
+    wgtfindreplacetext.cpp

@@ -1,5 +1,4 @@
 #include "wgttextview.h"
-#include "wgttextview_p.h"
 
 #include <QPlainTextEdit>
 #include <QFileInfo>
@@ -9,16 +8,113 @@
 #include <QMenu>
 #include <QMenuBar>
 
+//constructor
 wgtTextView::wgtTextView(QWidget *parent)
     :QMainWindow(parent)
-    , d_ptr(new wgtTextViewPrivate())
 {
-    Q_D(wgtTextView);
-    d->q_ptr = this;
-    d->createMenu();
+    createActions();
+    createMenu();
+
+    findReplace = new FindReplaceText();
+
+    textView = new QPlainTextEdit;
+    rwMode = true;
+
     resize(500, 500);
-    setCentralWidget(d->textView);
+    setCentralWidget(textView);
     setWindowTitle("ZBC viewer/editor");
+}
+
+//function for Menu
+void wgtTextView::createMenu()
+{
+
+    menu = this->menuBar()->addMenu(tr("&File"));
+    menu->addAction(fileSaveAsAct);
+    menu->addSeparator();
+    menu->addAction(quitAct);
+
+    editMenu = this->menuBar()->addMenu(tr("&Edit"));
+    editMenu->addAction(findAtTextAct);
+}
+
+//function for Actions
+void wgtTextView::createActions()
+{
+    quitAct = new QAction(tr("&Quit"), this);
+    quitAct->setStatusTip(tr("Close window"));
+    quitAct->setShortcut(QKeySequence::Close);
+    connect(quitAct, &QAction::triggered, this, &wgtTextView::close);
+
+    fileSaveAsAct = new QAction(tr("Save as..."), this);
+    fileSaveAsAct->setStatusTip(tr("File, save as"));
+    fileSaveAsAct->setShortcut(QKeySequence::SaveAs);
+    connect(fileSaveAsAct, &QAction::triggered, this, &wgtTextView::saveAs);
+
+    findAtTextAct = new QAction(tr("&Find"), this);
+    findAtTextAct->setStatusTip(tr("Find text"));
+    findAtTextAct->setShortcut(QKeySequence::Find);
+    connect(findAtTextAct, &QAction::triggered, this, &wgtTextView::findInText);
+}
+
+//function loadFile
+bool wgtTextView::loadFile(const QString &filePath, char mode)
+{
+    pathToFile = filePath;
+    if (mode == 'w')
+        rwMode = false;
+
+    QByteArray dataFromFile;
+    QFile inputFile(pathToFile);
+    if (!inputFile.open(QFile::ReadOnly))
+    {
+        qDebug()<<"Could not open the input file\n"<<pathToFile;
+        return false;
+    } else {
+        dataFromFile = inputFile.readAll();
+        textView->setReadOnly(rwMode);
+        textView->setPlainText(dataFromFile);
+        return true;
+    }
+}
+
+void wgtTextView::closeEvent(QCloseEvent *)
+{
+    findReplace->close();
+}
+
+//slot saveAs
+bool wgtTextView::saveAs()
+{
+    QString fileName = QFileDialog::getSaveFileName(this,
+                                                    QObject::tr("Save File"),
+                                                    pathToFile,
+                                                    QObject::tr("All files (*.*)"));
+    pathToFile = fileName;
+    return saveFile();
+}
+
+//slot saveFile
+bool wgtTextView::saveFile()
+{
+    QFile inputFile(pathToFile);
+    if (!inputFile.open(QFile::WriteOnly)) {
+        qDebug() << "Could not open the output file\n"<<pathToFile;
+        return false;
+    }
+    else {
+        QString buffer = textView->toPlainText();
+        QTextStream stream(&inputFile);
+        stream << buffer;
+        buffer.clear();
+        inputFile.close();
+        return true;
+    }
+}
+
+bool wgtTextView::findInText()
+{
+    findReplace->show();
 }
 
 wgtTextView::~wgtTextView()
@@ -26,64 +122,3 @@ wgtTextView::~wgtTextView()
 
 }
 
-wgtTextView::loadFile(const QString &filePath, char mode)
-{
-    Q_D(wgtTextView);
-    d->pathToFile = filePath;
-    if (mode == 'w')
-        d->rwMode = false;
-    d->readFile();
-}
-
-wgtTextView::wgtTextView(wgtTextViewPrivate &dd, QWidget *parent)
-    : QMainWindow(parent)
-    , d_ptr(&dd)
-{
-    Q_D(wgtTextView);
-    d->q_ptr = this;
-}
-
-//wgtTextViewPrivate class
-wgtTextViewPrivate::wgtTextViewPrivate()
-{
-    textView = new QPlainTextEdit;
-    rwMode = true;
-}
-
-void wgtTextViewPrivate::readFile()
-{
-    if (pathToFile.isEmpty())
-        return;
-    QByteArray dataFromFile;
-    QFile inputFile(pathToFile);
-    if (!inputFile.open(QFile::ReadOnly))
-    {
-        qDebug()<<"Could not open the input file\n"<<pathToFile;
-    }
-    dataFromFile = inputFile.readAll();
-    textView->setReadOnly(rwMode);
-    textView->setPlainText(dataFromFile);
-}
-
-wgtTextViewPrivate::~wgtTextViewPrivate()
-{
-
-}
-
-void wgtTextViewPrivate::createActions()
-{
-    Q_Q(wgtTextView);
-    quitAct = new QAction(QObject::tr("&Quit"), q_ptr);
-    quitAct->setStatusTip(QObject::tr("Close window"));
-    quitAct->setShortcut(QKeySequence::Close);
-    QObject::connect(quitAct, SIGNAL(triggered(bool)), q_ptr, SLOT(close()));
-}
-
-void wgtTextViewPrivate::createMenu()
-{
-    Q_Q(wgtTextView);
-    menu = q_ptr->menuBar()->addMenu(QObject::tr("&File"));
-    menu->addAction(quitAct);
-
-
-}
