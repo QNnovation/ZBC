@@ -78,6 +78,16 @@ bool wgtTextView::loadFile(const QString &filePath, char mode)
     }
 }
 
+void wgtTextView::viewFile(QString &filePath)
+{
+    loadFile(filePath);
+}
+
+void wgtTextView::editFile(QString &filePath)
+{
+    loadFile(filePath, 'w');
+}
+
 void wgtTextView::closeEvent(QCloseEvent *)
 {
     findReplace->close();
