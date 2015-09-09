@@ -12,7 +12,6 @@
 #include <QHBoxLayout>
 #include <QModelIndex>
 #include <QFileSystemModel>
-#include <QFileSystemWatcher>
 #include <QSplitter>
 
 
@@ -71,8 +70,6 @@ void zbcCentralWidget::createView()
     m_psplCentral->addWidget(m_psfwRight);
     m_psplCentral->setChildrenCollapsible(false);
 
-//Watcher
-    m_pfsWatcher        = new QFileSystemWatcher;
     m_psfwNotActive = m_psfwLeft;
 
 //Bottom Buttons Frame
@@ -133,10 +130,6 @@ void zbcCentralWidget::createConnections()
             this, SLOT(runDelete()));
     connect(m_pactDelete, SIGNAL(triggered()),
             this, SLOT(runDelete()));
-
-//Watcher
-//    connect(m_pfsWatcher, SIGNAL(directoryChanged(QString)),
-//            m_psfwNotActive, SLOT(setRootPathForFS(QString)));
 }
 
 
@@ -215,10 +208,6 @@ void zbcCentralWidget::runEdit()
 //Copy Buttom Pressed
 void zbcCentralWidget::runCopy()
 {
-
-//qDebug() << "m_pfsWatcher->addPath(m_psfwNotActive->getCurrentPath()): " <<
-//            m_pfsWatcher->addPath(m_psfwNotActive->getCurrentPath());
-
     FileOperationWgt* pwgtCopy               = new FileOperationWgt(this);
     QStringList lst =  m_psfwActive->getListOfSelectedItems();
 
@@ -229,22 +218,6 @@ void zbcCentralWidget::runCopy()
 
     pwgtCopy->setModal(true);
     pwgtCopy->show();
-
-
-//    connect(pwgtCopy, SIGNAL(finishOperation(QString)),
-//            m_pfsWatcher, SIGNAL(directoryChanged(QString)));
-
-//    connect(pwgtCopy, SIGNAL(finishOperation(QString)),
-//            m_psfwNotActive, SLOT(setRootPathForFS(QString)));
-}
-
-
-void zbcCentralWidget::addFileToSystemWatcher()
-{
-    qDebug() << "m_pfsWatcher->addPath(\"D:/Test2/Forrest_Gump.avi\"): " <<
-                 m_pfsWatcher->addPath("D:/Test2/Forrest_Gump.avi");
-
-    emit fileAdded();
 }
 
 

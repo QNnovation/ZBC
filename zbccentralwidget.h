@@ -5,7 +5,6 @@
 
 class zbcSideFrame;
 class zbcPushButton;
-class QFileSystemWatcher;
 class QSplitter;
 class QPushButton;
 
@@ -41,8 +40,6 @@ private:
     QAction*            m_pactNewFolder;
     QAction*            m_pactDelete;
 
-    QFileSystemWatcher* m_pfsWatcher;
-
 //METHODS
     void createBottomFrame();
     void createView();
@@ -57,7 +54,6 @@ private slots:
     void runMove();
     void runNewFolder();
     void runDelete();
-    void addFileToSystemWatcher(/*QString*/);
 
 signals:
     void fileAdded(/*QString*/);
