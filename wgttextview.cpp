@@ -1,220 +1,134 @@
-#include <QtWidgets>
-
 #include "wgttextview.h"
 
-wgtTextView::wgtTextView()
-{
-    textView = new QPlainTextEdit;
-    setCentralWidget(textView);
+#include <QPlainTextEdit>
+#include <QFileInfo>
+#include <QFile>
+#include <QFileDialog>
+#include <QDebug>
+#include <QMenu>
+#include <QMenuBar>
 
+//constructor
+wgtTextView::wgtTextView(QWidget *parent)
+    :QMainWindow(parent)
+{
     createActions();
-    createMenus();
-    createToolBars();
-    createStatusBar();
-    connect(textView->document(), SIGNAL(contentsChanged()), this, SLOT(documentWasModified()));
-    setCurrentFile("");
+    createMenu();
+
+    findReplace = new FindReplaceText();
+
+    textView = new QPlainTextEdit;
+    rwMode = true;
+
+    resize(500, 500);
+    setCentralWidget(textView);
+    setWindowTitle("ZBC viewer/editor");
 }
 
-void wgtTextView::viewFile(const QString &fileName)
+//function for Menu
+void wgtTextView::createMenu()
 {
-    loadFile(fileName);
-    textView->setReadOnly(true);
+
+    menu = this->menuBar()->addMenu(tr("&File"));
+    menu->addAction(fileSaveAsAct);
+    menu->addSeparator();
+    menu->addAction(quitAct);
+
+    editMenu = this->menuBar()->addMenu(tr("&Edit"));
+    editMenu->addAction(findAtTextAct);
 }
 
-void wgtTextView::editFile(const QString &fileName)
-{
-    loadFile(fileName);
-    textView->setReadOnly(false);
-}
-
-
-void wgtTextView::open()
-{
-    currentFile = QFileDialog::getOpenFileName(this);
-    if (!currentFile.isEmpty())
-        loadFile(currentFile);
-}
-
-void wgtTextView::newFile()
-{
-    if(maybeSave())
-    {
-        textView->clear();
-    }
-}
-
-bool wgtTextView::save()
-{
-    if(currentFile.isEmpty())
-    {
-        return saveAs();
-    }
-    else
-    {
-        return saveFile(currentFile);
-    }
-}
-
-bool wgtTextView::saveAs()
-{
-    QFileDialog dialog(this);
-    dialog.setWindowModality(Qt::WindowModal);
-    dialog.setAcceptMode(QFileDialog::AcceptSave);
-    QStringList files;
-    if (dialog.exec())
-        files = dialog.selectedFiles();
-    else
-        return false;
-    return saveFile(files.at(0));
-}
-
-void wgtTextView::documentWasModified()
-{
-    setWindowModified(textView->document()->isModified());
-}
-
+//function for Actions
 void wgtTextView::createActions()
 {
-    openAct = new QAction(tr("&Open..."), this);
-    openAct->setShortcuts(QKeySequence::Open);
-    openAct->setStatusTip(tr("Open a existing file"));
-    connect(openAct, SIGNAL(triggered(bool)), this, SLOT(open()));
+    quitAct = new QAction(tr("&Quit"), this);
+    quitAct->setStatusTip(tr("Close window"));
+    quitAct->setShortcut(QKeySequence::Close);
+    connect(quitAct, &QAction::triggered, this, &wgtTextView::close);
 
-    newAct = new QAction(tr("&New"), this);
-    newAct->setShortcuts(QKeySequence::New);
-    newAct->setStatusTip(tr("Create a new file"));
-    connect(newAct, SIGNAL(triggered(bool)), SLOT(newFile()));
+    fileSaveAsAct = new QAction(tr("Save as..."), this);
+    fileSaveAsAct->setStatusTip(tr("File, save as"));
+    fileSaveAsAct->setShortcut(QKeySequence::SaveAs);
+    connect(fileSaveAsAct, &QAction::triggered, this, &wgtTextView::saveAs);
 
-    exitAct = new QAction(tr("&Quit"), this);
-    exitAct->setShortcuts(QKeySequence::Quit);
-    exitAct->setStatusTip(tr("Exit program"));
-    connect(exitAct, SIGNAL(triggered(bool)), this, SLOT(close()));
-
-    saveAct = new QAction(tr("Save"), this);
-    saveAct->setShortcuts(QKeySequence::Save);
-    saveAct->setStatusTip(tr("Save file"));
-    connect(saveAct, SIGNAL(triggered(bool)), SLOT(save()));
-
-    saveAsAct = new QAction(tr("&Save As"), this);
-    saveAsAct->setShortcuts(QKeySequence::SaveAs);
-    saveAsAct->setStatusTip(tr("Save file as..."));
-    connect(saveAsAct, SIGNAL(triggered(bool)), SLOT(saveAs()));
-
-    copyAct = new QAction(tr("Copy"), this);
-    copyAct->setShortcuts(QKeySequence::Copy);
-    copyAct->setStatusTip(tr("Copy text"));
-    connect(copyAct, SIGNAL(triggered(bool)), textView, SLOT(copy()));
-
-    pasteAct = new QAction(tr("Paste"), this);
-    pasteAct->setShortcuts(QKeySequence::Paste);
-    pasteAct->setStatusTip(tr("Paste text"));
-    connect(pasteAct, SIGNAL(triggered(bool)), textView, SLOT(paste()));
-
-    cutAct = new QAction(tr("Cut"), this);
-    cutAct->setShortcuts(QKeySequence::Cut);
-    cutAct->setStatusTip(tr("Cut text"));
-    connect(cutAct, SIGNAL(triggered(bool)), textView, SLOT(cut()));
+    findAtTextAct = new QAction(tr("&Find"), this);
+    findAtTextAct->setStatusTip(tr("Find text"));
+    findAtTextAct->setShortcut(QKeySequence::Find);
+    connect(findAtTextAct, &QAction::triggered, this, &wgtTextView::findInText);
 }
 
-void wgtTextView::createMenus()
+//function loadFile
+bool wgtTextView::loadFile(const QString &filePath, char mode)
 {
-    fileMenu = menuBar()->addMenu(tr("&File"));
-    fileMenu->addAction(newAct);
-    fileMenu->addAction(openAct);
-    fileMenu->addAction(saveAct);
-    fileMenu->addAction(saveAsAct);
-    fileMenu->addSeparator();
-    fileMenu->addAction(exitAct);
+    pathToFile = filePath;
+    if (mode == 'w')
+        rwMode = false;
 
-    editMenu = menuBar()->addMenu(tr("&Edit"));
-    editMenu->addAction(copyAct);
-    editMenu->addAction(pasteAct);
-    editMenu->addAction(cutAct);
-}
-
-void wgtTextView::createToolBars()
-{
-    fileToolBar = addToolBar(tr("File"));
-    fileToolBar->addAction(newAct);
-    fileToolBar->addAction(openAct);
-    fileToolBar->addAction(saveAct);
-
-    editToolBar = addToolBar(tr("Edit"));
-    editToolBar->addAction(cutAct);
-    editToolBar->addAction(copyAct);
-    editToolBar->addAction(pasteAct);
-}
-
-void wgtTextView::createStatusBar()
-{
-    statusBar()->showMessage(currentFile);
-}
-
-bool wgtTextView::maybeSave()
-{
-    if (textView->document()->isModified())
+    QByteArray dataFromFile;
+    QFile inputFile(pathToFile);
+    if (!inputFile.open(QFile::ReadOnly))
     {
-        QMessageBox::StandardButton ret;
-        ret = QMessageBox::warning(this, tr("Application"),
-                                   tr("The document was modified.\n"
-                                      "Do you want to save your changes?"),
-                                   QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-        if (ret == QMessageBox::Save)
-            return save();
-        else if (ret == QMessageBox::Cancel)
-            return false;
+        qDebug()<<"Could not open the input file\n"<<pathToFile;
+        return false;
+    } else {
+        dataFromFile = inputFile.readAll();
+        textView->setReadOnly(rwMode);
+        textView->setPlainText(dataFromFile);
+        return true;
     }
-    return true;
 }
 
-
-void wgtTextView::loadFile(const QString &fileName)
+void wgtTextView::viewFile(QString &filePath)
 {
-    QFile file(fileName);
-    if (!file.open(QFile::ReadOnly | QFile::Text))
-    {
-        QMessageBox::warning(this, tr("Application"),
-                             tr("Cannot read file %1:\n%2.")
-                             .arg(fileName)
-                             .arg(file.errorString()));
-        return;
-    }
-    QTextStream in(&file);
-#ifndef QT_NO_CURSOR
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-#endif
-    textView->setPlainText(in.readAll());
-#ifndef QT_NO_CURSOR
-    QApplication::restoreOverrideCursor();
-#endif
-    statusBar()->showMessage(tr("File %1 loaded").arg(file.fileName()));
+    loadFile(filePath);
 }
 
-bool wgtTextView::saveFile(const QString &fileName)
+void wgtTextView::editFile(QString &filePath)
 {
-    QFile file(fileName);
-    if (!file.open(QFile::WriteOnly | QFile::Text))
-    {
-        QMessageBox::warning(this, tr("Application"),
-                             tr("Cannot write file %1:\n%2.")
-                             .arg(fileName)
-                             .arg(file.errorString()));
+    loadFile(filePath, 'w');
+}
+
+void wgtTextView::closeEvent(QCloseEvent *)
+{
+    findReplace->close();
+}
+
+//slot saveAs
+bool wgtTextView::saveAs()
+{
+    QString fileName = QFileDialog::getSaveFileName(this,
+                                                    QObject::tr("Save File"),
+                                                    pathToFile,
+                                                    QObject::tr("All files (*.*)"));
+    pathToFile = fileName;
+    return saveFile();
+}
+
+//slot saveFile
+bool wgtTextView::saveFile()
+{
+    QFile inputFile(pathToFile);
+    if (!inputFile.open(QFile::WriteOnly)) {
+        qDebug() << "Could not open the output file\n"<<pathToFile;
         return false;
     }
-    QTextStream out(&file);
-    out<<textView->toPlainText();
-    statusBar()->showMessage(tr("File saved"), 2000);
-    return true;
+    else {
+        QString buffer = textView->toPlainText();
+        QTextStream stream(&inputFile);
+        stream << buffer;
+        buffer.clear();
+        inputFile.close();
+        return true;
+    }
 }
 
-void wgtTextView::setCurrentFile(const QString &fileName)
+bool wgtTextView::findInText()
 {
-    currentFile = fileName;
-    textView->document()->setModified(false);
-    setWindowModified(false);
-
-    QString shownName = currentFile;
-    if (shownName.isEmpty())
-        shownName = "unnamed.txt";
-    setWindowFilePath(shownName);
+    findReplace->show();
 }
+
+wgtTextView::~wgtTextView()
+{
+
+}
+
