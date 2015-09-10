@@ -190,7 +190,7 @@ void zbcCentralWidget::runView()
 {
     wgtTextView*    pwgtTextView        = new wgtTextView;
     QString strFile = m_psfwActive->getListOfSelectedItems().at(0);
-    pwgtTextView->viewFile(strFile);
+    pwgtTextView->loadFile(strFile);
     pwgtTextView->show();
 }
 
@@ -200,7 +200,7 @@ void zbcCentralWidget::runEdit()
 {
     wgtTextView*    pwgtTextView        = new wgtTextView;
     QString strFile = m_psfwActive->getListOfSelectedItems().at(0);
-    pwgtTextView->editFile(strFile);
+    pwgtTextView->loadFile(strFile, 'w');
     pwgtTextView->show();
 }
 

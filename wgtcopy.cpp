@@ -124,6 +124,8 @@ bool FileOperationWgt::confirmOperation()
         return true;
     else
         this->close();
+    return false;
+
 }
 
 void FileOperationWgt::threadPauseResume()
@@ -200,6 +202,10 @@ bool FileOperations::Pause()
 
 bool FileOperations::Stop()
 {
+    d_ptr->sync.lock();
+    thread_Pause = false;
+    d_ptr->sync.unlock();
+    d_ptr->pauseCond.wakeAll();
     thread_Break = true;
     return thread_Break;
 }
@@ -470,8 +476,9 @@ void FileOperations::process()
             d_ptr->outputFile.close();
             d_ptr->inputFile.close();
         }
-        if (thread_Break)
+        if (thread_Break) {
             QFile(d_ptr->filesDestination.at(i)).remove();
+        }
     }
     //flag of removing
     if (d_ptr->b_moveFileOperation)
