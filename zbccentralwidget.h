@@ -3,8 +3,8 @@
 
 #include<QFrame>
 
-class zbcSideFrame;
-class zbcPushButton;
+class ZBC_SideFrame;
+class ZBC_PushButton;
 class QSplitter;
 class QPushButton;
 
@@ -18,19 +18,19 @@ public:
 
 private:
 //MEMBERS
-    zbcSideFrame*       m_psfwLeft;
-    zbcSideFrame*       m_psfwRight;
-    zbcSideFrame*       m_psfwActive;
-    zbcSideFrame*       m_psfwNotActive;
+    ZBC_SideFrame*       m_psfwLeft;
+    ZBC_SideFrame*       m_psfwRight;
+    ZBC_SideFrame*       m_psfwActive;
+    ZBC_SideFrame*       m_psfwNotActive;
     QSplitter*          m_psplCentral;
 
     QFrame*             m_pfrmBottomButtons;
-    zbcPushButton*      m_pbtnView;
-    zbcPushButton*      m_pbtnEdit;
-    zbcPushButton*      m_pbtnCopy;
-    zbcPushButton*      m_pbtnMove;
-    zbcPushButton*      m_pbtnNewFolder;
-    zbcPushButton*      m_pbtnDelete;
+    ZBC_PushButton*      m_pbtnView;
+    ZBC_PushButton*      m_pbtnEdit;
+    ZBC_PushButton*      m_pbtnCopy;
+    ZBC_PushButton*      m_pbtnMove;
+    ZBC_PushButton*      m_pbtnNewFolder;
+    ZBC_PushButton*      m_pbtnDelete;
     QPushButton*        m_pbtnExit;
 
     QAction*            m_pactView;
@@ -47,7 +47,7 @@ private:
     void createActions();
 
 private slots:
-    void setActiveFrame(zbcSideFrame*);
+    void setActiveFrame(ZBC_SideFrame*);
     void runView();
     void runEdit();
     void runCopy();

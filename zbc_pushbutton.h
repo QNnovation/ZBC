@@ -3,11 +3,11 @@
 
 #include <QPushButton>
 
-class zbcPushButton : public QPushButton
+class ZBC_PushButton : public QPushButton
 {
     Q_OBJECT
 public:
-    explicit zbcPushButton(const QString&);
+    explicit ZBC_PushButton(const QString&, QWidget* pwgt = 0);
 
 protected:
     virtual void enterEvent(QEvent* pe) override;

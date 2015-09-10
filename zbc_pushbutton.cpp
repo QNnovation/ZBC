@@ -1,17 +1,17 @@
-#include "zbcpushbutton.h"
+#include "zbc_pushbutton.h"
 
 #include <QMouseEvent>
 
 
 //C-tor
-zbcPushButton::zbcPushButton(const QString& str) : QPushButton(str)
+ZBC_PushButton::ZBC_PushButton(const QString& str, QWidget* pwgt) : QPushButton(str, pwgt)
 {
     this->setFlat(true);
 }
 
 
 //Mouse above button
-/*virtual*/ void zbcPushButton::enterEvent(QEvent *pe)
+/*virtual*/ void ZBC_PushButton::enterEvent(QEvent *pe)
 {
     Q_UNUSED(pe)
     this->setFlat(false);
@@ -20,7 +20,7 @@ zbcPushButton::zbcPushButton(const QString& str) : QPushButton(str)
 
 
 //Mouse laeve button area
-/*virtual*/ void zbcPushButton::leaveEvent(QEvent *pe)
+/*virtual*/ void ZBC_PushButton::leaveEvent(QEvent *pe)
 {
     Q_UNUSED(pe)
     this->setFlat(true);

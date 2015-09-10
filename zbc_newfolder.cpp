@@ -31,12 +31,12 @@ ZBC_NewFolder::ZBC_NewFolder(QString _curPath, QWidget* pwgt) : QDialog(pwgt)
             [this, _curPath, pledName](){
 
                 QString sNewFolder;
-                if(pledName->text().isEmpty())
+                if (pledName->text().isEmpty())
                     sNewFolder = _curPath + "New Folder";
                 else
                     sNewFolder = _curPath + pledName->text();
 
-                if(!QDir(sNewFolder).exists()){
+                if (!QDir(sNewFolder).exists()){
                     if(!QDir("").mkdir(sNewFolder)){
                         QMessageBox errorMsg(QMessageBox::Critical,
                                              QString("ZBC"),

@@ -2,8 +2,8 @@
 
 #include "zbccentralwidget.h"
 #include "zbc_newfolder.h"
-#include "zbcsideframe.h"
-#include "zbcpushbutton.h"
+#include "zbc_sideframe.h"
+#include "zbc_pushbutton.h"
 #include "wgtcopy.h"
 #include "wgttextview.h"
 
@@ -35,14 +35,14 @@ void zbcCentralWidget::createBottomFrame()
     m_pfrmBottomButtons = new QFrame;
 
 //Bottom Buttons
-    m_pbtnView          = new zbcPushButton(tr("F3 View"));
-    m_pbtnEdit          = new zbcPushButton(tr("F4 Edit"));
-    m_pbtnCopy          = new zbcPushButton(tr("F5 Copy"));
-    m_pbtnMove          = new zbcPushButton(tr("F6 Move"));
-    m_pbtnNewFolder     = new zbcPushButton(tr("F7 NewFolder"));
-    m_pbtnDelete        = new zbcPushButton(tr("F8 Delete"));
+    m_pbtnView          = new ZBC_PushButton(tr("F3 View"), this);
+    m_pbtnEdit          = new ZBC_PushButton(tr("F4 Edit"), this);
+    m_pbtnCopy          = new ZBC_PushButton(tr("F5 Copy"), this);
+    m_pbtnMove          = new ZBC_PushButton(tr("F6 Move"), this);
+    m_pbtnNewFolder     = new ZBC_PushButton(tr("F7 NewFolder"), this);
+    m_pbtnDelete        = new ZBC_PushButton(tr("F8 Delete"), this);
     m_pbtnDelete->setFlat(true);
-    m_pbtnExit          = new QPushButton(tr("Alt+F4 Exit"));
+    m_pbtnExit          = new QPushButton(tr("Alt+F4 Exit"), this);
 
 //Layout
     QHBoxLayout*        phblBoxLayout = new QHBoxLayout(m_pfrmBottomButtons);
@@ -61,8 +61,8 @@ void zbcCentralWidget::createBottomFrame()
 void zbcCentralWidget::createView()
 {
 //Side Frames
-    m_psfwLeft                  = new zbcSideFrame(this);
-    m_psfwRight                 = new zbcSideFrame(this);
+    m_psfwLeft                  = new ZBC_SideFrame(this);
+    m_psfwRight                 = new ZBC_SideFrame(this);
 
 //Splitter
     m_psplCentral               = new QSplitter(Qt::Horizontal);
@@ -89,11 +89,11 @@ void zbcCentralWidget::createView()
 void zbcCentralWidget::createConnections()
 {
 //Active Frame
-    connect(m_psfwLeft, SIGNAL(Active(zbcSideFrame*)),
-            this, SLOT(setActiveFrame(zbcSideFrame*)));
+    connect(m_psfwLeft, SIGNAL(Active(ZBC_SideFrame*)),
+            this, SLOT(setActiveFrame(ZBC_SideFrame*)));
 
-    connect(m_psfwRight, SIGNAL(Active(zbcSideFrame*)),
-            this, SLOT(setActiveFrame(zbcSideFrame*)));
+    connect(m_psfwRight, SIGNAL(Active(ZBC_SideFrame*)),
+            this, SLOT(setActiveFrame(ZBC_SideFrame*)));
 
 //View File
     connect(m_pbtnView, &QPushButton::clicked,
@@ -169,7 +169,7 @@ void zbcCentralWidget::createActions()
 
 
 //Set pointer to active frame
-void zbcCentralWidget::setActiveFrame(zbcSideFrame* _psfw)
+void zbcCentralWidget::setActiveFrame(ZBC_SideFrame* _psfw)
 {
     if(_psfw == m_psfwLeft)
     {
@@ -218,6 +218,7 @@ void zbcCentralWidget::runCopy()
 
     pwgtCopy->setModal(true);
     pwgtCopy->show();
+//    pwgtCopy->exec();
 }
 
 
