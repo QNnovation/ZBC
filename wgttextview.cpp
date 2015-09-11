@@ -54,7 +54,7 @@ void wgtTextView::createActions()
     findAtTextAct = new QAction(tr("&Find"), this);
     findAtTextAct->setStatusTip(tr("Find text"));
     findAtTextAct->setShortcut(QKeySequence::Find);
-    connect(findAtTextAct, &QAction::triggered, this, &wgtTextView::findInText);
+    connect(findAtTextAct, &QAction::triggered, this, &wgtTextView::findInTextSlot);
 }
 
 //function loadFile
@@ -122,9 +122,15 @@ bool wgtTextView::saveFile()
     }
 }
 
-bool wgtTextView::findInText()
+void wgtTextView::findTextOptionsSlot(QString word, QTextDocument::FindFlags flags)
+{
+    textView->find(word, flags);
+}
+
+void wgtTextView::findInTextSlot()
 {
     findReplace->show();
+    connect(findReplace, &FindReplaceText::findTextOptionsSig, this, &wgtTextView::findTextOptionsSlot);
 }
 
 wgtTextView::~wgtTextView()

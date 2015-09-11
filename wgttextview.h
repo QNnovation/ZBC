@@ -2,6 +2,7 @@
 #define WGTTEXTVIEW_H
 
 #include <QMainWindow>
+#include <QTextDocument>
 #include "wgtfindreplacetext.h"
 
 class QMenu;
@@ -39,13 +40,15 @@ private:
     QPlainTextEdit *textView;
 
     QString pathToFile;
-    QString findText;
     FindReplaceText *findReplace;
 
 private slots:
     bool saveAs();
     bool saveFile();
-    bool findInText();
+    void findTextOptionsSlot(QString, QTextDocument::FindFlags);
+    void findInTextSlot();
+
+
 };
 
 #endif // WGTTEXTVIEW_H
