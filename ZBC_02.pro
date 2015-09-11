@@ -12,7 +12,9 @@ HEADERS += \
     zbc_newfolder.h \
     wgtfindreplacetext.h \
     zbc_sideframe.h \
-    zbc_pushbutton.h
+    zbc_pushbutton.h \
+    zbc_centralwidget.h \
+    zbc_centralwidget_p.h
     zbc_newfolder.h
 
 SOURCES += \
@@ -24,4 +26,5 @@ SOURCES += \
     zbc_newfolder.cpp \
     wgtfindreplacetext.cpp \
     zbc_sideframe.cpp \
-    zbc_pushbutton.cpp
+    zbc_pushbutton.cpp \
+    zbc_centralwidget.cpp
