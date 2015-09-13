@@ -2,23 +2,28 @@
 #define ZBC_CENTRALWIDGET_P_H
 
 #include "zbc_centralwidget.h"
-#include "zbc_sideframe.h"
+//#include "zbc_sideframe.h"
 #include "zbc_pushbutton.h"
 
+class ZBC_SideFrame;
 
-class ZBC_CentralWidgetPrivate
+class QSettings;
+
+class ZBC_CentralWidgetPrivate : QObject
 {
     Q_OBJECT
 public:
-    ZBC_CentralWidgetPrivate();
+    explicit ZBC_CentralWidgetPrivate( ZBC_CentralWidget* parent);
+    ~ZBC_CentralWidgetPrivate() {}
 
 private:
+    ZBC_CentralWidget*  q_ptr;
+    Q_DECLARE_PUBLIC(ZBC_CentralWidget);
 //MEMBERS
-    ZBC_SideFrame*      m_psfwLeft;
-    ZBC_SideFrame*      m_psfwRight;
-    ZBC_SideFrame*      m_psfwActive;
-    ZBC_SideFrame*      m_psfwNotActive;
-
+    ZBC_SideFrame*       m_psfwLeft;
+    ZBC_SideFrame*       m_psfwRight;
+    ZBC_SideFrame*       m_psfwActive;
+    ZBC_SideFrame*       m_psfwNotActive;
 
     QFrame*             m_pfrmBottomButtons;
     ZBC_PushButton*      m_pbtnView;
@@ -36,6 +41,8 @@ private:
     QAction*            m_pactNewFolder;
     QAction*            m_pactDelete;
 
+    QSettings*           m_psettings;
+
 //METHODS
     void createBottomFrame();
     void createView();
@@ -43,6 +50,7 @@ private:
     void createActions();
 
 private slots:
+/*
     void setActiveFrame(ZBC_SideFrame*);
     void runView();
     void runEdit();
@@ -50,7 +58,7 @@ private slots:
     void runMove();
     void runNewFolder();
     void runDelete();
-
+*/
 signals:
     void fileAdded(/*QString*/);
 

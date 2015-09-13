@@ -12,10 +12,8 @@ public:
     explicit ZBC_CentralWidget(QWidget* pwgt = 0);
     virtual ~ZBC_CentralWidget(){ delete d_ptr; }
 
-protected:
-    ZBC_CentralWidgetPrivate* const d_ptr;
-
 private:
+    ZBC_CentralWidgetPrivate* const d_ptr;
     Q_DECLARE_PRIVATE(ZBC_CentralWidget);
 };
 

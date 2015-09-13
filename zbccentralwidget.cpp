@@ -13,7 +13,7 @@
 #include <QModelIndex>
 #include <QFileSystemModel>
 #include <QSplitter>
-
+#include <QSettings>
 
 //C-tor
 zbcCentralWidget::zbcCentralWidget(QWidget *pwgt) : QFrame(pwgt)
@@ -27,14 +27,15 @@ zbcCentralWidget::zbcCentralWidget(QWidget *pwgt) : QFrame(pwgt)
 //D-tor
 zbcCentralWidget::~zbcCentralWidget()
 {
-    m_settings.beginGroup("/Settings");
-    m_settings.beginGroup("/Panel");
+    m_psettings->beginGroup("/Settings");
+    m_psettings->beginGroup("/Panel");
 
-    m_settings.setValue("/LeftPath", m_psfwLeft->getCurrentPath());
-    m_settings.setValue("/RightPath", m_psfwRight->getCurrentPath());
+    m_psettings->setValue("/LeftPath", m_psfwLeft->getCurrentPath());
+    m_psettings->setValue("/RightPath", m_psfwRight->getCurrentPath());
 
-    m_settings.endGroup();
-    m_settings.endGroup();
+    m_psettings->endGroup();
+    m_psettings->endGroup();
+    delete m_psettings;
 }
 
 
@@ -71,22 +72,23 @@ void zbcCentralWidget::createBottomFrame()
 void zbcCentralWidget::createView()
 {
 //Settings
-    m_settings.beginGroup("/Settings");
-    m_settings.beginGroup("/Panel");
+    m_psettings          = new QSettings;
+    m_psettings->beginGroup("/Settings");
+    m_psettings->beginGroup("/Panel");
 
-    if ( !m_settings.contains("/LeftPath") )
-        m_settings.setValue("/LeftPath", "C:");
+    if ( !m_psettings->contains("/LeftPath") )
+        m_psettings->setValue("/LeftPath", "C:");
 
-    if ( !m_settings.contains("/RightPath") )
-        m_settings.setValue("/RightPath", "C:");
+    if ( !m_psettings->contains("/RightPath") )
+        m_psettings->setValue("/RightPath", "C:");
 
 
 //Side Frames
-    m_psfwLeft      = new ZBC_SideFrame((m_settings.value("/LeftPath", "").toString()), this);
-    m_psfwRight     = new ZBC_SideFrame((m_settings.value("/RightPath", "").toString()), this);
+    m_psfwLeft      = new ZBC_SideFrame((m_psettings->value("/LeftPath", "").toString()), this);
+    m_psfwRight     = new ZBC_SideFrame((m_psettings->value("/RightPath", "").toString()), this);
 
-    m_settings.endGroup();
-    m_settings.endGroup();
+    m_psettings->endGroup();
+    m_psettings->endGroup();
 
 //Splitter
     m_psplCentral               = new QSplitter(Qt::Horizontal);

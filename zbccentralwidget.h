@@ -2,12 +2,12 @@
 #define ZBCCENTRALWIDGET_H
 
 #include <QFrame>
-#include <QSettings>
 
 class ZBC_SideFrame;
 class ZBC_PushButton;
 class QSplitter;
 class QPushButton;
+class QSettings;
 
 
 class zbcCentralWidget : public QFrame
@@ -42,7 +42,7 @@ private:
     QAction*            m_pactNewFolder;
     QAction*            m_pactDelete;
 
-    QSettings           m_settings;
+    QSettings*           m_psettings;
 
 //METHODS
     void createBottomFrame();
