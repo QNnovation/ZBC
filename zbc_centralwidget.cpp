@@ -13,18 +13,27 @@
 #include <QFileSystemModel>
 #include <QSplitter>
 #include <QSettings>
+#include <QVBoxLayout>
 
+#include <QPushButton>
 
 //C-tor
 ZBC_CentralWidget::ZBC_CentralWidget(QWidget* pwgt) : QFrame(pwgt), d_ptr(new ZBC_CentralWidgetPrivate(this))
 {
-
+    Q_D(ZBC_CentralWidget);
+    d->q_ptr = this;
+    setLayout(d->pLayout);
 }
 
 
 //C-tor
 ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) : q_ptr(parent)
 {
+    pbtn = new ZBC_PushButton("Test");
+    pLayout = new QVBoxLayout;
+    pLayout->addWidget(pbtn);
+
+/*
 //Widgets
     m_psettings                 = new QSettings;
     m_psettings->beginGroup("/Settings");
@@ -46,16 +55,16 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) : 
 
 
 //Splitter
-    QSplitter splCentral(Qt::Horizontal, q_ptr);
-    splCentral.addWidget(m_psfwLeft);
-    splCentral.addWidget(m_psfwRight);
-    splCentral.setChildrenCollapsible(false);
+    QSplitter* splCentral = new QSplitter(Qt::Horizontal, q_ptr);
+    splCentral->addWidget(m_psfwLeft);
+    splCentral->addWidget(m_psfwRight);
+    splCentral->setChildrenCollapsible(false);
 
     m_psfwNotActive = m_psfwLeft;
     m_psfwActive = m_psfwRight;
 
 //Bottom Buttons Frame
-    QFrame frmBottomButtons(q_ptr);
+    QFrame* frmBottomButtons = new QFrame(q_ptr);
 
 //Bottom Buttons
     ZBC_PushButton btnView(tr("F3 View"), q_ptr);
@@ -66,8 +75,8 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) : 
     ZBC_PushButton btnDelete(tr("F8 Delete"), q_ptr);
     ZBC_PushButton btnExit(tr("Alt+F4 Exit"), q_ptr);
 
-//Layout
-    QHBoxLayout hblBoxLayout(&frmBottomButtons);
+//Layout Buttons
+    QHBoxLayout hblBoxLayout(frmBottomButtons);
     hblBoxLayout.addWidget(&btnView);
     hblBoxLayout.addWidget(&btnEdit);
     hblBoxLayout.addWidget(&btnCopy);
@@ -76,7 +85,14 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) : 
     hblBoxLayout.addWidget(&btnDelete);
     hblBoxLayout.addWidget(&btnExit);
 
-    frmBottomButtons.setLayout(&hblBoxLayout);
+    frmBottomButtons->setLayout(&hblBoxLayout);
+
+//Layout Top
+    QVBoxLayout* VblLayout = new QVBoxLayout(q_ptr);
+    VblLayout->setMargin(0);
+    VblLayout->addWidget(splCentral);
+    VblLayout->addWidget(frmBottomButtons);
+    q_ptr->setLayout(VblLayout);
 
 
 //Create Actions
@@ -140,7 +156,7 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) : 
 
 //Run View
     connect(&actView,
-            &QAction::trigger,
+            &QAction::triggered,
             [this](){
                 wgtTextView wgtTextView(q_ptr);
                 QString strFile = this->m_psfwActive->getListOfSelectedItems().at(0);
@@ -266,12 +282,14 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) : 
             &ZBC_PushButton::clicked,
             q_ptr,
             &ZBC_CentralWidget::close);
+*/
 }
 
 
 //D-tor
 ZBC_CentralWidgetPrivate::~ZBC_CentralWidgetPrivate()
 {
+/*
     m_psettings->beginGroup("/Settings");
     m_psettings->beginGroup("/Panel");
 
@@ -281,4 +299,5 @@ ZBC_CentralWidgetPrivate::~ZBC_CentralWidgetPrivate()
     m_psettings->endGroup();
     m_psettings->endGroup();
     delete m_psettings;
+*/
 }

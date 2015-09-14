@@ -5,6 +5,7 @@
 
 class ZBC_SideFrame;
 class ZBC_PushButton;
+class QVBoxLayout;
 
 class QSettings;
 
@@ -19,6 +20,9 @@ private:
     ZBC_CentralWidget*  q_ptr;
     Q_DECLARE_PUBLIC(ZBC_CentralWidget);
 
+    ZBC_PushButton*     pbtn;
+    QVBoxLayout*        pLayout;
+/*
     ZBC_SideFrame*       m_psfwLeft;
     ZBC_SideFrame*       m_psfwRight;
     ZBC_SideFrame*       m_psfwActive;
@@ -26,7 +30,7 @@ private:
 
 
     QSettings*           m_psettings;
-
+*/
 };
 
 #endif // ZBC_CENTRALWIDGET_P_H
