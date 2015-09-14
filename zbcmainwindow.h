@@ -11,7 +11,8 @@
 class QMenu;
 class QAction;
 class QToolBar;
-class zbcCentralWidget;
+//class zbcCentralWidget;
+class ZBC_CentralWidget;
 
 class zbcMainWindow : public QMainWindow
 {
@@ -26,13 +27,13 @@ private:
     QMenu*              m_pmnuFile;
     QToolBar*           m_ptbrFile;
     QAction*            m_pactQuit;
-    zbcCentralWidget*   m_pzbcCWgt;
+//    ZBC_CentralWidget   m_pzbcCWgt;
 
 //METHODS
     void createActions();
     void setupMenuBar();
     void setupToolBar();
-    void setupCentralWidget();
+//    void setupCentralWidget();
 };
 
 #endif // ZBCMAINWINDOW_H

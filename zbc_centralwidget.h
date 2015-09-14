@@ -10,9 +10,11 @@ class ZBC_CentralWidget : public QFrame
     Q_OBJECT
 public:
     explicit ZBC_CentralWidget(QWidget* pwgt = 0);
-    virtual ~ZBC_CentralWidget(){ delete d_ptr; }
+    virtual ~ZBC_CentralWidget(){ /*delete d_ptr;*/ }
 
-private:
+protected:
+
+//    QScopedPointer<ZBC_CentralWidgetPrivate> const d_ptr;
     ZBC_CentralWidgetPrivate* const d_ptr;
     Q_DECLARE_PRIVATE(ZBC_CentralWidget);
 };

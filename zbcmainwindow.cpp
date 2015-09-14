@@ -3,7 +3,8 @@
  * class zbcMainWindow for Ze Best Commender(ZBC)
 */
 
-#include "zbccentralwidget.h"
+//#include "zbccentralwidget.h"
+#include "zbc_centralwidget.h"
 #include "zbcmainwindow.h"
 
 #include <QAction>
@@ -18,7 +19,9 @@ zbcMainWindow::zbcMainWindow(QWidget *pwgt) : QMainWindow(pwgt)
     createActions();
     setupMenuBar();
     setupToolBar();
-    setupCentralWidget();
+//    setupCentralWidget();
+    ZBC_CentralWidget zbcCwgt(this);
+    this->setCentralWidget(&zbcCwgt);
 }
 
 
@@ -52,8 +55,10 @@ void zbcMainWindow::setupToolBar()
 
 
 //Central Widget
+/*
 void zbcMainWindow::setupCentralWidget()
 {
     m_pzbcCWgt          = new zbcCentralWidget(this);
     this->setCentralWidget(m_pzbcCWgt);
 }
+*/

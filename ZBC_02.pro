@@ -5,7 +5,6 @@ CONFIG += c++11
 
 HEADERS += \
     zbcmainwindow.h \
-    zbccentralwidget.h \
     wgttextview.h \
     wgtcopy.h \
     wgtcopy_p.h \
@@ -19,7 +18,6 @@ HEADERS += \
 
 SOURCES += \
     zbcmainwindow.cpp \
-    zbccentralwidget.cpp \
     wgttextview.cpp \
     wgtcopy.cpp \
     main.cpp \
