@@ -11,9 +11,10 @@
 #include <QGridLayout>
 #include <QDebug>
 
-FindReplaceText::FindReplaceText(QWidget *parent)
+FindReplaceText::FindReplaceText(bool mode, QWidget *parent)
     : QDialog(parent)
 {
+
     //line edit block
     textFindEdit = new QLineEdit();
     textReplaceEdit = new QLineEdit();
@@ -62,19 +63,28 @@ FindReplaceText::FindReplaceText(QWidget *parent)
     lineBlockLayout->addWidget(upBtn, 5, 0);
     lineBlockLayout->addWidget(wholeWordsBox, 5, 1);
 
+    if (mode)
+    {
+        textReplaceLbl->setVisible(true);
+        textReplaceEdit->setVisible(true);
+        replaceBtn->setVisible(true);
+        replaceAllBtn->setVisible(true);
+    }
+
     QHBoxLayout *mainLayout = new QHBoxLayout();
     mainLayout->addLayout(lineBlockLayout);
 
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setWindowTitle(tr("Find/Replace"));
-    setFixedSize(380, 150);
+    setFixedSize(380, 180);
     setLayout(mainLayout);
 
     connect(closeBtn, &QPushButton::clicked, this, &FindReplaceText::close);
-    connect(findBtn, &QPushButton::clicked, this, &FindReplaceText::fintTextSlot);
+    connect(findBtn, &QPushButton::clicked, this, &FindReplaceText::findTextSlot);
+    //connect(replaceBtn, &QPushButton::clicked, this, &FindReplaceText::);
 }
 
-void FindReplaceText::fintTextSlot()
+void FindReplaceText::findTextSlot()
 {
     QTextDocument::FindFlags options;
     if (upBtn->isChecked())
@@ -91,7 +101,8 @@ void FindReplaceText::fintTextSlot()
         options = QTextDocument::FindWholeWords | QTextDocument::FindCaseSensitively | QTextDocument::FindBackward;
     else if (caseSensitiveBox->isChecked() && wholeWordsBox->isChecked())
         QTextDocument::FindWholeWords | QTextDocument::FindCaseSensitively;
-    emit findTextOptionsSig(textFindEdit->text(), options, "");
+    QString wordToReplace = textReplaceEdit->text();
+    emit findTextOptionsSig(textFindEdit->text(), options, wordToReplace);
 }
 
 FindReplaceText::~FindReplaceText()

@@ -41,14 +41,13 @@ private:
 
     QString pathToFile;
     FindReplaceText *findReplace;
+    void replaceText(QString, QString, QTextDocument::FindFlags);
 
 private slots:
     bool saveAs();
     bool saveFile();
-    void findTextOptionsSlot(QString, QTextDocument::FindFlags);
-    void findInTextSlot();
-
-
+    void find();
+    void getFindReplace(QString, QTextDocument::FindFlags, QString);
 };
 
 #endif // WGTTEXTVIEW_H

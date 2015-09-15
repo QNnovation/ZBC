@@ -17,16 +17,18 @@ class FindReplaceText : public QDialog
 {
     Q_OBJECT
 public:
-    explicit FindReplaceText(QWidget *parent = 0);
+    explicit FindReplaceText(bool mode = false, QWidget *parent = 0);
     ~FindReplaceText();
 
 public slots:
-    void fintTextSlot();
+    void findTextSlot();
 
 signals:
     void findTextOptionsSig(QString, QTextDocument::FindFlags, QString);
 
 private:
+    //mode find or replace
+    bool mode;
     //line edit group
     QLineEdit *textFindEdit;
     QLineEdit *textReplaceEdit;
