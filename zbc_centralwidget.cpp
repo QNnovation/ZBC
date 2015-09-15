@@ -18,20 +18,32 @@
 #include <QPushButton>
 
 //C-tor
-ZBC_CentralWidget::ZBC_CentralWidget(QWidget* pwgt) : QFrame(pwgt), d_ptr(new ZBC_CentralWidgetPrivate(this))
+ZBC_CentralWidget::ZBC_CentralWidget(QWidget* pwgt) :
+    QFrame(pwgt),
+    d_ptr(new ZBC_CentralWidgetPrivate(this))
 {
-    Q_D(ZBC_CentralWidget);
-    d->q_ptr = this;
-    setLayout(d->pLayout);
+}
+
+
+//D-tor
+ZBC_CentralWidget::~ZBC_CentralWidget()
+{
 }
 
 
 //C-tor
 ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) : q_ptr(parent)
 {
-    pbtn = new ZBC_PushButton("Test");
-    pLayout = new QVBoxLayout;
-    pLayout->addWidget(pbtn);
+    m_pbtn  = new QPushButton("Ok");
+    m_pled  = new QLineEdit("Test");
+
+    QVBoxLayout layout;
+    layout.addWidget(m_pbtn);
+    layout.addWidget(m_pled);
+
+    Q_Q(ZBC_CentralWidget);
+    q->setLayout(&layout);
+
 
 /*
 //Widgets
