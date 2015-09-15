@@ -12,12 +12,13 @@
 
 
 //C-tor
-ZBC_SideFrame::ZBC_SideFrame(QWidget *pwgt) : QFrame(pwgt)
+ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 {
 //Model
     QFileSystemModel* pfsmModel             = new QFileSystemModel(this);
     pfsmModel->setFilter(QDir::NoDot | QDir::AllEntries | QDir::System);
-    pfsmModel->setRootPath("");
+    pfsmModel->setRootPath(path);
+//    pfsmModel->setRootPath("");
     pfsmModel->setReadOnly(false);
 
 //TreeView
@@ -25,6 +26,7 @@ ZBC_SideFrame::ZBC_SideFrame(QWidget *pwgt) : QFrame(pwgt)
     ptreView->setRootIsDecorated(false);
     ptreView->setItemsExpandable(false);
     ptreView->setModel(pfsmModel);
+    ptreView->setRootIndex(pfsmModel->index(path));
     ptreView->setFrameStyle(QFrame::NoFrame | QFrame::Plain);
     ptreView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     ptreView->setEditTriggers(QTreeView::NoEditTriggers);

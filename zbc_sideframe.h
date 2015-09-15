@@ -7,7 +7,7 @@ class ZBC_SideFrame : public QFrame
 {
     Q_OBJECT
 public:
-    explicit ZBC_SideFrame(QWidget *pwgt = 0);
+    explicit ZBC_SideFrame(const QString path, QWidget *pwgt = 0);
     ~ZBC_SideFrame();
 
     void clearListOfSelectedItems();

@@ -25,7 +25,17 @@ zbcCentralWidget::zbcCentralWidget(QWidget *pwgt) : QFrame(pwgt)
 
 
 //D-tor
-zbcCentralWidget::~zbcCentralWidget(){}
+zbcCentralWidget::~zbcCentralWidget()
+{
+    m_settings.beginGroup("/Settings");
+    m_settings.beginGroup("/Panel");
+
+    m_settings.setValue("/LeftPath", m_psfwLeft->getCurrentPath());
+    m_settings.setValue("/RightPath", m_psfwRight->getCurrentPath());
+
+    m_settings.endGroup();
+    m_settings.endGroup();
+}
 
 
 //Create Bottom Frame with buttons
@@ -60,9 +70,23 @@ void zbcCentralWidget::createBottomFrame()
 
 void zbcCentralWidget::createView()
 {
+//Settings
+    m_settings.beginGroup("/Settings");
+    m_settings.beginGroup("/Panel");
+
+    if ( !m_settings.contains("/LeftPath") )
+        m_settings.setValue("/LeftPath", "C:");
+
+    if ( !m_settings.contains("/RightPath") )
+        m_settings.setValue("/RightPath", "C:");
+
+
 //Side Frames
-    m_psfwLeft                  = new ZBC_SideFrame(this);
-    m_psfwRight                 = new ZBC_SideFrame(this);
+    m_psfwLeft      = new ZBC_SideFrame((m_settings.value("/LeftPath", "").toString()), this);
+    m_psfwRight     = new ZBC_SideFrame((m_settings.value("/RightPath", "").toString()), this);
+
+    m_settings.endGroup();
+    m_settings.endGroup();
 
 //Splitter
     m_psplCentral               = new QSplitter(Qt::Horizontal);
