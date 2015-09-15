@@ -11,6 +11,7 @@ class QPushButton;
 class QCheckBox;
 class QRadioButton;
 
+enum mode { find_text, replace_replace };
 
 class FindReplaceText : public QDialog
 {
@@ -23,7 +24,7 @@ public slots:
     void fintTextSlot();
 
 signals:
-    void findTextOptionsSig(QString, QTextDocument::FindFlags);
+    void findTextOptionsSig(QString, QTextDocument::FindFlags, QString);
 
 private:
     //line edit group

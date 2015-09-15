@@ -16,10 +16,10 @@ class wgtTextView : public QMainWindow
 
 public:
     explicit wgtTextView(QWidget *parent = 0);
-    ~wgtTextView();
     bool loadFile(const QString &, char mode = 'r');
     void viewFile(QString &);
     void editFile(QString &);
+    ~wgtTextView();
 
 protected:
     void closeEvent(QCloseEvent *);

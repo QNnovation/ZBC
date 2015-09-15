@@ -91,7 +91,7 @@ void FindReplaceText::fintTextSlot()
         options = QTextDocument::FindWholeWords | QTextDocument::FindCaseSensitively | QTextDocument::FindBackward;
     else if (caseSensitiveBox->isChecked() && wholeWordsBox->isChecked())
         QTextDocument::FindWholeWords | QTextDocument::FindCaseSensitively;
-    emit findTextOptionsSig(textFindEdit->text(), options);
+    emit findTextOptionsSig(textFindEdit->text(), options, "");
 }
 
 FindReplaceText::~FindReplaceText()
