@@ -27,7 +27,7 @@ private:
     QMenu*              m_pmnuFile;
     QToolBar*           m_ptbrFile;
     QAction*            m_pactQuit;
-//    ZBC_CentralWidget   m_pzbcCWgt;
+    ZBC_CentralWidget*  m_pzbcCwgt;
 
 //METHODS
     void createActions();

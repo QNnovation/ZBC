@@ -1,8 +1,9 @@
+#include<QDebug>
+
 #include "zbc_centralwidget.h"
 #include "zbc_centralwidget_p.h"
 #include "zbc_newfolder.h"
-#include "zbc_pushbutton.h"
-#include "zbc_sideframe.h"
+
 #include "wgtcopy.h"
 #include "wgttextview.h"
 
@@ -15,13 +16,13 @@
 #include <QSettings>
 #include <QVBoxLayout>
 
-#include <QPushButton>
 
 //C-tor
 ZBC_CentralWidget::ZBC_CentralWidget(QWidget* pwgt) :
     QFrame(pwgt),
     d_ptr(new ZBC_CentralWidgetPrivate(this))
 {
+
 }
 
 
@@ -32,21 +33,16 @@ ZBC_CentralWidget::~ZBC_CentralWidget()
 
 
 //C-tor
-ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) : q_ptr(parent)
+ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
+    q_ptr(parent),
+    m_pvblLayout( new QVBoxLayout(q_ptr) )
 {
-    m_pbtn  = new QPushButton("Ok");
-    m_pled  = new QLineEdit("Test");
-
-    QVBoxLayout layout;
-    layout.addWidget(m_pbtn);
-    layout.addWidget(m_pled);
-
-    Q_Q(ZBC_CentralWidget);
-    q->setLayout(&layout);
-
-
-/*
 //Widgets
+//Splitter
+    m_psplCentral = new QSplitter(Qt::Horizontal, q_ptr);
+    m_psplCentral->setChildrenCollapsible(false);
+
+//Settings
     m_psettings                 = new QSettings;
     m_psettings->beginGroup("/Settings");
     m_psettings->beginGroup("/Panel");
@@ -57,89 +53,85 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) : 
     if ( !m_psettings->contains("/RightPath") )
         m_psettings->setValue("/RightPath", "C:");
 
-
 //Side Frames
-    m_psfwLeft                  = new ZBC_SideFrame((m_psettings->value("/LeftPath", "").toString()), q_ptr);
-    m_psfwRight                 = new ZBC_SideFrame((m_psettings->value("/RightPath", "").toString()), q_ptr);
-
-    m_psettings->endGroup();
-    m_psettings->endGroup();
-
-
-//Splitter
-    QSplitter* splCentral = new QSplitter(Qt::Horizontal, q_ptr);
-    splCentral->addWidget(m_psfwLeft);
-    splCentral->addWidget(m_psfwRight);
-    splCentral->setChildrenCollapsible(false);
-
+    m_psfwLeft      = new ZBC_SideFrame((m_psettings->value("/LeftPath", "").toString()), m_psplCentral);
+    m_psfwRight     = new ZBC_SideFrame((m_psettings->value("/RightPath", "").toString()), m_psplCentral);
     m_psfwNotActive = m_psfwLeft;
     m_psfwActive = m_psfwRight;
 
+    m_psplCentral->addWidget(m_psfwLeft);
+    m_psplCentral->addWidget(m_psfwRight);
+
+    m_psettings->endGroup();
+    m_psettings->endGroup();
+
 //Bottom Buttons Frame
-    QFrame* frmBottomButtons = new QFrame(q_ptr);
+    m_pfrmBottomButtons = new QFrame(q_ptr);
 
 //Bottom Buttons
-    ZBC_PushButton btnView(tr("F3 View"), q_ptr);
-    ZBC_PushButton btnEdit(tr("F4 Edit"), q_ptr);
-    ZBC_PushButton btnCopy(tr("F5 Copy"), q_ptr);
-    ZBC_PushButton btnMove(tr("F6 Move"), q_ptr);
-    ZBC_PushButton btnNewFolder(tr("F7 NewFolder"), q_ptr);
-    ZBC_PushButton btnDelete(tr("F8 Delete"), q_ptr);
-    ZBC_PushButton btnExit(tr("Alt+F4 Exit"), q_ptr);
+    m_pbtnView      = new ZBC_PushButton("F3 View", m_pfrmBottomButtons);
+    m_pbtnEdit      = new ZBC_PushButton("F4 Edit", m_pfrmBottomButtons);
+    m_pbtnCopy      = new ZBC_PushButton("F5 Copy", m_pfrmBottomButtons);
+    m_pbtnMove      = new ZBC_PushButton("F6 Move", m_pfrmBottomButtons);
+    m_pbtnNewFolder = new ZBC_PushButton("F7 NewFolder", m_pfrmBottomButtons);
+    m_pbtnDelete    = new ZBC_PushButton("F8 Delete", m_pfrmBottomButtons);
+    m_pbtnExit      = new ZBC_PushButton("Alt+F4 Exit", m_pfrmBottomButtons);
 
 //Layout Buttons
-    QHBoxLayout hblBoxLayout(frmBottomButtons);
-    hblBoxLayout.addWidget(&btnView);
-    hblBoxLayout.addWidget(&btnEdit);
-    hblBoxLayout.addWidget(&btnCopy);
-    hblBoxLayout.addWidget(&btnMove);
-    hblBoxLayout.addWidget(&btnNewFolder);
-    hblBoxLayout.addWidget(&btnDelete);
-    hblBoxLayout.addWidget(&btnExit);
+    m_phblBoxLayout = new QHBoxLayout(m_pfrmBottomButtons);
+    m_phblBoxLayout->addWidget(m_pbtnView);
+    m_phblBoxLayout->addWidget(m_pbtnView);
+    m_phblBoxLayout->addWidget(m_pbtnEdit);
+    m_phblBoxLayout->addWidget(m_pbtnCopy);
+    m_phblBoxLayout->addWidget(m_pbtnMove);
+    m_phblBoxLayout->addWidget(m_pbtnNewFolder);
+    m_phblBoxLayout->addWidget(m_pbtnDelete);
+    m_phblBoxLayout->addWidget(m_pbtnExit);
 
-    frmBottomButtons->setLayout(&hblBoxLayout);
+    m_pfrmBottomButtons->setLayout(m_phblBoxLayout);
 
 //Layout Top
-    QVBoxLayout* VblLayout = new QVBoxLayout(q_ptr);
-    VblLayout->setMargin(0);
-    VblLayout->addWidget(splCentral);
-    VblLayout->addWidget(frmBottomButtons);
-    q_ptr->setLayout(VblLayout);
+    m_pvblLayout->setMargin(0);
+    m_pvblLayout->addWidget(m_psplCentral,2);
+    m_pvblLayout->addWidget(m_pfrmBottomButtons);
 
+    Q_Q(ZBC_CentralWidget);
+    q->setLayout(m_pvblLayout);
 
 //Create Actions
 //View
-    QAction actView(q_ptr);
-    actView.setShortcut(QKeySequence(Qt::Key_F3));
-    q_ptr->addAction(&actView);
-
+/*
+    m_pactView  = new QAction(q);
+    m_pactView->setShortcut(QKeySequence(Qt::Key_F3));
+    q->addAction(m_pactView);
+/*
 //Edit
-    QAction actEdit(q_ptr);
-    actEdit.setShortcut(QKeySequence(Qt::Key_F4));
-    q_ptr->addAction(&actEdit);
+    m_pactEdit  = new QAction(q);
+    m_pactEdit->setShortcut(QKeySequence(Qt::Key_F4));
+    q->addAction(m_pactEdit);
 
 //Copy
-    QAction actCopy(q_ptr);
-    actCopy.setShortcut(QKeySequence(Qt::Key_F5));
-    q_ptr->addAction(&actCopy);
+    m_pactCopy  = new QAction(q);
+    m_pactCopy->setShortcut(QKeySequence(Qt::Key_F5));
+    q->addAction(m_pactCopy);
 
 //Move
-    QAction actMove(q_ptr);
-    actMove.setShortcut(QKeySequence(Qt::Key_F6));
-    q_ptr->addAction(&actMove);
+    m_pactMove  = new   QAction(q);
+    m_pactMove->setShortcut(QKeySequence(Qt::Key_F6));
+    q->addAction(m_pactMove);
 
 
 //New Folder
-    QAction actNewFolder(q_ptr);
-    actNewFolder.setShortcut(QKeySequence(Qt::Key_F7));
-    q_ptr->addAction(&actNewFolder);
+    m_pactNewFolder = new QAction(q);
+    m_pactNewFolder->setShortcut(QKeySequence(Qt::Key_F7));
+    q->addAction(m_pactNewFolder);
 
 //Delete
-    QAction actDelete(q_ptr);
-    actDelete.setShortcut(QKeySequence(Qt::Key_F8));
-    q_ptr->addAction(&actDelete);
-
-
+    m_pactDelete    = new QAction(q_ptr);
+    m_pactDelete->setShortcut(QKeySequence(Qt::Key_F8));
+    q->addAction(m_pactDelete);
+*/
+/*
 //Create Connections
 //Active Side
     connect(m_psfwLeft,
@@ -154,6 +146,7 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) : 
                     this->m_psfwNotActive = this->m_psfwLeft;
                 }});
 
+
     connect(m_psfwLeft,
         &ZBC_SideFrame::Active,
         [this](ZBC_SideFrame* _psfw){
@@ -167,7 +160,7 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) : 
                 }});
 
 //Run View
-    connect(&actView,
+    connect(m_pactView,
             &QAction::triggered,
             [this](){
                 wgtTextView wgtTextView(q_ptr);
@@ -175,7 +168,7 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) : 
                 wgtTextView.loadFile(strFile);
                 wgtTextView.show();
             });
-    connect(&btnView,
+    connect(m_pbtnView,
             &ZBC_PushButton::clicked,
             [this](){
                 wgtTextView wgtTextView(q_ptr);
@@ -183,9 +176,9 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) : 
                 wgtTextView.loadFile(strFile);
                 wgtTextView.show();
             });
-
+/*
 //Run Edit
-    connect(&actEdit,
+    connect(m_pactEdit,
             &QAction::triggered,
             [this](){
                 wgtTextView TextView(q_ptr);
@@ -194,7 +187,7 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) : 
                 TextView.show();
             });
 
-    connect(&btnEdit,
+    connect(m_pbtnEdit,
             &ZBC_PushButton::clicked,
             [this](){
                 wgtTextView TextView(q_ptr);
@@ -204,7 +197,7 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) : 
             });
 
 //Run Copy
-    connect(&actCopy,
+    connect(m_pactCopy,
             &QAction::triggered,
             [this](){
                 FileOperationWgt wgtCopy(q_ptr);
@@ -216,7 +209,7 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) : 
                 wgtCopy.show();
             });
 
-    connect(&btnCopy,
+    connect(m_pbtnCopy,
             &ZBC_PushButton::clicked,
             [this](){
                 FileOperationWgt wgtCopy(q_ptr);
@@ -229,7 +222,7 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) : 
             });
 
 //Move
-    connect(&actMove,
+    connect(m_pactMove,
             &QAction::triggered,
             [this](){
                 FileOperationWgt wgtMove(q_ptr);
@@ -241,7 +234,7 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) : 
                 wgtMove.show();
             });
 
-    connect(&btnMove,
+    connect(m_pbtnMove,
             &ZBC_PushButton::clicked,
             [this](){
                 FileOperationWgt wgtMove(q_ptr);
@@ -254,14 +247,15 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) : 
             });
 
 //Run New Folder
-    connect(&actNewFolder,
+    connect(m_pactNewFolder,
             &QAction::triggered,
             [this](){
-                ZBC_NewFolder wgtNewFolder(m_psfwActive->getCurrentPath(), q_ptr);
-                wgtNewFolder.exec();
+//                ZBC_NewFolder wgtNewFolder(m_psfwActive->getCurrentPath(), q_ptr);
+//                wgtNewFolder.exec();
+        qDebug() << "New folder";
             });
 
-    connect(&btnNewFolder,
+    connect(m_pbtnNewFolder,
             &ZBC_PushButton::clicked,
             [this](){
                 ZBC_NewFolder wgtNewFolder(m_psfwActive->getCurrentPath(), q_ptr);
@@ -269,7 +263,7 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) : 
             });
 
 //Run Delete
-    connect(&actDelete,
+    connect(m_pactDelete,
             &QAction::triggered,
             [this](){
                 FileOperationWgt wgtDelete(q_ptr);
@@ -279,7 +273,7 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) : 
                 wgtDelete.show();
             });
 
-    connect(&btnDelete,
+    connect(m_pbtnDelete,
             &ZBC_PushButton::clicked,
             [this](){
                 FileOperationWgt wgtDelete(q_ptr);
@@ -290,9 +284,9 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) : 
             });
 
 //Exit
-    connect(&btnExit,
+    connect(m_pactDelete,
             &ZBC_PushButton::clicked,
-            q_ptr,
+            q,
             &ZBC_CentralWidget::close);
 */
 }
@@ -301,7 +295,7 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) : 
 //D-tor
 ZBC_CentralWidgetPrivate::~ZBC_CentralWidgetPrivate()
 {
-/*
+
     m_psettings->beginGroup("/Settings");
     m_psettings->beginGroup("/Panel");
 
@@ -311,5 +305,6 @@ ZBC_CentralWidgetPrivate::~ZBC_CentralWidgetPrivate()
     m_psettings->endGroup();
     m_psettings->endGroup();
     delete m_psettings;
-*/
+
+    delete q_ptr;
 }

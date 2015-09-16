@@ -20,8 +20,8 @@ zbcMainWindow::zbcMainWindow(QWidget *pwgt) : QMainWindow(pwgt)
     setupMenuBar();
     setupToolBar();
 //    setupCentralWidget();
-    ZBC_CentralWidget zbcCwgt(this);
-    this->setCentralWidget(&zbcCwgt);
+    m_pzbcCwgt = new    ZBC_CentralWidget(this);
+    this->setCentralWidget(m_pzbcCwgt);
 }
 
 

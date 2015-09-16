@@ -1,42 +1,59 @@
 #ifndef ZBC_CENTRALWIDGET_P_H
 #define ZBC_CENTRALWIDGET_P_H
 
-//#include "zbc_centralwidget.h"
+#include <QSettings>
+#include <QSplitter>
+#include "zbc_sideframe.h"
+#include "zbc_pushbutton.h"
 
-//class ZBC_SideFrame;
-//class ZBC_PushButton;
-//class QVBoxLayout;
 
-//class QSettings;
-
-#include <QLineEdit>
-#include <QPushButton>
+class QSplitter;
+class QFrame;
+class QAction;
+class QVBoxLayout;
+class QHBoxLayout;
 
 class ZBC_CentralWidget;
 
-class ZBC_CentralWidgetPrivate // : QObject
+
+
+class ZBC_CentralWidgetPrivate : public QObject
 {
     Q_OBJECT
     Q_DECLARE_PUBLIC(ZBC_CentralWidget)
 
-    QScopedPointer<ZBC_CentralWidget>  q_ptr;
-
+    ZBC_CentralWidget*  q_ptr;
 public:
     explicit ZBC_CentralWidgetPrivate( ZBC_CentralWidget* parent);
     ~ZBC_CentralWidgetPrivate();
 
 private:
-    QPushButton*        m_pbtn;
-    QLineEdit*          m_pled;
+    QVBoxLayout*        m_pvblLayout;
+    QSplitter*          m_psplCentral;
 
+    QSettings*          m_psettings;
+    ZBC_SideFrame*      m_psfwLeft;
+    ZBC_SideFrame*      m_psfwRight;
+    ZBC_SideFrame*      m_psfwActive;
+    ZBC_SideFrame*      m_psfwNotActive;
+
+
+    QFrame*             m_pfrmBottomButtons;
+    QHBoxLayout*        m_phblBoxLayout;
+    ZBC_PushButton*     m_pbtnView;
+    ZBC_PushButton*     m_pbtnEdit;
+    ZBC_PushButton*     m_pbtnCopy;
+    ZBC_PushButton*     m_pbtnMove;
+    ZBC_PushButton*     m_pbtnNewFolder;
+    ZBC_PushButton*     m_pbtnDelete;
+    ZBC_PushButton*     m_pbtnExit;
 /*
-    ZBC_SideFrame*       m_psfwLeft;
-    ZBC_SideFrame*       m_psfwRight;
-    ZBC_SideFrame*       m_psfwActive;
-    ZBC_SideFrame*       m_psfwNotActive;
-
-
-    QSettings*           m_psettings;
+    QAction*            m_pactView;
+    QAction*            m_pactEdit;
+    QAction*            m_pactCopy;
+    QAction*            m_pactMove;
+    QAction*            m_pactNewFolder;
+    QAction*            m_pactDelete;
 */
 };
 

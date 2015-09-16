@@ -15,9 +15,8 @@ public:
     explicit ZBC_CentralWidget(QWidget* pwgt = 0);
     virtual ~ZBC_CentralWidget();
 
-//protected:
-//    ZBC_CentralWidgetPrivate* const d_ptr;
-//    Q_DECLARE_PRIVATE(ZBC_CentralWidget);
+private:
+    void createView();
 };
 
 #endif // ZBC_CENTRALWIDGET_H
