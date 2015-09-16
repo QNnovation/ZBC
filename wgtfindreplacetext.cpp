@@ -9,26 +9,30 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QGridLayout>
+#include <QDebug>
 
-FindReplaceText::FindReplaceText(QWidget *parent)
+FindReplaceText::FindReplaceText(bool mode, QWidget *parent)
     : QDialog(parent)
 {
+
     //line edit block
     textFindEdit = new QLineEdit();
     textReplaceEdit = new QLineEdit();
     textFindLbl = new QLabel(tr("Find:"));
     textReplaceLbl = new QLabel(tr("Replace with:"));
+    textReplaceLbl->setVisible(false);
+    textReplaceEdit->setVisible(false);
 
     //radiobutton group
     directionLbl = new QLabel(tr("Direction"));
     downBtn = new QRadioButton(tr("Down"));
     upBtn = new QRadioButton(tr("Up"));
+    downBtn->setChecked(true);
 
     //checkbox group
     optionsLbl = new QLabel(tr("Options"));
     caseSensitiveBox = new QCheckBox(tr("&Case sensitive"));
     wholeWordsBox = new QCheckBox(tr("&Whole words only"));
-    regularExprBox = new QCheckBox(tr("&Regular Expression"));
 
     //buttons block
     findBtn = new QPushButton(tr("&Find"));
@@ -58,21 +62,52 @@ FindReplaceText::FindReplaceText(QWidget *parent)
     lineBlockLayout->addWidget(caseSensitiveBox, 4, 1);
     lineBlockLayout->addWidget(upBtn, 5, 0);
     lineBlockLayout->addWidget(wholeWordsBox, 5, 1);
-    lineBlockLayout->addWidget(regularExprBox, 6, 1);
+
+    if (mode)
+    {
+        textReplaceLbl->setVisible(true);
+        textReplaceEdit->setVisible(true);
+        replaceBtn->setVisible(true);
+        replaceAllBtn->setVisible(true);
+    }
 
     QHBoxLayout *mainLayout = new QHBoxLayout();
     mainLayout->addLayout(lineBlockLayout);
 
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setWindowTitle(tr("Find/Replace"));
-    setFixedSize(380, 200);
+    setFixedSize(380, 180);
     setLayout(mainLayout);
 
     connect(closeBtn, &QPushButton::clicked, this, &FindReplaceText::close);
+    connect(findBtn, &QPushButton::clicked, this, &FindReplaceText::findTextSlot);
+    //connect(replaceBtn, &QPushButton::clicked, this, &FindReplaceText::);
+}
+
+void FindReplaceText::findTextSlot()
+{
+    QTextDocument::FindFlags options;
+    if (upBtn->isChecked())
+        options = QTextDocument::FindBackward;
+    else if (caseSensitiveBox->isChecked())
+        options = QTextDocument::FindCaseSensitively;
+    else if (caseSensitiveBox->isChecked() && upBtn->isChecked())
+        options = QTextDocument::FindCaseSensitively | QTextDocument::FindBackward;
+    else if (wholeWordsBox->isChecked())
+        options = QTextDocument::FindWholeWords;
+    else if (wholeWordsBox->isChecked() && upBtn->isChecked())
+        options = QTextDocument::FindWholeWords | QTextDocument::FindBackward;
+    else if (caseSensitiveBox->isChecked() && wholeWordsBox->isChecked() && upBtn->isChecked())
+        options = QTextDocument::FindWholeWords | QTextDocument::FindCaseSensitively | QTextDocument::FindBackward;
+    else if (caseSensitiveBox->isChecked() && wholeWordsBox->isChecked())
+        QTextDocument::FindWholeWords | QTextDocument::FindCaseSensitively;
+    QString wordToReplace = textReplaceEdit->text();
+    emit findTextOptionsSig(textFindEdit->text(), options, wordToReplace);
 }
 
 FindReplaceText::~FindReplaceText()
 {
 
 }
+
 

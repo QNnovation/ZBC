@@ -2,6 +2,7 @@
 #define FINDREPLACETEXT_H
 
 #include <QDialog>
+#include <QTextDocument>
 
 class QDialogButtonBox ;
 class QLineEdit;
@@ -10,13 +11,24 @@ class QPushButton;
 class QCheckBox;
 class QRadioButton;
 
+enum mode { find_text, replace_replace };
+
 class FindReplaceText : public QDialog
 {
+    Q_OBJECT
 public:
-    explicit FindReplaceText(QWidget *parent = 0);
+    explicit FindReplaceText(bool mode = false, QWidget *parent = 0);
     ~FindReplaceText();
 
+public slots:
+    void findTextSlot();
+
+signals:
+    void findTextOptionsSig(QString, QTextDocument::FindFlags, QString);
+
 private:
+    //mode find or replace
+    bool mode;
     //line edit group
     QLineEdit *textFindEdit;
     QLineEdit *textReplaceEdit;
@@ -38,7 +50,6 @@ private:
     QLabel *optionsLbl;
     QCheckBox *caseSensitiveBox;
     QCheckBox *wholeWordsBox;
-    QCheckBox *regularExprBox;
 
     //label status
     QLabel *statusLbl;

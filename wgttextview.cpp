@@ -15,8 +15,6 @@ wgtTextView::wgtTextView(QWidget *parent)
     createActions();
     createMenu();
 
-    findReplace = new FindReplaceText();
-
     textView = new QPlainTextEdit;
     rwMode = true;
 
@@ -54,7 +52,13 @@ void wgtTextView::createActions()
     findAtTextAct = new QAction(tr("&Find"), this);
     findAtTextAct->setStatusTip(tr("Find text"));
     findAtTextAct->setShortcut(QKeySequence::Find);
-    connect(findAtTextAct, &QAction::triggered, this, &wgtTextView::findInText);
+    connect(findAtTextAct, &QAction::triggered, this, &wgtTextView::find);
+}
+
+void wgtTextView::replaceText(QString word, QString newWord, QTextDocument::FindFlags flags)
+{
+    if (textView->find(word, flags))
+    textView->textCursor().insertText(newWord);
 }
 
 //function loadFile
@@ -122,9 +126,26 @@ bool wgtTextView::saveFile()
     }
 }
 
-bool wgtTextView::findInText()
+void wgtTextView::find()
 {
+    if (rwMode)
+        findReplace = new FindReplaceText();
+    else
+        findReplace = new FindReplaceText(true);
     findReplace->show();
+    connect(findReplace, &FindReplaceText::findTextOptionsSig, this, &wgtTextView::getFindReplace);
+}
+
+void wgtTextView::getFindReplace(QString word, QTextDocument::FindFlags flags, QString newWord)
+{
+    if (rwMode) {
+    textView->find(word, flags);
+    }
+    else {
+    //реализовать функцию заменить один раз
+    replaceText(word, newWord, flags);
+    //реализовать функцию заменить всё
+    }
 }
 
 wgtTextView::~wgtTextView()
