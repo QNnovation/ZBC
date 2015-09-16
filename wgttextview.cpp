@@ -58,7 +58,7 @@ void wgtTextView::createActions()
 void wgtTextView::replaceText(QString word, QString newWord, QTextDocument::FindFlags flags)
 {
     if (textView->find(word, flags))
-    textView->textCursor().insertText(newWord);
+        textView->textCursor().insertText(newWord);
 }
 
 //function loadFile
@@ -133,19 +133,27 @@ void wgtTextView::find()
     else
         findReplace = new FindReplaceText(true);
     findReplace->show();
-    connect(findReplace, &FindReplaceText::findTextOptionsSig, this, &wgtTextView::getFindReplace);
+    connect(findReplace, &FindReplaceText::findTextOptionsSig, this, &wgtTextView::getFind);
+    if (rwMode) {
+        connect(findReplace, &FindReplaceText::findReplaceSig, this, &wgtTextView::getReplace);
+        connect(findReplace, &FindReplaceText::findReplaceAllSig, this, &wgtTextView::getReplaceAll);
+    }
 }
 
-void wgtTextView::getFindReplace(QString word, QTextDocument::FindFlags flags, QString newWord)
+void wgtTextView::getFind(QString word, QTextDocument::FindFlags flags)
 {
-    if (rwMode) {
     textView->find(word, flags);
-    }
-    else {
-    //реализовать функцию заменить один раз
+}
+
+void wgtTextView::getReplace(QString word, QTextDocument::FindFlags flags, QString newWord)
+{
+    qDebug() << word << flags << newWord;
     replaceText(word, newWord, flags);
-    //реализовать функцию заменить всё
-    }
+}
+
+void wgtTextView::getReplaceAll(QString word, QTextDocument::FindFlags flags, QString newWord)
+{
+
 }
 
 wgtTextView::~wgtTextView()

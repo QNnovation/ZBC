@@ -11,8 +11,6 @@ class QPushButton;
 class QCheckBox;
 class QRadioButton;
 
-enum mode { find_text, replace_replace };
-
 class FindReplaceText : public QDialog
 {
     Q_OBJECT
@@ -22,11 +20,18 @@ public:
 
 public slots:
     void findTextSlot();
+    void replaceSlot();
+    void replaceAllSlot();
+    void isEmptyText(QString);
 
 signals:
     void findTextOptionsSig(QString, QTextDocument::FindFlags, QString);
+    void findReplaceSig(QString, QTextDocument::FindFlags, QString);
+    void findReplaceAllSig(QString, QTextDocument::FindFlags, QString);
 
 private:
+    //return flag;
+    QTextDocument::FindFlags setOptions();
     //mode find or replace
     bool mode;
     //line edit group
@@ -53,6 +58,10 @@ private:
 
     //label status
     QLabel *statusLbl;
+
+    //data
+    QString newWord;
+    QTextDocument::FindFlags flags;
 };
 
 #endif // FINDREPLACETEXT_H

@@ -81,10 +81,50 @@ FindReplaceText::FindReplaceText(bool mode, QWidget *parent)
 
     connect(closeBtn, &QPushButton::clicked, this, &FindReplaceText::close);
     connect(findBtn, &QPushButton::clicked, this, &FindReplaceText::findTextSlot);
-    //connect(replaceBtn, &QPushButton::clicked, this, &FindReplaceText::);
+    connect(replaceBtn, &QPushButton::clicked, this, &FindReplaceText::replaceSlot);
+    connect(replaceAllBtn, &QPushButton::clicked, this, &FindReplaceText::replaceAllSlot);
+    connect(textFindEdit, &QLineEdit::textChanged, this, &FindReplaceText::isEmptyText);
 }
 
+//find text slot
 void FindReplaceText::findTextSlot()
+{
+    flags = setOptions();
+    newWord = textReplaceEdit->text();
+    emit findTextOptionsSig(textFindEdit->text(), flags, newWord);
+}
+
+//replace button slot
+void FindReplaceText::replaceSlot()
+{
+    flags = setOptions();
+    newWord = textReplaceEdit->text();
+    emit findReplaceSig(textFindEdit->text(), flags, newWord);
+    qDebug() << textFindEdit->text() << flags << newWord;
+}
+
+//replaceALl button slot
+void FindReplaceText::replaceAllSlot()
+{
+
+}
+
+//block buttons if text is empty
+void FindReplaceText::isEmptyText(QString text)
+{
+    QList<QPushButton*> list = this->findChildren<QPushButton*>();
+    if (text.isEmpty()) {
+        for (int i = 0; i < list.size(); ++i) {
+            list.at(i)->setEnabled(false);
+        }
+    } else {
+        for (int i = 0; i < list.size(); ++i) {
+            list.at(i)->setEnabled(true);
+        }
+    }
+}
+
+QTextDocument::FindFlags FindReplaceText::setOptions()
 {
     QTextDocument::FindFlags options;
     if (upBtn->isChecked())
@@ -100,11 +140,11 @@ void FindReplaceText::findTextSlot()
     else if (caseSensitiveBox->isChecked() && wholeWordsBox->isChecked() && upBtn->isChecked())
         options = QTextDocument::FindWholeWords | QTextDocument::FindCaseSensitively | QTextDocument::FindBackward;
     else if (caseSensitiveBox->isChecked() && wholeWordsBox->isChecked())
-        QTextDocument::FindWholeWords | QTextDocument::FindCaseSensitively;
-    QString wordToReplace = textReplaceEdit->text();
-    emit findTextOptionsSig(textFindEdit->text(), options, wordToReplace);
+        options = QTextDocument::FindWholeWords | QTextDocument::FindCaseSensitively;
+    return options;
 }
 
+//destructor
 FindReplaceText::~FindReplaceText()
 {
 

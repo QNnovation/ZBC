@@ -47,7 +47,10 @@ private slots:
     bool saveAs();
     bool saveFile();
     void find();
-    void getFindReplace(QString, QTextDocument::FindFlags, QString);
+    void getFind(QString, QTextDocument::FindFlags);
+    void getReplace(QString, QTextDocument::FindFlags, QString);
+    void getReplaceAll(QString, QTextDocument::FindFlags, QString);
+
 };
 
 #endif // WGTTEXTVIEW_H
