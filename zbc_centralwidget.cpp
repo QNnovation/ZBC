@@ -98,13 +98,13 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
     Q_Q(ZBC_CentralWidget);
     q->setLayout(m_pvblLayout);
 
+
 //Create Actions
 //View
-/*
     m_pactView  = new QAction(q);
     m_pactView->setShortcut(QKeySequence(Qt::Key_F3));
     q->addAction(m_pactView);
-/*
+
 //Edit
     m_pactEdit  = new QAction(q);
     m_pactEdit->setShortcut(QKeySequence(Qt::Key_F4));
@@ -120,7 +120,6 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
     m_pactMove->setShortcut(QKeySequence(Qt::Key_F6));
     q->addAction(m_pactMove);
 
-
 //New Folder
     m_pactNewFolder = new QAction(q);
     m_pactNewFolder->setShortcut(QKeySequence(Qt::Key_F7));
@@ -130,8 +129,8 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
     m_pactDelete    = new QAction(q_ptr);
     m_pactDelete->setShortcut(QKeySequence(Qt::Key_F8));
     q->addAction(m_pactDelete);
-*/
-/*
+
+
 //Create Connections
 //Active Side
     connect(m_psfwLeft,
@@ -145,7 +144,6 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
                     this->m_psfwActive = this->m_psfwRight;
                     this->m_psfwNotActive = this->m_psfwLeft;
                 }});
-
 
     connect(m_psfwLeft,
         &ZBC_SideFrame::Active,
@@ -163,124 +161,126 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
     connect(m_pactView,
             &QAction::triggered,
             [this](){
-                wgtTextView wgtTextView(q_ptr);
+                wgtTextView* TextView   = new wgtTextView;
                 QString strFile = this->m_psfwActive->getListOfSelectedItems().at(0);
-                wgtTextView.loadFile(strFile);
-                wgtTextView.show();
+                TextView->loadFile(strFile);
+                TextView->show();
             });
+
     connect(m_pbtnView,
             &ZBC_PushButton::clicked,
             [this](){
-                wgtTextView wgtTextView(q_ptr);
+                wgtTextView* TextView   = new wgtTextView;
                 QString strFile = this->m_psfwActive->getListOfSelectedItems().at(0);
-                wgtTextView.loadFile(strFile);
-                wgtTextView.show();
+                TextView->loadFile(strFile);
+                TextView->show();
             });
-/*
+
 //Run Edit
     connect(m_pactEdit,
             &QAction::triggered,
             [this](){
-                wgtTextView TextView(q_ptr);
+                wgtTextView* TextView   = new wgtTextView;
                 QString strFile = m_psfwActive->getListOfSelectedItems().at(0);
-                TextView.loadFile(strFile, 'w');
-                TextView.show();
+                TextView->loadFile(strFile, 'w');
+                TextView->show();
             });
+
 
     connect(m_pbtnEdit,
             &ZBC_PushButton::clicked,
             [this](){
-                wgtTextView TextView(q_ptr);
+                wgtTextView* TextView   = new wgtTextView;
                 QString strFile = m_psfwActive->getListOfSelectedItems().at(0);
-                TextView.loadFile(strFile, 'w');
-                TextView.show();
+                TextView->loadFile(strFile, 'w');
+                TextView->show();
             });
 
 //Run Copy
     connect(m_pactCopy,
             &QAction::triggered,
             [this](){
-                FileOperationWgt wgtCopy(q_ptr);
+                FileOperationWgt* wgtCopy   = new FileOperationWgt;
                 QStringList lst =  m_psfwActive->getListOfSelectedItems();
-                wgtCopy.copyFileOperation(lst,
+                wgtCopy->copyFileOperation(lst,
                                             m_psfwNotActive->getCurrentPath());
                 m_psfwActive->clearListOfSelectedItems();
-                wgtCopy.setModal(true);
-                wgtCopy.show();
+                wgtCopy->setModal(true);
+                wgtCopy->show();
             });
 
     connect(m_pbtnCopy,
             &ZBC_PushButton::clicked,
             [this](){
-                FileOperationWgt wgtCopy(q_ptr);
+                FileOperationWgt* wgtCopy   = new FileOperationWgt;
                 QStringList lst =  m_psfwActive->getListOfSelectedItems();
-                wgtCopy.copyFileOperation(lst,
+                wgtCopy->copyFileOperation(lst,
                                             m_psfwNotActive->getCurrentPath());
                 m_psfwActive->clearListOfSelectedItems();
-                wgtCopy.setModal(true);
-                wgtCopy.show();
+                wgtCopy->setModal(true);
+                wgtCopy->show();
             });
 
 //Move
     connect(m_pactMove,
             &QAction::triggered,
             [this](){
-                FileOperationWgt wgtMove(q_ptr);
+                FileOperationWgt* wgtMove   = new FileOperationWgt;
                 QStringList lst = m_psfwActive->getListOfSelectedItems();
-                wgtMove.moveFileOperation(lst,
+                wgtMove->moveFileOperation(lst,
                                           m_psfwNotActive->getCurrentPath());
                 m_psfwActive->clearListOfSelectedItems();;
-                wgtMove.setModal(true);
-                wgtMove.show();
+                wgtMove->setModal(true);
+                wgtMove->show();
             });
 
     connect(m_pbtnMove,
             &ZBC_PushButton::clicked,
             [this](){
-                FileOperationWgt wgtMove(q_ptr);
+                FileOperationWgt* wgtMove   = new FileOperationWgt;
                 QStringList lst = m_psfwActive->getListOfSelectedItems();
-                wgtMove.moveFileOperation(lst,
+                wgtMove->moveFileOperation(lst,
                                           m_psfwNotActive->getCurrentPath());
                 m_psfwActive->clearListOfSelectedItems();;
-                wgtMove.setModal(true);
-                wgtMove.show();
+                wgtMove->setModal(true);
+                wgtMove->show();
             });
+
 
 //Run New Folder
     connect(m_pactNewFolder,
             &QAction::triggered,
             [this](){
-//                ZBC_NewFolder wgtNewFolder(m_psfwActive->getCurrentPath(), q_ptr);
-//                wgtNewFolder.exec();
-        qDebug() << "New folder";
+                ZBC_NewFolder* wgtNewFolder = new ZBC_NewFolder(m_psfwActive->getCurrentPath(), q_ptr);
+                wgtNewFolder->exec();
             });
 
     connect(m_pbtnNewFolder,
             &ZBC_PushButton::clicked,
             [this](){
-                ZBC_NewFolder wgtNewFolder(m_psfwActive->getCurrentPath(), q_ptr);
-                wgtNewFolder.exec();
+                ZBC_NewFolder* wgtNewFolder = new ZBC_NewFolder(m_psfwActive->getCurrentPath(), q_ptr);
+                wgtNewFolder->exec();
             });
 
 //Run Delete
     connect(m_pactDelete,
             &QAction::triggered,
             [this](){
-                FileOperationWgt wgtDelete(q_ptr);
+                FileOperationWgt* wgtDelete = new FileOperationWgt;
                 QStringList lst =  m_psfwActive->getListOfSelectedItems();
-                wgtDelete.removeFileOperation(lst);
-                wgtDelete.setModal(true);
-                wgtDelete.show();
+                wgtDelete->removeFileOperation(lst);
+                wgtDelete->setModal(true);
+                wgtDelete->show();
             });
 
     connect(m_pbtnDelete,
             &ZBC_PushButton::clicked,
             [this](){
-                FileOperationWgt wgtDelete(q_ptr);
+                FileOperationWgt* wgtDelete = new FileOperationWgt;
                 QStringList lst =  m_psfwActive->getListOfSelectedItems();
-                wgtDelete.removeFileOperation(lst);
-                wgtDelete.setModal(true);
-                wgtDelete.show();
+                wgtDelete->removeFileOperation(lst);
+                wgtDelete->setModal(true);
+                wgtDelete->show();
             });
 
 //Exit
@@ -288,7 +288,6 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
             &ZBC_PushButton::clicked,
             q,
             &ZBC_CentralWidget::close);
-*/
 }
 
 
@@ -305,6 +304,4 @@ ZBC_CentralWidgetPrivate::~ZBC_CentralWidgetPrivate()
     m_psettings->endGroup();
     m_psettings->endGroup();
     delete m_psettings;
-
-    delete q_ptr;
 }

@@ -47,13 +47,20 @@ private:
     ZBC_PushButton*     m_pbtnNewFolder;
     ZBC_PushButton*     m_pbtnDelete;
     ZBC_PushButton*     m_pbtnExit;
-/*
+
     QAction*            m_pactView;
     QAction*            m_pactEdit;
     QAction*            m_pactCopy;
     QAction*            m_pactMove;
     QAction*            m_pactNewFolder;
     QAction*            m_pactDelete;
+/*
+
+
+
+
+
+
 */
 };
 
