@@ -19,7 +19,7 @@ private:
     QStringList                 stlSelectedItems;
 
 signals:
-    void Active(ZBC_SideFrame*);
+    void Active();
 };
 
 #endif // ZBCSIDEFRAME_H

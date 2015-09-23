@@ -13,7 +13,6 @@ ZBC_PushButton::ZBC_PushButton(const QString& str, QWidget* pwgt) : QPushButton(
 //Mouse above button
 /*virtual*/ void ZBC_PushButton::enterEvent(QEvent *pe)
 {
-    Q_UNUSED(pe)
     this->setFlat(false);
     QPushButton::enterEvent(pe);
 }
@@ -22,7 +21,6 @@ ZBC_PushButton::ZBC_PushButton(const QString& str, QWidget* pwgt) : QPushButton(
 //Mouse laeve button area
 /*virtual*/ void ZBC_PushButton::leaveEvent(QEvent *pe)
 {
-    Q_UNUSED(pe)
     this->setFlat(true);
     QPushButton::leaveEvent(pe);
 }

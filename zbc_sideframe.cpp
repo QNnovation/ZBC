@@ -1,4 +1,5 @@
 #include "zbc_sideframe.h"
+#include "zbc_treeview.h"
 
 #include <QComboBox>
 #include <QDesktopServices>
@@ -7,7 +8,6 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QModelIndex>
-#include <QTreeView>
 #include <QUrl>
 
 
@@ -18,18 +18,12 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
     QFileSystemModel* pfsmModel             = new QFileSystemModel(this);
     pfsmModel->setFilter(QDir::NoDot | QDir::AllEntries | QDir::System);
     pfsmModel->setRootPath(path);
-//    pfsmModel->setRootPath("");
     pfsmModel->setReadOnly(false);
 
 //TreeView
-    QTreeView* ptreView              = new QTreeView(this);
-    ptreView->setRootIsDecorated(false);
-    ptreView->setItemsExpandable(false);
-    ptreView->setModel(pfsmModel);
-    ptreView->setRootIndex(pfsmModel->index(path));
-    ptreView->setFrameStyle(QFrame::NoFrame | QFrame::Plain);
-    ptreView->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    ptreView->setEditTriggers(QTreeView::NoEditTriggers);
+    ZBC_TreeView* ptreeView         = new ZBC_TreeView(this);
+    ptreeView->setModel(pfsmModel);
+    ptreeView->setRootIndex(pfsmModel->index(path));
 
 //ComboBox as View
     QComboBox*  pcbxVolumes     = new QComboBox(this);
@@ -48,7 +42,7 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
     pgrdLayout->setMargin(0);
     pgrdLayout->addWidget(pcbxVolumes, 0, 0, 1, 2);
     pgrdLayout->addWidget(plblCurPath, 1, 0, 1, 10);
-    pgrdLayout->addWidget(ptreView, 2, 0, 20, 20);
+    pgrdLayout->addWidget(ptreeView, 2, 0, 20, 20);
 
     this->setLayout(pgrdLayout);
 
@@ -56,7 +50,7 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 //Change value of QComboBox with drives
     connect(pcbxVolumes,
             static_cast<void(QComboBox::*)(const QString&)>(&QComboBox::currentIndexChanged),
-            [this, pfsmModel, ptreView, plblCurPath](QString _sPath){
+            [this, pfsmModel, ptreeView, plblCurPath](QString _sPath){
                 QString sCurDisk;
                 if (_sPath.length() == 2)
                     sCurDisk = _sPath;
@@ -67,21 +61,21 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 
                 m_sCurPath = sCurDisk;
                 plblCurPath->setText(getCurrentPath());
-                ptreView->setRootIndex(pfsmModel->index(sCurDisk));}
+                ptreeView->setRootIndex(pfsmModel->index(sCurDisk));}
             );
 
 //Double click on item at QTreeView(change dir or open file)
-    connect(ptreView,
+    connect(ptreeView,
             &QTreeView::doubleClicked,
-            [this, pfsmModel, ptreView, plblCurPath](const QModelIndex &_index){
+            [this, pfsmModel, ptreeView, plblCurPath](const QModelIndex &_index){
                 if (QFileInfo(pfsmModel->filePath(_index)).isDir()){
 
                     if ( (pfsmModel->filePath(_index)) == ".." )
-                        ptreView->setRootIndex(QModelIndex(pfsmModel->index("..")));
+                        ptreeView->setRootIndex(QModelIndex(pfsmModel->index("..")));
                     else
-                        ptreView->setRootIndex(QModelIndex(pfsmModel->index(pfsmModel->filePath(_index))));
+                        ptreeView->setRootIndex(QModelIndex(pfsmModel->index(pfsmModel->filePath(_index))));
 
-                    m_sCurPath = pfsmModel->filePath(ptreView->rootIndex());
+                    m_sCurPath = pfsmModel->filePath(ptreeView->rootIndex());
                     plblCurPath->setText(getCurrentPath());
                     stlSelectedItems.clear();
                 }
@@ -90,11 +84,11 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
             );
 
 //Fill QStringList with selected items
-    connect(ptreView->selectionModel(),
+    connect(ptreeView->selectionModel(),
             &QItemSelectionModel::selectionChanged,
-            [this, pfsmModel, ptreView](){
+            [this, pfsmModel, ptreeView](){
                 QModelIndexList* plstIndexes = new QModelIndexList;
-                *plstIndexes = ptreView->selectionModel()->selectedRows();
+                *plstIndexes = ptreeView->selectionModel()->selectedRows();
 
                 stlSelectedItems.clear();
                 foreach (QModelIndex index, *plstIndexes){
@@ -106,9 +100,13 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                         stlSelectedItems.push_back(pfsmModel->filePath(index));
                 }
                 plstIndexes->clear();
+            });
 
-                emit Active(this);}
-            );
+//Send Signal about active TreeView
+    connect(ptreeView,
+            &ZBC_TreeView::Active,
+            this,
+            &ZBC_SideFrame::Active);
 }
 
 

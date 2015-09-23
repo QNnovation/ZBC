@@ -19,7 +19,6 @@ zbcMainWindow::zbcMainWindow(QWidget *pwgt) : QMainWindow(pwgt)
     createActions();
     setupMenuBar();
     setupToolBar();
-//    setupCentralWidget();
     m_pzbcCwgt = new    ZBC_CentralWidget(this);
     this->setCentralWidget(m_pzbcCwgt);
 }
@@ -52,13 +51,3 @@ void zbcMainWindow::setupToolBar()
     m_ptbrFile = addToolBar(tr("File"));
     m_ptbrFile->addAction(m_pactQuit);
 }
-
-
-//Central Widget
-/*
-void zbcMainWindow::setupCentralWidget()
-{
-    m_pzbcCWgt          = new zbcCentralWidget(this);
-    this->setCentralWidget(m_pzbcCWgt);
-}
-*/

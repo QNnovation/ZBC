@@ -1,5 +1,3 @@
-#include<QDebug>
-
 #include "zbc_centralwidget.h"
 #include "zbc_centralwidget_p.h"
 #include "zbc_newfolder.h"
@@ -22,7 +20,6 @@ ZBC_CentralWidget::ZBC_CentralWidget(QWidget* pwgt) :
     QFrame(pwgt),
     d_ptr(new ZBC_CentralWidgetPrivate(this))
 {
-
 }
 
 
@@ -37,9 +34,11 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
     q_ptr(parent),
     m_pvblLayout( new QVBoxLayout(q_ptr) )
 {
+    Q_Q(ZBC_CentralWidget);
+
 //Widgets
 //Splitter
-    m_psplCentral = new QSplitter(Qt::Horizontal, q_ptr);
+    m_psplCentral = new QSplitter(Qt::Horizontal, q);
     m_psplCentral->setChildrenCollapsible(false);
 
 //Settings
@@ -66,7 +65,7 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
     m_psettings->endGroup();
 
 //Bottom Buttons Frame
-    m_pfrmBottomButtons = new QFrame(q_ptr);
+    m_pfrmBottomButtons = new QFrame(q);
 
 //Bottom Buttons
     m_pbtnView      = new ZBC_PushButton("F3 View", m_pfrmBottomButtons);
@@ -95,7 +94,6 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
     m_pvblLayout->addWidget(m_psplCentral,2);
     m_pvblLayout->addWidget(m_pfrmBottomButtons);
 
-    Q_Q(ZBC_CentralWidget);
     q->setLayout(m_pvblLayout);
 
 
@@ -126,7 +124,7 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
     q->addAction(m_pactNewFolder);
 
 //Delete
-    m_pactDelete    = new QAction(q_ptr);
+    m_pactDelete    = new QAction(q);
     m_pactDelete->setShortcut(QKeySequence(Qt::Key_F8));
     q->addAction(m_pactDelete);
 
@@ -135,27 +133,17 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
 //Active Side
     connect(m_psfwLeft,
             &ZBC_SideFrame::Active,
-            [this](ZBC_SideFrame* _psfw){
-                if (_psfw == this->m_psfwLeft){
+            [this](){
                     this->m_psfwActive = this->m_psfwLeft;
                     this->m_psfwNotActive = this->m_psfwRight;
-                }
-                if (_psfw == this->m_psfwRight){
-                    this->m_psfwActive = this->m_psfwRight;
-                    this->m_psfwNotActive = this->m_psfwLeft;
-                }});
+                });
 
-    connect(m_psfwLeft,
+    connect(m_psfwRight,
         &ZBC_SideFrame::Active,
-        [this](ZBC_SideFrame* _psfw){
-            if (_psfw == this->m_psfwLeft){
-                this->m_psfwActive = this->m_psfwLeft;
-                this->m_psfwNotActive = this->m_psfwRight;
-            }
-            if (_psfw == this->m_psfwRight){
+        [this](){
                 this->m_psfwActive = this->m_psfwRight;
                 this->m_psfwNotActive = this->m_psfwLeft;
-                }});
+                });
 
 //Run View
     connect(m_pactView,
@@ -246,7 +234,6 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
                 wgtMove->show();
             });
 
-
 //Run New Folder
     connect(m_pactNewFolder,
             &QAction::triggered,
@@ -284,10 +271,11 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
             });
 
 //Exit
-    connect(m_pactDelete,
+    connect(m_pbtnExit,
             &ZBC_PushButton::clicked,
-            q,
-            &ZBC_CentralWidget::close);
+            [q](){
+            q->parentWidget()->close();
+    });
 }
 
 
