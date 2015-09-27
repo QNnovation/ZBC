@@ -7,6 +7,7 @@
 #include <QFileSystemModel>
 #include <QGridLayout>
 #include <QLabel>
+#include <QMessageBox>
 #include <QModelIndex>
 #include <QUrl>
 
@@ -14,6 +15,10 @@
 //C-tor
 ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 {
+//NTFS Permissions
+    extern Q_CORE_EXPORT int qt_ntfs_permission_lookup;
+    qt_ntfs_permission_lookup++;
+
 //Model
     QFileSystemModel* pfsmModel             = new QFileSystemModel(this);
     pfsmModel->setFilter(QDir::NoDot | QDir::AllEntries | QDir::System);
@@ -69,18 +74,52 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
             &QTreeView::doubleClicked,
             [this, pfsmModel, ptreeView, plblCurPath](const QModelIndex &_index){
                 if (QFileInfo(pfsmModel->filePath(_index)).isDir()){
-
-                    if ( (pfsmModel->filePath(_index)) == ".." )
-                        ptreeView->setRootIndex(QModelIndex(pfsmModel->index("..")));
-                    else
-                        ptreeView->setRootIndex(QModelIndex(pfsmModel->index(pfsmModel->filePath(_index))));
-
-                    m_sCurPath = pfsmModel->filePath(ptreeView->rootIndex());
-                    plblCurPath->setText(getCurrentPath());
-                    stlSelectedItems.clear();
+                    if ( (pfsmModel->permissions(_index)) == (QFlags<QFile::Permissions>(0)) )
+                        QMessageBox::critical(this,
+                                              "ZBC Error",
+                                              "Access denied on folder " + pfsmModel->filePath(_index),
+                                              QMessageBox::Ok);
+                    else{
+                        if ( (pfsmModel->filePath(_index)) == ".." )
+                            ptreeView->setRootIndex(QModelIndex(pfsmModel->index("..")));
+                        else
+                            ptreeView->setRootIndex(QModelIndex(pfsmModel->index(pfsmModel->filePath(_index))));
+                        m_sCurPath = pfsmModel->filePath(ptreeView->rootIndex());
+                        plblCurPath->setText(getCurrentPath());
+                        stlSelectedItems.clear();
+                    }
                 }
                 else
-                QDesktopServices::openUrl(QUrl::fromLocalFile(pfsmModel->filePath(_index)));}
+                    QDesktopServices::openUrl(QUrl::fromLocalFile(pfsmModel->filePath(_index)));
+
+
+/*
+                if (QFileInfo(pfsmModel->filePath(_index)).isDir()){
+                    if ( (pfsmModel->filePath(_index)) == ".." ){
+                        ptreeView->setRootIndex(QModelIndex(pfsmModel->index("..")));
+                        m_sCurPath = pfsmModel->filePath(ptreeView->rootIndex());
+                        plblCurPath->setText(getCurrentPath());
+                        stlSelectedItems.clear();
+                    }
+                    else{
+                        if ( (pfsmModel->permissions(_index)) == (QFlags<QFile::Permissions>(0)) )
+                            QMessageBox::critical(this,
+                                                  "ZBC Error",
+                                                  "Access denied on folder " + pfsmModel->filePath(_index),
+                                                  QMessageBox::Ok);
+                        else {
+                            ptreeView->setRootIndex(QModelIndex(pfsmModel->index(pfsmModel->filePath(_index))));
+                            m_sCurPath = pfsmModel->filePath(ptreeView->rootIndex());
+                            plblCurPath->setText(getCurrentPath());
+                            stlSelectedItems.clear();
+                            qt_ntfs_permission_lookup++;
+                        }
+                    }
+                }
+                else
+                QDesktopServices::openUrl(QUrl::fromLocalFile(pfsmModel->filePath(_index)));
+                */
+            }
             );
 
 //Fill QStringList with selected items

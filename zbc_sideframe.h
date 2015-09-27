@@ -23,3 +23,4 @@ signals:
 };
 
 #endif // ZBCSIDEFRAME_H
+
