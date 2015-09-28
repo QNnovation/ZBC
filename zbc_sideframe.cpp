@@ -107,19 +107,18 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 //Fill QStringList with selected items
     connect(ptreeView->selectionModel(),
             &QItemSelectionModel::selectionChanged,
-            [this, pfsmModel, ptreeView](){
+            [this, pfsmModel, psfpModel, ptreeView](){
                 QModelIndexList* plstIndexes = new QModelIndexList;
                 *plstIndexes = ptreeView->selectionModel()->selectedRows();
 
                 stlSelectedItems.clear();
-                qDebug() << *plstIndexes;
                 foreach (QModelIndex index, *plstIndexes){
-                    if ( (pfsmModel->filePath(index).right(2)) == ".." )
+                    if ( (pfsmModel->filePath(psfpModel->mapToSource(index)).right(2)) == ".." )
                         continue;
-                    if (pfsmModel->isDir(index))
-                        stlSelectedItems.push_back(pfsmModel->filePath(index) + "/");
+                    if ( pfsmModel->isDir(psfpModel->mapToSource(index)) )
+                        stlSelectedItems.push_back(pfsmModel->filePath(psfpModel->mapToSource(index)) + "/");
                     else
-                        stlSelectedItems.push_back(pfsmModel->filePath(index));
+                        stlSelectedItems.push_back(pfsmModel->filePath(psfpModel->mapToSource(index)));
                 }
                 plstIndexes->clear();
             });
