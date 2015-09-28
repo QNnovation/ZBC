@@ -29,6 +29,7 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 //ProxyModel
     QSortFilterProxyModel* psfpModel        = new QSortFilterProxyModel(this);
     psfpModel->setSourceModel(pfsmModel);
+    psfpModel->setSortCaseSensitivity(Qt::CaseInsensitive);
 
 //TreeView
     ZBC_TreeView* ptreeView         = new ZBC_TreeView(this);
