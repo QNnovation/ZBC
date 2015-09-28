@@ -1,5 +1,3 @@
-#include <QDebug>
-
 #include "zbc_sideframe.h"
 #include "zbc_treeview.h"
 
@@ -34,15 +32,13 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 
 //TreeView
     ZBC_TreeView* ptreeView         = new ZBC_TreeView(this);
-//    ptreeView->setModel(pfsmModel);
-//    ptreeView->setRootIndex(pfsmModel->index(path));
     ptreeView->setModel(psfpModel);
     ptreeView->setSortingEnabled(true);
+    ptreeView->sortByColumn(0, Qt::AscendingOrder);
     ptreeView->setRootIndex( psfpModel->mapFromSource(pfsmModel->index(path)) );
 
 //ComboBox as View
     QComboBox*  pcbxVolumes     = new QComboBox(this);
-//    pcbxVolumes->setModel(pfsmModel);
     pcbxVolumes->setModel(psfpModel);
     pcbxVolumes->setMaximumSize(pcbxVolumes->sizeHint());
 
@@ -84,24 +80,24 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
     connect(ptreeView,
             &QTreeView::doubleClicked,
             [this, pfsmModel, psfpModel, ptreeView, plblCurPath](const QModelIndex &_index){
-                if (QFileInfo(pfsmModel->filePath(_index)).isDir()){
-                    if ( (pfsmModel->permissions(_index)) == (QFlags<QFile::Permissions>(0)) )
+                if (QFileInfo(pfsmModel->filePath(psfpModel->mapToSource(_index))).isDir()){
+                    if ( (pfsmModel->permissions(psfpModel->mapToSource(_index))) == (QFlags<QFile::Permissions>(0)) )
                         QMessageBox::critical(this,
                                               "ZBC Error",
                                               "Access denied on folder " + pfsmModel->filePath(_index),
                                               QMessageBox::Ok);
                     else{
-                        if ( (pfsmModel->filePath(_index)) == ".." )
-                            ptreeView->setRootIndex(QModelIndex(pfsmModel->index("..")));
+                        if ( (pfsmModel->filePath(psfpModel->mapToSource(_index))) == ".." )
+                            ptreeView->setRootIndex(QModelIndex( psfpModel->mapFromSource(pfsmModel->index(".."))));
                         else
-                            ptreeView->setRootIndex(QModelIndex(pfsmModel->index(pfsmModel->filePath(_index))));
-                        m_sCurPath = pfsmModel->filePath(ptreeView->rootIndex());
+                            ptreeView->setRootIndex(psfpModel->mapFromSource(pfsmModel->index(pfsmModel->filePath(psfpModel->mapToSource(_index)))));
+                        m_sCurPath = pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex()));
                         plblCurPath->setText(getCurrentPath());
                         stlSelectedItems.clear();
                     }
                 }
                 else
-                    QDesktopServices::openUrl(QUrl::fromLocalFile(pfsmModel->filePath(_index)));
+                    QDesktopServices::openUrl(QUrl::fromLocalFile(pfsmModel->filePath(psfpModel->mapToSource(_index))));
             });
 
 //Fill QStringList with selected items
