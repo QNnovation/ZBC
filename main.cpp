@@ -1,4 +1,4 @@
-#include "zbcmainwindow.h"
+#include "zbc_mainwindow.h"
 #include <QApplication>
 #include <QScopedPointer>
 
@@ -7,7 +7,7 @@ int main(int argc, char** argv)
     QApplication        zbcApp(argc, argv);
     QCoreApplication::setOrganizationName("QNnovation");
     QCoreApplication::setApplicationName("ZBC");
-    QScopedPointer<zbcMainWindow> wnd( new zbcMainWindow );
+    QScopedPointer<ZBC_MainWindow> wnd( new ZBC_MainWindow );
 
     wnd->setWindowTitle("ZBC_02");
     wnd->showMaximized();

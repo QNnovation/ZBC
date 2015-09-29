@@ -4,7 +4,6 @@ QT += widgets
 CONFIG += c++11
 
 HEADERS += \
-    zbcmainwindow.h \
     wgttextview.h \
     wgtcopy.h \
     wgtcopy_p.h \
@@ -14,11 +13,11 @@ HEADERS += \
     zbc_pushbutton.h \
     zbc_centralwidget.h \
     zbc_centralwidget_p.h \
-    zbc_treeview.h
+    zbc_treeview.h \
+    zbc_mainwindow.h
     zbc_newfolder.h
 
 SOURCES += \
-    zbcmainwindow.cpp \
     wgttextview.cpp \
     wgtcopy.cpp \
     main.cpp \
@@ -27,4 +26,5 @@ SOURCES += \
     zbc_sideframe.cpp \
     zbc_pushbutton.cpp \
     zbc_centralwidget.cpp \
-    zbc_treeview.cpp
+    zbc_treeview.cpp \
+    zbc_mainwindow.cpp
