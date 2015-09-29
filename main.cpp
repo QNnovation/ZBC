@@ -9,7 +9,7 @@ int main(int argc, char** argv)
     QCoreApplication::setApplicationName("ZBC");
     QScopedPointer<ZBC_MainWindow> wnd( new ZBC_MainWindow );
 
-    wnd->setWindowTitle("ZBC_02");
-    wnd->showMaximized();
+    wnd->setWindowTitle("ZBC");
+    wnd->show();
     return zbcApp.exec();
 }

@@ -42,7 +42,7 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
     m_psplCentral->setChildrenCollapsible(false);
 
 //Settings
-    m_psettings                 = new QSettings;
+    m_psettings                 = new QSettings(this);
     m_psettings->beginGroup("/Settings");
     m_psettings->beginGroup("/Panel");
 

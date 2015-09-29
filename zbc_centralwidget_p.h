@@ -1,17 +1,15 @@
 #ifndef ZBC_CENTRALWIDGET_P_H
 #define ZBC_CENTRALWIDGET_P_H
 
-#include <QSettings>
-#include <QSplitter>
 #include "zbc_sideframe.h"
 #include "zbc_pushbutton.h"
 
-
-class QSplitter;
 class QFrame;
 class QAction;
 class QVBoxLayout;
 class QHBoxLayout;
+class QSettings;
+class QSplitter;
 
 class ZBC_CentralWidget;
 

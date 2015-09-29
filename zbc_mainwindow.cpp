@@ -3,7 +3,10 @@
 
 #include <QMenuBar>
 #include <QToolBar>
+#include <QSettings>
 
+
+//C-tor
 ZBC_MainWindow::ZBC_MainWindow(QWidget* pwgt) : QMainWindow(pwgt)
 {
 //Actions
@@ -26,5 +29,27 @@ ZBC_MainWindow::ZBC_MainWindow(QWidget* pwgt) : QMainWindow(pwgt)
 //Central Widget
     ZBC_CentralWidget* pzbcCwgt = new ZBC_CentralWidget(this);
     this->setCentralWidget(pzbcCwgt);
+
+//Settings
+    QSettings Settings;
+    Settings.beginGroup("/Settings");
+    Settings.beginGroup("/MainWindow");
+    if (Settings.contains("/Geometry"))
+        this->restoreGeometry(Settings.value("/Geometry").toByteArray());
+    Settings.endGroup();
+    Settings.endGroup();
 }
 
+
+//Override closeEvent
+void ZBC_MainWindow::closeEvent(QCloseEvent *pe)
+{
+    QSettings Settings;
+    Settings.beginGroup("/Settings");
+    Settings.beginGroup("/MainWindow");
+    Settings.setValue("Geometry", saveGeometry());
+    Settings.endGroup();
+    Settings.endGroup();
+
+    QMainWindow::closeEvent(pe);
+}
