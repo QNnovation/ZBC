@@ -46,10 +46,12 @@ private:
 private slots:
     bool saveAs();
     bool saveFile();
+
+    //slots for wgtfindreplacetext
     void find();
-    void getFind(QString, QTextDocument::FindFlags);
-    void getReplace(QString, QTextDocument::FindFlags, QString);
-    void getReplaceAll(QString, QTextDocument::FindFlags, QString);
+    void findSlot(QString, QTextDocument::FindFlags);
+    void replaceSlot(QString, QTextDocument::FindFlags, QString);
+//    void getReplaceAll(QString, QTextDocument::FindFlags, QString);
 
 };
 

@@ -80,18 +80,18 @@ FindReplaceText::FindReplaceText(bool mode, QWidget *parent)
     setLayout(mainLayout);
 
     connect(closeBtn, &QPushButton::clicked, this, &FindReplaceText::close);
-    connect(findBtn, &QPushButton::clicked, this, &FindReplaceText::findTextSlot);
+    connect(findBtn, &QPushButton::clicked, this, &FindReplaceText::findSlot);
     connect(replaceBtn, &QPushButton::clicked, this, &FindReplaceText::replaceSlot);
     connect(replaceAllBtn, &QPushButton::clicked, this, &FindReplaceText::replaceAllSlot);
     connect(textFindEdit, &QLineEdit::textChanged, this, &FindReplaceText::isEmptyText);
 }
 
 //find text slot
-void FindReplaceText::findTextSlot()
+void FindReplaceText::findSlot()
 {
     flags = setOptions();
     newWord = textReplaceEdit->text();
-    emit findTextOptionsSig(textFindEdit->text(), flags, newWord);
+    emit findSignal(textFindEdit->text(), flags);
 }
 
 //replace button slot
@@ -99,14 +99,13 @@ void FindReplaceText::replaceSlot()
 {
     flags = setOptions();
     newWord = textReplaceEdit->text();
-    emit findReplaceSig(textFindEdit->text(), flags, newWord);
-    qDebug() << textFindEdit->text() << flags << newWord;
+    emit replaceSignal(textFindEdit->text(), flags, newWord);
 }
 
-//replaceALl button slot
+//replaceAll button slot
 void FindReplaceText::replaceAllSlot()
 {
-
+    qDebug() << "Replace all slot";
 }
 
 //block buttons if text is empty

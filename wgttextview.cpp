@@ -126,35 +126,38 @@ bool wgtTextView::saveFile()
     }
 }
 
+//find slot
 void wgtTextView::find()
 {
     if (rwMode)
         findReplace = new FindReplaceText();
     else
         findReplace = new FindReplaceText(true);
+
     findReplace->show();
-    connect(findReplace, &FindReplaceText::findTextOptionsSig, this, &wgtTextView::getFind);
-    if (rwMode) {
-        connect(findReplace, &FindReplaceText::findReplaceSig, this, &wgtTextView::getReplace);
-        connect(findReplace, &FindReplaceText::findReplaceAllSig, this, &wgtTextView::getReplaceAll);
+    connect(findReplace, &FindReplaceText::findSignal, this, &wgtTextView::findSlot);
+
+    if (!rwMode) {
+        connect(findReplace, &FindReplaceText::replaceSignal, this, &wgtTextView::replaceSlot);
+        //connect(findReplace, &FindReplaceText::findReplaceAllSig, this, &wgtTextView::getReplaceAll);
     }
 }
 
-void wgtTextView::getFind(QString word, QTextDocument::FindFlags flags)
+void wgtTextView::findSlot(QString word, QTextDocument::FindFlags flags)
 {
     textView->find(word, flags);
 }
 
-void wgtTextView::getReplace(QString word, QTextDocument::FindFlags flags, QString newWord)
+void wgtTextView::replaceSlot(QString word, QTextDocument::FindFlags flags, QString newWord)
 {
     qDebug() << word << flags << newWord;
     replaceText(word, newWord, flags);
 }
 
-void wgtTextView::getReplaceAll(QString word, QTextDocument::FindFlags flags, QString newWord)
-{
+//void wgtTextView::getReplaceAll(QString word, QTextDocument::FindFlags flags, QString newWord)
+//{
 
-}
+//}
 
 wgtTextView::~wgtTextView()
 {

@@ -19,15 +19,15 @@ public:
     ~FindReplaceText();
 
 public slots:
-    void findTextSlot();
+    void findSlot();
     void replaceSlot();
     void replaceAllSlot();
     void isEmptyText(QString);
 
 signals:
-    void findTextOptionsSig(QString, QTextDocument::FindFlags, QString);
-    void findReplaceSig(QString, QTextDocument::FindFlags, QString);
-    void findReplaceAllSig(QString, QTextDocument::FindFlags, QString);
+    void findSignal(QString, QTextDocument::FindFlags);
+    void replaceSignal(QString, QTextDocument::FindFlags, QString);
+    void replaceAllSignal(QString, QTextDocument::FindFlags, QString);
 
 private:
     //return flag;
