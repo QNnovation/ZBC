@@ -66,6 +66,7 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
 
 //Bottom Buttons Frame
     m_pfrmBottomButtons = new QFrame(q);
+    m_pfrmBottomButtons->setFrameStyle(QFrame::Panel | QFrame::Plain);
 
 //Bottom Buttons
     m_pbtnView      = new ZBC_PushButton("F3 View", m_pfrmBottomButtons);
@@ -78,6 +79,7 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
 
 //Layout Buttons
     m_phblBoxLayout = new QHBoxLayout(m_pfrmBottomButtons);
+    m_phblBoxLayout->setMargin(2);
     m_phblBoxLayout->addWidget(m_pbtnView);
     m_phblBoxLayout->addWidget(m_pbtnView);
     m_phblBoxLayout->addWidget(m_pbtnEdit);

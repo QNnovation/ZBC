@@ -18,6 +18,11 @@ private:
     QString                     m_sCurPath;
     QStringList                 stlSelectedItems;
 
+    QHash<QString, qint64>*     m_phashFiles;
+    QSet<QString>*              m_psetDirs;
+
+    void setListOfItemsInDir();
+
 signals:
     void Active();
 };
