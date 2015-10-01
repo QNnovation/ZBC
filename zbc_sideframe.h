@@ -3,6 +3,8 @@
 
 #include <QFrame>
 
+class QLabel;
+
 class ZBC_SideFrame : public QFrame
 {
     Q_OBJECT
@@ -18,10 +20,15 @@ private:
     QString                     m_sCurPath;
     QStringList                 stlSelectedItems;
 
-    QHash<QString, qint64>*     m_phashFiles;
+    QHash<QString, int>         m_hashFiles;
     QSet<QString>*              m_psetDirs;
 
     void setListOfItemsInDir();
+    qint64 getSizeOfFiles(QHash<QString, int>) const;
+    qint64 getSizeOfSelectedFiles( bool retSum = true );
+
+
+    void setTextForLblDirInfo(QLabel*);
 
 signals:
     void Active();

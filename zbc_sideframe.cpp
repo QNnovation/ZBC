@@ -1,5 +1,3 @@
-#include <QDebug>
-
 #include "zbc_sideframe.h"
 #include "zbc_treeview.h"
 
@@ -57,11 +55,7 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
     QLabel* plblDirInfo         = new QLabel(this);
     plblDirInfo->setFrameStyle(QFrame::Panel | QFrame::Plain);
     setListOfItemsInDir();
-    plblDirInfo->setText("0 k/ 0 k in 0/"
-                         + QString::number(m_phashFiles->size())
-                         + " files, 0/"
-                         + QString::number(m_psetDirs->size())
-                         + " dirs");
+    setTextForLblDirInfo(plblDirInfo);
 
 //Layout
     QGridLayout* pgrdLayout = new QGridLayout;
@@ -80,7 +74,7 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 //Change value of QComboBox with drives
     connect(pcbxVolumes,
             static_cast<void(QComboBox::*)(const QString&)>(&QComboBox::currentIndexChanged),
-            [this, pfsmModel, psfpModel, ptreeView, plblCurPath](QString _sPath){
+            [this, pfsmModel, psfpModel, ptreeView, plblCurPath, plblDirInfo](QString _sPath){
                 QString sCurDisk;
                 if (_sPath.length() == 2)
                     sCurDisk = _sPath;
@@ -91,7 +85,8 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 
                 m_sCurPath = sCurDisk;
                 plblCurPath->setText(getCurrentPath());
-                ptreeView->setRootIndex(psfpModel->mapFromSource(pfsmModel->index(sCurDisk)));}
+                ptreeView->setRootIndex(psfpModel->mapFromSource(pfsmModel->index(sCurDisk)));
+                setTextForLblDirInfo(plblDirInfo);}
             );
 
 //Double click on item at QTreeView(change dir or open file)
@@ -114,12 +109,7 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                         m_sCurPath = pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex()));
                         plblCurPath->setText(getCurrentPath());
                         stlSelectedItems.clear();
-                        setListOfItemsInDir();
-                        plblDirInfo->setText("0 k/ 0 k in 0/"
-                                             + QString::number(m_phashFiles->size())
-                                             + " files, 0/"
-                                             + QString::number(m_psetDirs->size())
-                                             + " dirs");
+                        setTextForLblDirInfo(plblDirInfo);
                     }
                 }
                 else
@@ -129,7 +119,7 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 //Fill QStringList with selected items
     connect(ptreeView->selectionModel(),
             &QItemSelectionModel::selectionChanged,
-            [this, pfsmModel, psfpModel, ptreeView](){
+            [this, pfsmModel, psfpModel, ptreeView, plblDirInfo](){
                 QModelIndexList* plstIndexes = new QModelIndexList;
                 *plstIndexes = ptreeView->selectionModel()->selectedRows();
 
@@ -143,6 +133,7 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                         stlSelectedItems.push_back(pfsmModel->filePath(psfpModel->mapToSource(index)));
                 }
                 plstIndexes->clear();
+                setTextForLblDirInfo(plblDirInfo);
             });
 
 //Send Signal about active TreeView
@@ -156,7 +147,6 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 //D-tor
 ZBC_SideFrame::~ZBC_SideFrame()
 {
-    delete m_phashFiles;
     delete m_psetDirs;
 }
 
@@ -194,9 +184,8 @@ void ZBC_SideFrame::setListOfItemsInDir()
                      | QDir::NoDotAndDotDot);
 
     QFileInfoList finList = curFiles.entryInfoList();
-    m_phashFiles            = new QHash<QString, qint64>;
     foreach (QFileInfo file, finList)
-        m_phashFiles->insert(file.absoluteFilePath(), file.size() / KBytes );
+        m_hashFiles.insert(file.absoluteFilePath(), file.size() / KBytes );
 
 
     QDir curDirs(m_sCurPath);
@@ -207,15 +196,77 @@ void ZBC_SideFrame::setListOfItemsInDir()
     QFileInfoList dirList = curDirs.entryInfoList();
     m_psetDirs             = new QSet<QString>;
     foreach (QFileInfo dir, dirList)
-        m_psetDirs->insert(dir.absoluteFilePath());
+        m_psetDirs->insert(dir.absoluteFilePath() + "/");
 }
 
 
+//Get size of files saved in QHash dir
+qint64 ZBC_SideFrame::getSizeOfFiles(QHash<QString, int> _hash) const
+{
+    int sz = 0;
+    QHashIterator<QString, int> iter(_hash);
+    while (iter.hasNext()){
+        iter.next();
+        sz += iter.value();
+    }
+
+    return sz;
+}
 
 
+//Calculate total size of selected files
+//Stupid solution ( cause I don't now STL( )
+qint64 ZBC_SideFrame::getSizeOfSelectedFiles( bool retSum )
+{
+    QHash<QString, int> tmpHash;
+    QHashIterator<QString, int> iterHash(m_hashFiles);
+
+    if ( stlSelectedItems.size() >= m_hashFiles.size() ){
+        for (int i = 0; i != stlSelectedItems.size(); ++i){
+            while(iterHash.hasNext()){
+                iterHash.next();
+                if ( stlSelectedItems.at(i) == iterHash.key() )
+                    tmpHash.insert(iterHash.key(), iterHash.value());
+            }
+            iterHash.toFront();
+        }
+    } else{
+        while(iterHash.hasNext()){
+            iterHash.next();
+            for(int i = 0; i != stlSelectedItems.size(); ++i){
+                if( iterHash.key() == stlSelectedItems.at(i) )
+                    tmpHash.insert(iterHash.key(), iterHash.value());
+            }
+        }
+    }
+
+    if (retSum)
+        return getSizeOfFiles(tmpHash);
+    else
+        return tmpHash.size();
+}
 
 
+//
+void ZBC_SideFrame::setTextForLblDirInfo(QLabel * plbl)
+{
+    setListOfItemsInDir();
+    plbl->setText(QString::number(getSizeOfSelectedFiles())
+                         + " k/ "
+                         + QString::number(getSizeOfFiles(m_hashFiles))
+                         + " k in "
+                         + QString::number(getSizeOfSelectedFiles(false))
+                         + "/"
+                         + QString::number(m_hashFiles.size())
+                         + " files, "
+                         + QString::number(QSet<QString>::fromList(stlSelectedItems).intersect(*m_psetDirs).size())
+                         + "/"
+                         + QString::number(m_psetDirs->size())
+                         + " dirs");
 
+    m_hashFiles.clear();
+    m_psetDirs->clear();
+}
 
 
 
