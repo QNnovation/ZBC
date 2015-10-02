@@ -105,7 +105,9 @@ void FindReplaceText::replaceSlot()
 //replaceAll button slot
 void FindReplaceText::replaceAllSlot()
 {
-    qDebug() << "Replace all slot";
+    flags = setOptions();
+    newWord = textReplaceEdit->text();
+    emit replaceAllSignal(textFindEdit->text(), flags, newWord);
 }
 
 //block buttons if text is empty

@@ -33,6 +33,8 @@ private:
     QAction *quitAct;
     QAction *fileSaveAsAct;
     QAction *findAtTextAct;
+    QAction *undoAct;
+    QAction *redoAct;
 
     void createMenu();
     void createActions();
@@ -41,7 +43,8 @@ private:
 
     QString pathToFile;
     FindReplaceText *findReplace;
-    void replaceText(QString, QString, QTextDocument::FindFlags);
+    void replace(QString, QString, QTextDocument::FindFlags);
+    void replaceAll(QString, QString, QTextDocument::FindFlags);
 
 private slots:
     bool saveAs();
@@ -51,7 +54,7 @@ private slots:
     void find();
     void findSlot(QString, QTextDocument::FindFlags);
     void replaceSlot(QString, QTextDocument::FindFlags, QString);
-//    void getReplaceAll(QString, QTextDocument::FindFlags, QString);
+    void replaceAllSlot(QString, QTextDocument::FindFlags, QString);
 
 };
 

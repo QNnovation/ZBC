@@ -12,10 +12,11 @@
 wgtTextView::wgtTextView(QWidget *parent)
     :QMainWindow(parent)
 {
+    textView = new QPlainTextEdit;
+
     createActions();
     createMenu();
 
-    textView = new QPlainTextEdit;
     rwMode = true;
 
     resize(500, 500);
@@ -34,6 +35,8 @@ void wgtTextView::createMenu()
 
     editMenu = this->menuBar()->addMenu(tr("&Edit"));
     editMenu->addAction(findAtTextAct);
+    editMenu->addAction(undoAct);
+    editMenu->addAction(redoAct);
 }
 
 //function for Actions
@@ -53,12 +56,29 @@ void wgtTextView::createActions()
     findAtTextAct->setStatusTip(tr("Find text"));
     findAtTextAct->setShortcut(QKeySequence::Find);
     connect(findAtTextAct, &QAction::triggered, this, &wgtTextView::find);
+
+    undoAct = new QAction(tr("Undo"), this);
+    undoAct->setStatusTip(tr("Undo action"));
+    undoAct->setShortcut(QKeySequence::Undo);
+    connect(undoAct, &QAction::triggered, textView, &QPlainTextEdit::undo);
+
+    redoAct = new QAction(tr("Redo"), this);
+    redoAct->setStatusTip(tr("Redo action"));
+    redoAct->setShortcut(QKeySequence::Redo);
+    connect(redoAct, &QAction::triggered, textView, &QPlainTextEdit::redo);
 }
 
-void wgtTextView::replaceText(QString word, QString newWord, QTextDocument::FindFlags flags)
+void wgtTextView::replace(QString word, QString newWord, QTextDocument::FindFlags flags)
 {
     if (textView->find(word, flags))
         textView->textCursor().insertText(newWord);
+}
+
+void wgtTextView::replaceAll(QString word, QString newWord, QTextDocument::FindFlags flags)
+{
+    while (textView->find(word, flags)) {
+        textView->textCursor().insertText(newWord);
+    }
 }
 
 //function loadFile
@@ -139,7 +159,7 @@ void wgtTextView::find()
 
     if (!rwMode) {
         connect(findReplace, &FindReplaceText::replaceSignal, this, &wgtTextView::replaceSlot);
-        //connect(findReplace, &FindReplaceText::findReplaceAllSig, this, &wgtTextView::getReplaceAll);
+        connect(findReplace, &FindReplaceText::replaceAllSignal, this, &wgtTextView::replaceAllSlot);
     }
 }
 
@@ -150,14 +170,13 @@ void wgtTextView::findSlot(QString word, QTextDocument::FindFlags flags)
 
 void wgtTextView::replaceSlot(QString word, QTextDocument::FindFlags flags, QString newWord)
 {
-    qDebug() << word << flags << newWord;
-    replaceText(word, newWord, flags);
+    replace(word, newWord, flags);
 }
 
-//void wgtTextView::getReplaceAll(QString word, QTextDocument::FindFlags flags, QString newWord)
-//{
-
-//}
+void wgtTextView::replaceAllSlot(QString word, QTextDocument::FindFlags flags, QString newWord)
+{
+    replaceAll(word, newWord, flags);
+}
 
 wgtTextView::~wgtTextView()
 {
