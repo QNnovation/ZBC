@@ -14,7 +14,8 @@ HEADERS += \
     zbc_centralwidget.h \
     zbc_centralwidget_p.h \
     zbc_treeview.h \
-    zbc_mainwindow.h
+    zbc_mainwindow.h \
+    zbc_lineedit.h
     zbc_newfolder.h
 
 SOURCES += \
@@ -27,4 +28,5 @@ SOURCES += \
     zbc_pushbutton.cpp \
     zbc_centralwidget.cpp \
     zbc_treeview.cpp \
-    zbc_mainwindow.cpp
+    zbc_mainwindow.cpp \
+    zbc_lineedit.cpp

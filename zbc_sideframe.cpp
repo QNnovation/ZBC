@@ -1,4 +1,7 @@
+#include <QDebug>
+
 #include "zbc_sideframe.h"
+#include "zbc_lineedit.h"
 #include "zbc_treeview.h"
 
 #include <QComboBox>
@@ -47,9 +50,10 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 //Current path
     m_sCurPath = pfsmModel->rootPath();
 
-//Label with current path
-    QLabel* plblCurPath           = new QLabel(this);
-    plblCurPath->setText(this->getCurrentPath());
+//LineEdit with current path
+    ZBC_LineEdit* pledCurPath      = new ZBC_LineEdit(this);
+    pledCurPath->setReadOnly(true);
+    pledCurPath->setText(this->getCurrentPath());
 
 //Label with info about files and dirs
     QLabel* plblDirInfo         = new QLabel(this);
@@ -61,7 +65,7 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
     QGridLayout* pgrdLayout = new QGridLayout;
     pgrdLayout->setMargin(5);
     pgrdLayout->addWidget(pcbxVolumes, 0, 0, 1, 2);
-    pgrdLayout->addWidget(plblCurPath, 1, 0, 1, 10);
+    pgrdLayout->addWidget(pledCurPath,1, 0, 1, 20);
     pgrdLayout->addWidget(ptreeView, 2, 0, 20, 20);
     pgrdLayout->addWidget(plblDirInfo, 22, 0, 1, 20);
 
@@ -74,7 +78,7 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 //Change value of QComboBox with drives
     connect(pcbxVolumes,
             static_cast<void(QComboBox::*)(const QString&)>(&QComboBox::currentIndexChanged),
-            [this, pfsmModel, psfpModel, ptreeView, plblCurPath, plblDirInfo](QString _sPath){
+            [this, pfsmModel, psfpModel, ptreeView, pledCurPath, plblDirInfo](QString _sPath){
                 QString sCurDisk;
                 if (_sPath.length() == 2)
                     sCurDisk = _sPath;
@@ -84,15 +88,31 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                 }
 
                 m_sCurPath = sCurDisk;
-                plblCurPath->setText(getCurrentPath());
+                pledCurPath->setText(getCurrentPath());
                 ptreeView->setRootIndex(psfpModel->mapFromSource(pfsmModel->index(sCurDisk)));
                 setTextForLblDirInfo(plblDirInfo);}
             );
 
+//Enter pressed on LineEdit with current path
+    connect(pledCurPath,
+            &ZBC_LineEdit::pressedEnter,
+            [this, pfsmModel, psfpModel, ptreeView, pledCurPath, plblDirInfo](QString oldVal){
+        QDir tmpDir(pledCurPath->text());
+        if (!tmpDir.exists())
+            pledCurPath->setText(oldVal);
+        else{
+             ptreeView->setRootIndex(QModelIndex( psfpModel->mapFromSource(pfsmModel->index(pledCurPath->text()))));
+        }
+         m_sCurPath = pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex()));
+         stlSelectedItems.clear();
+         setTextForLblDirInfo(plblDirInfo);
+
+    });
+
 //Double click on item at QTreeView(change dir or open file)
     connect(ptreeView,
             &QTreeView::doubleClicked,
-            [this, pfsmModel, psfpModel, ptreeView, plblCurPath, plblDirInfo](const QModelIndex &_index){
+            [this, pfsmModel, psfpModel, ptreeView, pledCurPath, plblDirInfo](const QModelIndex &_index){
                 if (QFileInfo(pfsmModel->filePath(psfpModel->mapToSource(_index))).isDir()){
                     if ( (pfsmModel->permissions(psfpModel->mapToSource(_index))) == (QFlags<QFile::Permissions>(0)) )
                         QMessageBox::critical(this,
@@ -107,7 +127,7 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 
                         }
                         m_sCurPath = pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex()));
-                        plblCurPath->setText(getCurrentPath());
+                        pledCurPath->setText(getCurrentPath());
                         stlSelectedItems.clear();
                         setTextForLblDirInfo(plblDirInfo);
                     }
