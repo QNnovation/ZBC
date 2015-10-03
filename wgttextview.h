@@ -31,6 +31,7 @@ private:
     QMenu *editMenu;
 
     QAction *quitAct;
+    QAction *saveAct;
     QAction *fileSaveAsAct;
     QAction *findAtTextAct;
     QAction *undoAct;

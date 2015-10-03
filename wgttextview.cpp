@@ -7,12 +7,23 @@
 #include <QDebug>
 #include <QMenu>
 #include <QMenuBar>
+#include <QMessageBox>
 
 //constructor
 wgtTextView::wgtTextView(QWidget *parent)
     :QMainWindow(parent)
 {
     textView = new QPlainTextEdit;
+
+    //color theme
+    QPalette p = this->textView->palette();
+    p.setColor(QPalette::Base, Qt::white);
+    p.setColor(QPalette::Text, Qt::black);
+    p.setColor(QPalette::Highlight, Qt::green);
+    p.setColor(QPalette::HighlightedText, Qt::black);
+    this->textView->setPalette(p);
+
+    findReplace = new FindReplaceText();
 
     createActions();
     createMenu();
@@ -29,6 +40,7 @@ void wgtTextView::createMenu()
 {
 
     menu = this->menuBar()->addMenu(tr("&File"));
+    menu->addAction(saveAct);
     menu->addAction(fileSaveAsAct);
     menu->addSeparator();
     menu->addAction(quitAct);
@@ -66,6 +78,11 @@ void wgtTextView::createActions()
     redoAct->setStatusTip(tr("Redo action"));
     redoAct->setShortcut(QKeySequence::Redo);
     connect(redoAct, &QAction::triggered, textView, &QPlainTextEdit::redo);
+
+    saveAct = new QAction(tr("Save"), this);
+    saveAct->setStatusTip(tr("Save file"));
+    saveAct->setShortcut(QKeySequence::Save);
+    connect(saveAct, &QAction::triggered, this, &wgtTextView::saveFile);
 }
 
 void wgtTextView::replace(QString word, QString newWord, QTextDocument::FindFlags flags)
@@ -76,9 +93,9 @@ void wgtTextView::replace(QString word, QString newWord, QTextDocument::FindFlag
 
 void wgtTextView::replaceAll(QString word, QString newWord, QTextDocument::FindFlags flags)
 {
-    while (textView->find(word, flags)) {
+    while (textView->find(word, flags))
         textView->textCursor().insertText(newWord);
-    }
+
 }
 
 //function loadFile
@@ -114,7 +131,20 @@ void wgtTextView::editFile(QString &filePath)
 
 void wgtTextView::closeEvent(QCloseEvent *)
 {
-    findReplace->close();
+    QMessageBox::StandardButton reply;
+    if (textView->document()->isModified()) {
+        reply = QMessageBox::question(this, "Documet was modified",
+                                      "Do you want save?",
+                                      QMessageBox::Yes | QMessageBox::No);
+    }
+    if (reply == QMessageBox::Yes)
+    {
+        this->saveFile();
+        findReplace->close();
+    }
+    else {
+        findReplace->close();
+    }
 }
 
 //slot saveAs
@@ -149,14 +179,9 @@ bool wgtTextView::saveFile()
 //find slot
 void wgtTextView::find()
 {
-    if (rwMode)
-        findReplace = new FindReplaceText();
-    else
-        findReplace = new FindReplaceText(true);
-
+    findReplace->isReplace(!rwMode);
     findReplace->show();
     connect(findReplace, &FindReplaceText::findSignal, this, &wgtTextView::findSlot);
-
     if (!rwMode) {
         connect(findReplace, &FindReplaceText::replaceSignal, this, &wgtTextView::replaceSlot);
         connect(findReplace, &FindReplaceText::replaceAllSignal, this, &wgtTextView::replaceAllSlot);

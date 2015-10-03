@@ -11,7 +11,7 @@
 #include <QGridLayout>
 #include <QDebug>
 
-FindReplaceText::FindReplaceText(bool mode, QWidget *parent)
+FindReplaceText::FindReplaceText(QWidget *parent)
     : QDialog(parent)
 {
 
@@ -63,13 +63,10 @@ FindReplaceText::FindReplaceText(bool mode, QWidget *parent)
     lineBlockLayout->addWidget(upBtn, 5, 0);
     lineBlockLayout->addWidget(wholeWordsBox, 5, 1);
 
-    if (mode)
-    {
-        textReplaceLbl->setVisible(true);
-        textReplaceEdit->setVisible(true);
-        replaceBtn->setVisible(true);
-        replaceAllBtn->setVisible(true);
-    }
+    textReplaceLbl->setVisible(false);
+    textReplaceEdit->setVisible(false);
+    replaceBtn->setVisible(false);
+    replaceAllBtn->setVisible(false);
 
     QHBoxLayout *mainLayout = new QHBoxLayout();
     mainLayout->addLayout(lineBlockLayout);
@@ -84,6 +81,16 @@ FindReplaceText::FindReplaceText(bool mode, QWidget *parent)
     connect(replaceBtn, &QPushButton::clicked, this, &FindReplaceText::replaceSlot);
     connect(replaceAllBtn, &QPushButton::clicked, this, &FindReplaceText::replaceAllSlot);
     connect(textFindEdit, &QLineEdit::textChanged, this, &FindReplaceText::isEmptyText);
+}
+
+void FindReplaceText::isReplace(bool mode)
+{
+    if (mode) {
+        textReplaceLbl->setVisible(true);
+        textReplaceEdit->setVisible(true);
+        replaceBtn->setVisible(true);
+        replaceAllBtn->setVisible(true);
+    }
 }
 
 //find text slot

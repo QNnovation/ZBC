@@ -15,7 +15,8 @@ class FindReplaceText : public QDialog
 {
     Q_OBJECT
 public:
-    explicit FindReplaceText(bool mode = false, QWidget *parent = 0);
+    explicit FindReplaceText(QWidget *parent = 0);
+    void isReplace(bool);
     ~FindReplaceText();
 
 public slots:
@@ -32,8 +33,6 @@ signals:
 private:
     //return flag;
     QTextDocument::FindFlags setOptions();
-    //mode find or replace
-    bool mode;
     //line edit group
     QLineEdit *textFindEdit;
     QLineEdit *textReplaceEdit;
