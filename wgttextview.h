@@ -30,7 +30,7 @@ private:
     QMenu *menu;
     QMenu *editMenu;
 
-    QAction *quitAct;
+    QAction *m_quitAct;
     QAction *saveAct;
     QAction *fileSaveAsAct;
     QAction *findAtTextAct;

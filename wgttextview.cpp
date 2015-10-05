@@ -43,7 +43,7 @@ void wgtTextView::createMenu()
     menu->addAction(saveAct);
     menu->addAction(fileSaveAsAct);
     menu->addSeparator();
-    menu->addAction(quitAct);
+    menu->addAction(m_quitAct);
 
     editMenu = this->menuBar()->addMenu(tr("&Edit"));
     editMenu->addAction(findAtTextAct);
@@ -54,10 +54,10 @@ void wgtTextView::createMenu()
 //function for Actions
 void wgtTextView::createActions()
 {
-    quitAct = new QAction(tr("&Quit"), this);
-    quitAct->setStatusTip(tr("Close window"));
-    quitAct->setShortcut(QKeySequence::Close);
-    connect(quitAct, &QAction::triggered, this, &wgtTextView::close);
+    m_quitAct = new QAction(tr("&Quit"), this);
+    m_quitAct->setStatusTip(tr("Close window"));
+    m_quitAct->setShortcut(QKeySequence::Close);
+    connect(m_quitAct, &QAction::triggered, this, &wgtTextView::close);
 
     fileSaveAsAct = new QAction(tr("Save as..."), this);
     fileSaveAsAct->setStatusTip(tr("File, save as"));
@@ -131,7 +131,7 @@ void wgtTextView::editFile(QString &filePath)
 
 void wgtTextView::closeEvent(QCloseEvent *)
 {
-    QMessageBox::StandardButton reply;
+    QMessageBox::StandardButton reply = QMessageBox::No;
     if (textView->document()->isModified()) {
         reply = QMessageBox::question(this, "Documet was modified",
                                       "Do you want save?",

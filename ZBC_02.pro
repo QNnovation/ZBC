@@ -1,7 +1,23 @@
 QT += widgets
 
-#QMAKE_CXXFLAGS += -std=c++11
 CONFIG += c++11
+
+#win32 {
+#    QMAKE_CXXFLAGS *= /EHsc
+#    QMAKE_CXXFLAGS *= /MP
+#    QMAKE_CXXFLAGS *= /Wall
+#    QMAKE_CXXFLAGS *= /WX
+
+#    QMAKE_CFLAGS *= /TP
+#    QMAKE_CFLAGS *= /EHsc
+#    QMAKE_CFLAGS *= /Wall
+#    QMAKE_CFLAGS *= /WX
+#}
+
+win32 {
+QMAKE_CXXFLAGS = -Wall -Wextra -Werror
+QMAKE_CFLAGS = -Wall -Wextra -Werror
+}
 
 HEADERS += \
     wgttextview.h \

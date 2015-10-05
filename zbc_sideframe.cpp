@@ -116,8 +116,8 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                 if (QFileInfo(pfsmModel->filePath(psfpModel->mapToSource(_index))).isDir()){
                     if ( (pfsmModel->permissions(psfpModel->mapToSource(_index))) == (QFlags<QFile::Permissions>(0)) )
                         QMessageBox::critical(this,
-                                              "ZBC Error",
-                                              "Access denied on folder " + pfsmModel->filePath(_index),
+                                              tr("ZBC Error"),
+                                              tr("Access denied on folder %1").arg(pfsmModel->filePath(_index)),
                                               QMessageBox::Ok);
                     else{
                         if ( (pfsmModel->filePath(psfpModel->mapToSource(_index))) == ".." )
@@ -139,20 +139,21 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 //Fill QStringList with selected items
     connect(ptreeView->selectionModel(),
             &QItemSelectionModel::selectionChanged,
-            [this, pfsmModel, psfpModel, ptreeView, plblDirInfo](){
-                QModelIndexList* plstIndexes = new QModelIndexList;
-                *plstIndexes = ptreeView->selectionModel()->selectedRows();
+            [=](){
+//                QModelIndexList* plstIndexes = new QModelIndexList;
+//                *plstIndexes = ptreeView->selectionModel()->selectedRows();
 
                 stlSelectedItems.clear();
-                foreach (QModelIndex index, *plstIndexes){
-                    if ( (pfsmModel->filePath(psfpModel->mapToSource(index)).right(2)) == ".." )
+                for ( const QModelIndex& index:ptreeView->selectionModel()->selectedRows()){
+                //for (QModelIndex index, *plstIndexes){
+                    if ( (pfsmModel->filePath(psfpModel->mapToSource(index)).right(2)) == QLatin1String("..") )
                         continue;
                     if ( pfsmModel->isDir(psfpModel->mapToSource(index)) )
-                        stlSelectedItems.push_back(pfsmModel->filePath(psfpModel->mapToSource(index)) + "/");
+                        stlSelectedItems.push_back(pfsmModel->filePath(psfpModel->mapToSource(index)) + QDir::separator());
                     else
                         stlSelectedItems.push_back(pfsmModel->filePath(psfpModel->mapToSource(index)));
                 }
-                plstIndexes->clear();
+//                plstIndexes->clear();
                 setTextForLblDirInfo(plblDirInfo);
             });
 
@@ -167,7 +168,7 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 //D-tor
 ZBC_SideFrame::~ZBC_SideFrame()
 {
-    delete m_psetDirs;
+
 }
 
 
@@ -197,14 +198,14 @@ QString ZBC_SideFrame::getCurrentPath()
 //Number of files and dors in folder
 void ZBC_SideFrame::setListOfItemsInDir()
 {
-    const int KBytes = 1024;
+    static const int KBytes = 1024;
     QDir curFiles(m_sCurPath);
     curFiles.setFilter(QDir::Files
                      | QDir::NoSymLinks
                      | QDir::NoDotAndDotDot);
 
-    QFileInfoList finList = curFiles.entryInfoList();
-    foreach (QFileInfo file, finList)
+//    QFileInfoList finList = curFiles.entryInfoList();
+    for (const QFileInfo& file : curFiles.entryInfoList())
         m_hashFiles.insert(file.absoluteFilePath(), file.size() / KBytes );
 
 
@@ -212,11 +213,9 @@ void ZBC_SideFrame::setListOfItemsInDir()
     curDirs.setFilter(QDir::Dirs
                      | QDir::NoSymLinks
                      | QDir::NoDotAndDotDot);
-
-    QFileInfoList dirList = curDirs.entryInfoList();
-    m_psetDirs             = new QSet<QString>;
-    foreach (QFileInfo dir, dirList)
-        m_psetDirs->insert(dir.absoluteFilePath() + "/");
+//QDirIterator
+    for (const QFileInfo& dir : curDirs.entryInfoList())
+        m_setDirs.insert(dir.absoluteFilePath() + "/");
 }
 
 
@@ -279,13 +278,13 @@ void ZBC_SideFrame::setTextForLblDirInfo(QLabel * plbl)
                          + "/"
                          + QString::number(m_hashFiles.size())
                          + " files, "
-                         + QString::number(QSet<QString>::fromList(stlSelectedItems).intersect(*m_psetDirs).size())
+                         + QString::number(QSet<QString>::fromList(stlSelectedItems).intersect(m_setDirs).size())
                          + "/"
-                         + QString::number(m_psetDirs->size())
+                         + QString::number(m_setDirs.size())
                          + " dirs");
 
     m_hashFiles.clear();
-    m_psetDirs->clear();
+    m_setDirs.clear();
 }
 
 
