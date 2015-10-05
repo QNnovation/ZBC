@@ -13,25 +13,25 @@
 wgtTextView::wgtTextView(QWidget *parent)
     :QMainWindow(parent)
 {
-    textView = new QPlainTextEdit;
+    m_textView = new QPlainTextEdit;
 
     //color theme
-    QPalette p = this->textView->palette();
+    QPalette p = this->m_textView->palette();
     p.setColor(QPalette::Base, Qt::white);
     p.setColor(QPalette::Text, Qt::black);
     p.setColor(QPalette::Highlight, Qt::green);
     p.setColor(QPalette::HighlightedText, Qt::black);
-    this->textView->setPalette(p);
+    this->m_textView->setPalette(p);
 
-    findReplace = new FindReplaceText();
+    m_findReplace = new FindReplaceText();
 
     createActions();
     createMenu();
 
-    rwMode = true;
+    m_rwMode = true;
 
     resize(500, 500);
-    setCentralWidget(textView);
+    setCentralWidget(m_textView);
     setWindowTitle("ZBC viewer/editor");
 }
 
@@ -39,62 +39,62 @@ wgtTextView::wgtTextView(QWidget *parent)
 void wgtTextView::createMenu()
 {
 
-    menu = this->menuBar()->addMenu(tr("&File"));
-    menu->addAction(saveAct);
-    menu->addAction(fileSaveAsAct);
-    menu->addSeparator();
-    menu->addAction(quitAct);
+    m_menu = this->menuBar()->addMenu(tr("&File"));
+    m_menu->addAction(m_saveAct);
+    m_menu->addAction(m_fileSaveAsAct);
+    m_menu->addSeparator();
+    m_menu->addAction(m_quitAct);
 
-    editMenu = this->menuBar()->addMenu(tr("&Edit"));
-    editMenu->addAction(findAtTextAct);
-    editMenu->addAction(undoAct);
-    editMenu->addAction(redoAct);
+    m_editMenu = this->menuBar()->addMenu(tr("&Edit"));
+    m_editMenu->addAction(m_findAtTextAct);
+    m_editMenu->addAction(m_undoAct);
+    m_editMenu->addAction(m_redoAct);
 }
 
 //function for Actions
 void wgtTextView::createActions()
 {
-    quitAct = new QAction(tr("&Quit"), this);
-    quitAct->setStatusTip(tr("Close window"));
-    quitAct->setShortcut(QKeySequence::Close);
-    connect(quitAct, &QAction::triggered, this, &wgtTextView::close);
+    m_quitAct = new QAction(tr("&Quit"), this);
+    m_quitAct->setStatusTip(tr("Close window"));
+    m_quitAct->setShortcut(QKeySequence::Close);
+    connect(m_quitAct, &QAction::triggered, this, &wgtTextView::close);
 
-    fileSaveAsAct = new QAction(tr("Save as..."), this);
-    fileSaveAsAct->setStatusTip(tr("File, save as"));
-    fileSaveAsAct->setShortcut(QKeySequence::SaveAs);
-    connect(fileSaveAsAct, &QAction::triggered, this, &wgtTextView::saveAs);
+    m_fileSaveAsAct = new QAction(tr("Save as..."), this);
+    m_fileSaveAsAct->setStatusTip(tr("File, save as"));
+    m_fileSaveAsAct->setShortcut(QKeySequence::SaveAs);
+    connect(m_fileSaveAsAct, &QAction::triggered, this, &wgtTextView::saveAs);
 
-    findAtTextAct = new QAction(tr("&Find"), this);
-    findAtTextAct->setStatusTip(tr("Find text"));
-    findAtTextAct->setShortcut(QKeySequence::Find);
-    connect(findAtTextAct, &QAction::triggered, this, &wgtTextView::find);
+    m_findAtTextAct = new QAction(tr("&Find"), this);
+    m_findAtTextAct->setStatusTip(tr("Find text"));
+    m_findAtTextAct->setShortcut(QKeySequence::Find);
+    connect(m_findAtTextAct, &QAction::triggered, this, &wgtTextView::find);
 
-    undoAct = new QAction(tr("Undo"), this);
-    undoAct->setStatusTip(tr("Undo action"));
-    undoAct->setShortcut(QKeySequence::Undo);
-    connect(undoAct, &QAction::triggered, textView, &QPlainTextEdit::undo);
+    m_undoAct = new QAction(tr("Undo"), this);
+    m_undoAct->setStatusTip(tr("Undo action"));
+    m_undoAct->setShortcut(QKeySequence::Undo);
+    connect(m_undoAct, &QAction::triggered, m_textView, &QPlainTextEdit::undo);
 
-    redoAct = new QAction(tr("Redo"), this);
-    redoAct->setStatusTip(tr("Redo action"));
-    redoAct->setShortcut(QKeySequence::Redo);
-    connect(redoAct, &QAction::triggered, textView, &QPlainTextEdit::redo);
+    m_redoAct = new QAction(tr("Redo"), this);
+    m_redoAct->setStatusTip(tr("Redo action"));
+    m_redoAct->setShortcut(QKeySequence::Redo);
+    connect(m_redoAct, &QAction::triggered, m_textView, &QPlainTextEdit::redo);
 
-    saveAct = new QAction(tr("Save"), this);
-    saveAct->setStatusTip(tr("Save file"));
-    saveAct->setShortcut(QKeySequence::Save);
-    connect(saveAct, &QAction::triggered, this, &wgtTextView::saveFile);
+    m_saveAct = new QAction(tr("Save"), this);
+    m_saveAct->setStatusTip(tr("Save file"));
+    m_saveAct->setShortcut(QKeySequence::Save);
+    connect(m_saveAct, &QAction::triggered, this, &wgtTextView::saveFile);
 }
 
-void wgtTextView::replace(QString word, QString newWord, QTextDocument::FindFlags flags)
+void wgtTextView::replace(const QString &word, const QString &newWord, QTextDocument::FindFlags flags)
 {
-    if (textView->find(word, flags))
-        textView->textCursor().insertText(newWord);
+    if (m_textView->find(word, flags))
+        m_textView->textCursor().insertText(newWord);
 }
 
-void wgtTextView::replaceAll(QString word, QString newWord, QTextDocument::FindFlags flags)
+void wgtTextView::replaceAll(const QString &word, const QString &newWord, QTextDocument::FindFlags flags)
 {
-    while (textView->find(word, flags))
-        textView->textCursor().insertText(newWord);
+    while (m_textView->find(word, flags))
+        m_textView->textCursor().insertText(newWord);
 
 }
 
@@ -103,7 +103,7 @@ bool wgtTextView::loadFile(const QString &filePath, char mode)
 {
     pathToFile = filePath;
     if (mode == 'w')
-        rwMode = false;
+        m_rwMode = false;
 
     QByteArray dataFromFile;
     QFile inputFile(pathToFile);
@@ -113,37 +113,36 @@ bool wgtTextView::loadFile(const QString &filePath, char mode)
         return false;
     } else {
         dataFromFile = inputFile.readAll();
-        textView->setReadOnly(rwMode);
-        textView->setPlainText(dataFromFile);
+        m_textView->setReadOnly(m_rwMode);
+        m_textView->setPlainText(dataFromFile);
         return true;
     }
 }
 
-void wgtTextView::viewFile(QString &filePath)
+void wgtTextView::viewFile(const QString &filePath)
 {
     loadFile(filePath);
 }
 
-void wgtTextView::editFile(QString &filePath)
+void wgtTextView::editFile(const QString &filePath)
 {
     loadFile(filePath, 'w');
 }
 
 void wgtTextView::closeEvent(QCloseEvent *)
 {
-    QMessageBox::StandardButton reply;
-    if (textView->document()->isModified()) {
-        reply = QMessageBox::question(this, "Documet was modified",
-                                      "Do you want save?",
+    QMessageBox::StandardButton reply = QMessageBox::No;
+    if (m_textView->document()->isModified()) {
+        reply = QMessageBox::question(this, tr("Documet was modified"),
+                                      tr("Do you want save?"),
                                       QMessageBox::Yes | QMessageBox::No);
     }
     if (reply == QMessageBox::Yes)
     {
         this->saveFile();
-        findReplace->close();
     }
     else {
-        findReplace->close();
+        m_findReplace->close();
     }
 }
 
@@ -167,7 +166,7 @@ bool wgtTextView::saveFile()
         return false;
     }
     else {
-        QString buffer = textView->toPlainText();
+        QString buffer = m_textView->toPlainText();
         QTextStream stream(&inputFile);
         stream << buffer;
         buffer.clear();
@@ -179,32 +178,32 @@ bool wgtTextView::saveFile()
 //find slot
 void wgtTextView::find()
 {
-    findReplace->isReplace(!rwMode);
-    findReplace->show();
-    connect(findReplace, &FindReplaceText::findSignal, this, &wgtTextView::findSlot);
-    if (!rwMode) {
-        connect(findReplace, &FindReplaceText::replaceSignal, this, &wgtTextView::replaceSlot);
-        connect(findReplace, &FindReplaceText::replaceAllSignal, this, &wgtTextView::replaceAllSlot);
+    m_findReplace->isReplace(!m_rwMode);
+    m_findReplace->show();
+    connect(m_findReplace, &FindReplaceText::findSignal, this, &wgtTextView::findSlot);
+    if (!m_rwMode) {
+        connect(m_findReplace, &FindReplaceText::replaceSignal, this, &wgtTextView::replaceSlot);
+        connect(m_findReplace, &FindReplaceText::replaceAllSignal, this, &wgtTextView::replaceAllSlot);
     }
 }
 
-void wgtTextView::findSlot(QString word, QTextDocument::FindFlags flags)
+void wgtTextView::findSlot(const QString &word, QTextDocument::FindFlags flags)
 {
-    textView->find(word, flags);
+    m_textView->find(word, flags);
 }
 
-void wgtTextView::replaceSlot(QString word, QTextDocument::FindFlags flags, QString newWord)
+void wgtTextView::replaceSlot(const QString &word, QTextDocument::FindFlags flags, const QString &newWord)
 {
     replace(word, newWord, flags);
 }
 
-void wgtTextView::replaceAllSlot(QString word, QTextDocument::FindFlags flags, QString newWord)
+void wgtTextView::replaceAllSlot(const QString &word, QTextDocument::FindFlags flags, const QString &newWord)
 {
     replaceAll(word, newWord, flags);
 }
 
 wgtTextView::~wgtTextView()
 {
-
+    delete m_findReplace;
 }
 

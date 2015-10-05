@@ -23,43 +23,44 @@ public slots:
     void findSlot();
     void replaceSlot();
     void replaceAllSlot();
-    void isEmptyText(QString);
+    void isEmptyText(const QString &);
 
 signals:
-    void findSignal(QString, QTextDocument::FindFlags);
-    void replaceSignal(QString, QTextDocument::FindFlags, QString);
-    void replaceAllSignal(QString, QTextDocument::FindFlags, QString);
+    void findSignal(const QString &, QTextDocument::FindFlags);
+    void replaceSignal(const QString &, QTextDocument::FindFlags, const QString &);
+    void replaceAllSignal(const QString &, QTextDocument::FindFlags, const QString &);
 
 private:
     //return flag;
-    QTextDocument::FindFlags setOptions();
+    QTextDocument::FindFlags options() const;
+
     //line edit group
-    QLineEdit *textFindEdit;
-    QLineEdit *textReplaceEdit;
-    QLabel *textFindLbl;
-    QLabel *textReplaceLbl;
+    QLineEdit    *m_textFindEdit;
+    QLineEdit    *m_textReplaceEdit;
+    QLabel       *m_textFindLbl;
+    QLabel       *m_textReplaceLbl;
 
     //buttons
-    QPushButton *findBtn;
-    QPushButton *closeBtn;
-    QPushButton *replaceBtn;
-    QPushButton *replaceAllBtn;
+    QPushButton  *m_findBtn;
+    QPushButton  *m_closeBtn;
+    QPushButton  *m_replaceBtn;
+    QPushButton  *m_replaceAllBtn;
 
     //radiobutton group
-    QLabel *directionLbl;
-    QRadioButton *downBtn;
-    QRadioButton *upBtn;
+    QLabel       *m_directionLbl;
+    QRadioButton *m_downBtn;
+    QRadioButton *m_upBtn;
 
     //checkbox group
-    QLabel *optionsLbl;
-    QCheckBox *caseSensitiveBox;
-    QCheckBox *wholeWordsBox;
+    QLabel       *m_optionsLbl;
+    QCheckBox    *m_caseSensitiveBox;
+    QCheckBox    *m_wholeWordsBox;
 
     //label status
-    QLabel *statusLbl;
+    QLabel       *m_statusLbl;
 
     //data
-    QString newWord;
+    QString       m_newWord;
     QTextDocument::FindFlags flags;
 };
 

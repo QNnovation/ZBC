@@ -17,35 +17,35 @@ class wgtTextView : public QMainWindow
 public:
     explicit wgtTextView(QWidget *parent = 0);
     bool loadFile(const QString &, char mode = 'r');
-    void viewFile(QString &);
-    void editFile(QString &);
+    void viewFile(const QString &);
+    void editFile(const QString &);
     ~wgtTextView();
 
 protected:
     void closeEvent(QCloseEvent *);
 
 private:
-    bool rwMode;
+    bool             m_rwMode;
 
-    QMenu *menu;
-    QMenu *editMenu;
+    QMenu           *m_menu;
+    QMenu           *m_editMenu;
 
-    QAction *quitAct;
-    QAction *saveAct;
-    QAction *fileSaveAsAct;
-    QAction *findAtTextAct;
-    QAction *undoAct;
-    QAction *redoAct;
+    QAction         *m_quitAct;
+    QAction         *m_saveAct;
+    QAction         *m_fileSaveAsAct;
+    QAction         *m_findAtTextAct;
+    QAction         *m_undoAct;
+    QAction         *m_redoAct;
 
     void createMenu();
     void createActions();
 
-    QPlainTextEdit *textView;
+    QPlainTextEdit  *m_textView;
 
     QString pathToFile;
-    FindReplaceText *findReplace;
-    void replace(QString, QString, QTextDocument::FindFlags);
-    void replaceAll(QString, QString, QTextDocument::FindFlags);
+    FindReplaceText *m_findReplace;
+    void replace(const QString &, const QString &, QTextDocument::FindFlags);
+    void replaceAll(const QString &, const QString &, QTextDocument::FindFlags);
 
 private slots:
     bool saveAs();
@@ -53,9 +53,9 @@ private slots:
 
     //slots for wgtfindreplacetext
     void find();
-    void findSlot(QString, QTextDocument::FindFlags);
-    void replaceSlot(QString, QTextDocument::FindFlags, QString);
-    void replaceAllSlot(QString, QTextDocument::FindFlags, QString);
+    void findSlot(const QString &, QTextDocument::FindFlags);
+    void replaceSlot(const QString &, QTextDocument::FindFlags, const QString &);
+    void replaceAllSlot(const QString &, QTextDocument::FindFlags, const QString &);
 
 };
 
