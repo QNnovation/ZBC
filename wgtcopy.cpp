@@ -31,6 +31,7 @@ FileOperationWgt::FileOperationWgt(QWidget *parent)
     d->q_ptr = this;
 
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint & Qt::WindowMinimized);
+    this->setWindowModality(Qt::ApplicationModal);
     setWindowTitle("ZBC Copying");
     setFixedSize(450, 128); //125 175
 
@@ -164,7 +165,9 @@ void FileOperationWgt::closeEvent(QCloseEvent *)
 
 void FileOperationWgt::toBackground()
 {
-    showMinimized();
+    this->hide();
+    this->setWindowModality(Qt::NonModal);
+    this->show();
 }
 
 FileOperationWgt::~FileOperationWgt()
@@ -479,7 +482,7 @@ void FileOperations::process()
         }
     }
     //flag of removing
-    if (d_ptr->b_moveFileOperation)
+    if (d_ptr->b_moveFileOperation && ((percent == 99) || (percent == 100)))
     {
         remDirsFiles(d_ptr->deleteFileList);
     }
@@ -498,17 +501,19 @@ FileOperations::FileOperations(FileOperationsPrivate &dd, QObject *parent)
 void FileOperations::remDirsFiles(const QStringList &sList)
 {
     for (int i = 0; i < sList.size(); ++i) {
-        if (QFileInfo(sList.at(i)).isFile())
-        {
+        if (QFileInfo(sList.at(i)).isFile()) {
+            qDebug() << "File: " << sList.at(i);
             QFile(sList.at(i)).remove();
         }
-        else
-        {
+        else {
             QDir dir(sList.at(i));
             QStringList listOfDirs = dir.entryList(QDir::Dirs |
                                                    QDir::AllDirs |
                                                    QDir::NoDotAndDotDot);
-            QStringList listOfFiles = dir.entryList(QDir::Files);
+            QStringList listOfFiles = dir.entryList(QDir::Files |
+                                                    QDir::System |
+                                                    QDir::Hidden);
+
             foreach (QString value, listOfFiles) {
                 QString valueAbsolutePath = dir.absolutePath() + "/" + value;
                 QFile::setPermissions(valueAbsolutePath, QFile::ReadOwner | QFile::WriteOwner);
