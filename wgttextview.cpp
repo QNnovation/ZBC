@@ -13,6 +13,7 @@
 wgtTextView::wgtTextView(QWidget *parent)
     :QMainWindow(parent)
 {
+    this->setAttribute(Qt::WA_DeleteOnClose, true);
     m_textView = new QPlainTextEdit;
 
     //color theme

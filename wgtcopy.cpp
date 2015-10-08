@@ -18,9 +18,9 @@
 #include <QLabel>
 #include <windows.h>
 
-quint64 const gigaByte = 1073741824;
-quint64 const megaByte = 1048576;
-quint32 const kiloByte = 1024;
+qint64 const gigaByte = 1073741824;
+qint64 const megaByte = 1048576;
+qint32 const kiloByte = 1024;
 
 //FileOperationWgt class implementation***/
 FileOperationWgt::FileOperationWgt(QWidget *parent)
@@ -149,14 +149,14 @@ void FileOperationWgt::currentFileName(QString filePath)
     emit curFile(filePath.remove(0, 4));
 }
 
-FileOperationWgt::FileOperationWgt(FileOperationWgtPrivate &dd, QWidget *parent)
+FileOperationWgt::FileOperationWgt(FileOperationWgtPrivate &dd, QWidget *)
     : d_ptr(&dd)
 {
     Q_D(FileOperationWgt);
     d->q_ptr = this;
 }
 
-void FileOperationWgt::closeEvent(QCloseEvent *event)
+void FileOperationWgt::closeEvent(QCloseEvent *)
 {
     Q_D(FileOperationWgt);
     d->fileoperations->Stop();
@@ -215,13 +215,11 @@ bool FileOperations::spaceCheck(QString path, quint64 size)
 {
     ULARGE_INTEGER  freeSpace, totalSpace, p3;
     LPCTSTR source = (LPCWSTR)path.utf16();
-    if (GetDiskFreeSpaceEx(source, &freeSpace, &totalSpace, &p3))
-    {
-        if (size > freeSpace.QuadPart)
-            return false;
-        else
-            return true;
-    }
+    GetDiskFreeSpaceEx(source, &freeSpace, &totalSpace, &p3);
+    if (size > freeSpace.QuadPart)
+        return false;
+    else
+        return true;
 }
 
 int FileOperations::numFiles()
