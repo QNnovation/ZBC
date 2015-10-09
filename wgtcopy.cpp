@@ -16,7 +16,11 @@
 #include <QProgressBar>
 #include <QPushButton>
 #include <QLabel>
+
+#ifndef Q_WS_WIN
 #include <windows.h>
+#include <shellapi.h>
+#endif
 
 qint64 const gigaByte = 1073741824;
 qint64 const megaByte = 1048576;
@@ -104,14 +108,26 @@ void FileOperationWgt::moveFileOperation(const QStringList& files, const QString
 void FileOperationWgt::removeFileOperation(const QStringList& files)
 {
     Q_D(const FileOperationWgt);
-    if (confirmOperation())
-    {
+    if (confirmOperation()) {
         d->copyStatusSpeed->setText(tr("Deleting"));
         d->copyTo->setVisible(false);
         d->numberOfFiles->setVisible(false);
         d->sizeOfFiles->setVisible(false);
         d->filesCopyStatus->setVisible(false);
         d->fileoperations->remDirsFiles(files);
+    }
+}
+
+void FileOperationWgt::moveToRecycleBin(const QStringList &files)
+{
+    Q_D(const FileOperationWgt);
+    if (confirmOperation()) {
+        d->copyStatusSpeed->setText(tr("Moving to recycle bin"));
+        d->copyTo->setVisible(false);
+        d->numberOfFiles->setVisible(false);
+        d->sizeOfFiles->setVisible(false);
+        d->filesCopyStatus->setVisible(false);
+        d->fileoperations->moveToRecycleBin(files);
     }
 }
 
@@ -216,6 +232,7 @@ bool FileOperations::Stop()
 //checking for free space
 bool FileOperations::spaceCheck(QString path, quint64 size)
 {
+#ifndef Q_WS_WIN
     ULARGE_INTEGER  freeSpace, totalSpace, p3;
     LPCTSTR source = (LPCWSTR)path.utf16();
     GetDiskFreeSpaceEx(source, &freeSpace, &totalSpace, &p3);
@@ -223,6 +240,7 @@ bool FileOperations::spaceCheck(QString path, quint64 size)
         return false;
     else
         return true;
+#endif
 }
 
 int FileOperations::numFiles()
@@ -407,8 +425,8 @@ void FileOperations::process()
             }
             //initialization path to copy
             destination = d_ptr->filesDestination.at(i); // + fileInfo.fileName();
-            emit currentFile("From: " + d_ptr->inputFile.fileName());
-            emit currentPath("To: " + destination);
+            emit currentFile("From: " + QDir::toNativeSeparators(d_ptr->inputFile.fileName()));
+            emit currentPath("To: " + QDir::toNativeSeparators(destination));
 
             //div file size to 100;
             int copyPart = d_ptr->inputFile.size() / 100;
@@ -528,6 +546,31 @@ void FileOperations::remDirsFiles(const QStringList &sList)
         }
         emit formClose(true);
     }
+}
+
+void FileOperations::moveToRecycleBin(const QStringList &list)
+{
+//http://forum.vingrad.ru/topic-308409.html
+#ifndef Q_WS_WIN
+    SHFILEOPSTRUCT  fileStruct;
+    LPCTSTR source;
+    QString path;
+    for (int i = 0; i < list.size(); ++i) {
+        //fill structure
+        qDebug() << list.at(i);
+        path =list.at(i);
+        path.append("\0\0");
+        source = (wchar_t*)(path.utf16());
+        fileStruct.wFunc = FO_DELETE;
+        fileStruct.pFrom = source;
+        fileStruct.pTo = NULL;
+        fileStruct.fFlags = FOF_ALLOWUNDO
+                | FOF_SILENT
+                | FOF_NOERRORUI
+                | FOF_NOCONFIRMATION;
+        SHFileOperation(&fileStruct);
+    }
+#endif
 }
 
 FileOperations::~FileOperations()
