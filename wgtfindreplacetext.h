@@ -11,46 +11,57 @@ class QPushButton;
 class QCheckBox;
 class QRadioButton;
 
-enum mode { find_text, replace_replace };
-
 class FindReplaceText : public QDialog
 {
     Q_OBJECT
 public:
     explicit FindReplaceText(QWidget *parent = 0);
+    void isReplace(bool);
     ~FindReplaceText();
 
 public slots:
-    void fintTextSlot();
+    void findSlot();
+    void replaceSlot();
+    void replaceAllSlot();
+    void isEmptyText(const QString &);
 
 signals:
-    void findTextOptionsSig(QString, QTextDocument::FindFlags, QString);
+    void findSignal(const QString &, QTextDocument::FindFlags);
+    void replaceSignal(const QString &, QTextDocument::FindFlags, const QString &);
+    void replaceAllSignal(const QString &, QTextDocument::FindFlags, const QString &);
 
 private:
+    //return flag;
+    QTextDocument::FindFlags options() const;
+
     //line edit group
-    QLineEdit *textFindEdit;
-    QLineEdit *textReplaceEdit;
-    QLabel *textFindLbl;
-    QLabel *textReplaceLbl;
+    QLineEdit    *m_textFindEdit;
+    QLineEdit    *m_textReplaceEdit;
+    QLabel       *m_textFindLbl;
+    QLabel       *m_textReplaceLbl;
 
     //buttons
-    QPushButton *findBtn;
-    QPushButton *closeBtn;
-    QPushButton *replaceBtn;
-    QPushButton *replaceAllBtn;
+    QPushButton  *m_findBtn;
+    QPushButton  *m_closeBtn;
+    QPushButton  *m_replaceBtn;
+    QPushButton  *m_replaceAllBtn;
 
     //radiobutton group
-    QLabel *directionLbl;
-    QRadioButton *downBtn;
-    QRadioButton *upBtn;
+    QLabel       *m_directionLbl;
+    QRadioButton *m_downBtn;
+    QRadioButton *m_upBtn;
 
     //checkbox group
-    QLabel *optionsLbl;
-    QCheckBox *caseSensitiveBox;
-    QCheckBox *wholeWordsBox;
+    QLabel       *m_optionsLbl;
+    QCheckBox    *m_caseSensitiveBox;
+    QCheckBox    *m_wholeWordsBox;
 
     //label status
-    QLabel *statusLbl;
+    QLabel       *m_statusLbl;
+
+    //data
+    QString       m_newWord;
+    QTextDocument::FindFlags flags;
 };
 
 #endif // FINDREPLACETEXT_H

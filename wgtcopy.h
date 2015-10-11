@@ -19,6 +19,7 @@ public:
     void loadFiles(QStringList files_Patch, const QString files_Destination, char act = 'c');
     void copyDirs(const QDir& dir);
     void remDirsFiles(const QStringList&);
+    void moveToRecycleBin(const QStringList&);
     //variables for thread control
     bool thread_Pause;
     bool thread_Break;
@@ -63,9 +64,10 @@ class FileOperationWgt : public QDialog
 public:
     explicit FileOperationWgt(QWidget *parent = 0);
 
-    void copyFileOperation(const QStringList&, const QString&);
-    void moveFileOperation(const QStringList&, const QString&);
-    void removeFileOperation(const QStringList&);
+    void copyFileOperation(const QStringList &, const QString&);
+    void moveFileOperation(const QStringList &, const QString&);
+    void removeFileOperation(const QStringList &);
+    void moveToRecycleBin(const QStringList &);
 
     bool confirmOperation();
     ~FileOperationWgt();
