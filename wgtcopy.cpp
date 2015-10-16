@@ -16,11 +16,15 @@
 #include <QProgressBar>
 #include <QPushButton>
 #include <QLabel>
-#include <windows.h>
 
-quint64 const gigaByte = 1073741824;
-quint64 const megaByte = 1048576;
-quint32 const kiloByte = 1024;
+#ifndef Q_WS_WIN
+#include <windows.h>
+#include <shellapi.h>
+#endif
+
+qint64 const gigaByte = 1073741824;
+qint64 const megaByte = 1048576;
+qint32 const kiloByte = 1024;
 
 //FileOperationWgt class implementation***/
 FileOperationWgt::FileOperationWgt(QWidget *parent)
@@ -31,6 +35,7 @@ FileOperationWgt::FileOperationWgt(QWidget *parent)
     d->q_ptr = this;
 
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint & Qt::WindowMinimized);
+    this->setWindowModality(Qt::ApplicationModal);
     setWindowTitle("ZBC Copying");
     setFixedSize(450, 128); //125 175
 
@@ -103,14 +108,26 @@ void FileOperationWgt::moveFileOperation(const QStringList& files, const QString
 void FileOperationWgt::removeFileOperation(const QStringList& files)
 {
     Q_D(const FileOperationWgt);
-    if (confirmOperation())
-    {
+    if (confirmOperation()) {
         d->copyStatusSpeed->setText(tr("Deleting"));
         d->copyTo->setVisible(false);
         d->numberOfFiles->setVisible(false);
         d->sizeOfFiles->setVisible(false);
         d->filesCopyStatus->setVisible(false);
         d->fileoperations->remDirsFiles(files);
+    }
+}
+
+void FileOperationWgt::moveToRecycleBin(const QStringList &files)
+{
+    Q_D(const FileOperationWgt);
+    if (confirmOperation()) {
+        d->copyStatusSpeed->setText(tr("Moving to recycle bin"));
+        d->copyTo->setVisible(false);
+        d->numberOfFiles->setVisible(false);
+        d->sizeOfFiles->setVisible(false);
+        d->filesCopyStatus->setVisible(false);
+        d->fileoperations->moveToRecycleBin(files);
     }
 }
 
@@ -149,14 +166,14 @@ void FileOperationWgt::currentFileName(QString filePath)
     emit curFile(filePath.remove(0, 4));
 }
 
-FileOperationWgt::FileOperationWgt(FileOperationWgtPrivate &dd, QWidget *parent)
+FileOperationWgt::FileOperationWgt(FileOperationWgtPrivate &dd, QWidget *)
     : d_ptr(&dd)
 {
     Q_D(FileOperationWgt);
     d->q_ptr = this;
 }
 
-void FileOperationWgt::closeEvent(QCloseEvent *event)
+void FileOperationWgt::closeEvent(QCloseEvent *)
 {
     Q_D(FileOperationWgt);
     d->fileoperations->Stop();
@@ -164,7 +181,9 @@ void FileOperationWgt::closeEvent(QCloseEvent *event)
 
 void FileOperationWgt::toBackground()
 {
-    showMinimized();
+    this->hide();
+    this->setWindowModality(Qt::NonModal);
+    this->show();
 }
 
 FileOperationWgt::~FileOperationWgt()
@@ -213,15 +232,15 @@ bool FileOperations::Stop()
 //checking for free space
 bool FileOperations::spaceCheck(QString path, quint64 size)
 {
+#ifndef Q_WS_WIN
     ULARGE_INTEGER  freeSpace, totalSpace, p3;
     LPCTSTR source = (LPCWSTR)path.utf16();
-    if (GetDiskFreeSpaceEx(source, &freeSpace, &totalSpace, &p3))
-    {
-        if (size > freeSpace.QuadPart)
-            return false;
-        else
-            return true;
-    }
+    GetDiskFreeSpaceEx(source, &freeSpace, &totalSpace, &p3);
+    if (size > freeSpace.QuadPart)
+        return false;
+    else
+        return true;
+#endif
 }
 
 int FileOperations::numFiles()
@@ -406,8 +425,8 @@ void FileOperations::process()
             }
             //initialization path to copy
             destination = d_ptr->filesDestination.at(i); // + fileInfo.fileName();
-            emit currentFile("From: " + d_ptr->inputFile.fileName());
-            emit currentPath("To: " + destination);
+            emit currentFile("From: " + QDir::toNativeSeparators(d_ptr->inputFile.fileName()));
+            emit currentPath("To: " + QDir::toNativeSeparators(destination));
 
             //div file size to 100;
             int copyPart = d_ptr->inputFile.size() / 100;
@@ -481,7 +500,7 @@ void FileOperations::process()
         }
     }
     //flag of removing
-    if (d_ptr->b_moveFileOperation)
+    if (d_ptr->b_moveFileOperation && ((percent == 99) || (percent == 100)))
     {
         remDirsFiles(d_ptr->deleteFileList);
     }
@@ -500,17 +519,19 @@ FileOperations::FileOperations(FileOperationsPrivate &dd, QObject *parent)
 void FileOperations::remDirsFiles(const QStringList &sList)
 {
     for (int i = 0; i < sList.size(); ++i) {
-        if (QFileInfo(sList.at(i)).isFile())
-        {
+        if (QFileInfo(sList.at(i)).isFile()) {
+            qDebug() << "File: " << sList.at(i);
             QFile(sList.at(i)).remove();
         }
-        else
-        {
+        else {
             QDir dir(sList.at(i));
             QStringList listOfDirs = dir.entryList(QDir::Dirs |
                                                    QDir::AllDirs |
                                                    QDir::NoDotAndDotDot);
-            QStringList listOfFiles = dir.entryList(QDir::Files);
+            QStringList listOfFiles = dir.entryList(QDir::Files |
+                                                    QDir::System |
+                                                    QDir::Hidden);
+
             foreach (QString value, listOfFiles) {
                 QString valueAbsolutePath = dir.absolutePath() + "/" + value;
                 QFile::setPermissions(valueAbsolutePath, QFile::ReadOwner | QFile::WriteOwner);
@@ -525,6 +546,31 @@ void FileOperations::remDirsFiles(const QStringList &sList)
         }
         emit formClose(true);
     }
+}
+
+void FileOperations::moveToRecycleBin(const QStringList &list)
+{
+//http://forum.vingrad.ru/topic-308409.html
+#ifndef Q_WS_WIN
+    SHFILEOPSTRUCT  fileStruct;
+    LPCTSTR source;
+    QString path;
+    for (int i = 0; i < list.size(); ++i) {
+        //fill structure
+        qDebug() << list.at(i);
+        path =list.at(i);
+        path.append("\0\0");
+        source = (wchar_t*)(path.utf16());
+        fileStruct.wFunc = FO_DELETE;
+        fileStruct.pFrom = source;
+        fileStruct.pTo = NULL;
+        fileStruct.fFlags = FOF_ALLOWUNDO
+                | FOF_SILENT
+                | FOF_NOERRORUI
+                | FOF_NOCONFIRMATION;
+        SHFileOperation(&fileStruct);
+    }
+#endif
 }
 
 FileOperations::~FileOperations()

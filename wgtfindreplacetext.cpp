@@ -11,65 +11,62 @@
 #include <QGridLayout>
 #include <QDebug>
 
-FindReplaceText::FindReplaceText(bool mode, QWidget *parent)
+FindReplaceText::FindReplaceText(QWidget *parent)
     : QDialog(parent)
 {
 
     //line edit block
-    textFindEdit = new QLineEdit();
-    textReplaceEdit = new QLineEdit();
-    textFindLbl = new QLabel(tr("Find:"));
-    textReplaceLbl = new QLabel(tr("Replace with:"));
-    textReplaceLbl->setVisible(false);
-    textReplaceEdit->setVisible(false);
+    m_textFindEdit = new QLineEdit();
+    m_textReplaceEdit = new QLineEdit();
+    m_textFindLbl = new QLabel(tr("Find:"));
+    m_textReplaceLbl = new QLabel(tr("Replace with:"));
+    m_textReplaceLbl->setVisible(false);
+    m_textReplaceEdit->setVisible(false);
 
     //radiobutton group
-    directionLbl = new QLabel(tr("Direction"));
-    downBtn = new QRadioButton(tr("Down"));
-    upBtn = new QRadioButton(tr("Up"));
-    downBtn->setChecked(true);
+    m_directionLbl = new QLabel(tr("Direction"));
+    m_downBtn = new QRadioButton(tr("Down"));
+    m_upBtn = new QRadioButton(tr("Up"));
+    m_downBtn->setChecked(true);
 
     //checkbox group
-    optionsLbl = new QLabel(tr("Options"));
-    caseSensitiveBox = new QCheckBox(tr("&Case sensitive"));
-    wholeWordsBox = new QCheckBox(tr("&Whole words only"));
+    m_optionsLbl = new QLabel(tr("Options"));
+    m_caseSensitiveBox = new QCheckBox(tr("&Case sensitive"));
+    m_wholeWordsBox = new QCheckBox(tr("&Whole words only"));
 
     //buttons block
-    findBtn = new QPushButton(tr("&Find"));
-    closeBtn = new QPushButton(tr("&Close"));
-    replaceBtn = new QPushButton(tr("&Replace"));
-    replaceAllBtn = new QPushButton(tr("Replace &All"));
-    replaceBtn->setVisible(false);
-    replaceAllBtn->setVisible(false);
+    m_findBtn = new QPushButton(tr("&Find"));
+    m_closeBtn = new QPushButton(tr("&Close"));
+    m_replaceBtn = new QPushButton(tr("&Replace"));
+    m_replaceAllBtn = new QPushButton(tr("Replace &All"));
+    m_replaceBtn->setVisible(false);
+    m_replaceAllBtn->setVisible(false);
 
-    statusLbl = new QLabel();
+    m_statusLbl = new QLabel();
 
     QGridLayout *lineBlockLayout = new QGridLayout;
-    lineBlockLayout->addWidget(textFindLbl, 0, 0);
-    lineBlockLayout->addWidget(textFindEdit, 0, 1);
-    lineBlockLayout->addWidget(findBtn, 0, 2);
-    lineBlockLayout->addWidget(textReplaceLbl, 1, 0);
-    lineBlockLayout->addWidget(textReplaceEdit, 1, 1);
-    lineBlockLayout->addWidget(closeBtn, 1, 2);
+    lineBlockLayout->addWidget(m_textFindLbl, 0, 0);
+    lineBlockLayout->addWidget(m_textFindEdit, 0, 1);
+    lineBlockLayout->addWidget(m_findBtn, 0, 2);
+    lineBlockLayout->addWidget(m_textReplaceLbl, 1, 0);
+    lineBlockLayout->addWidget(m_textReplaceEdit, 1, 1);
+    lineBlockLayout->addWidget(m_closeBtn, 1, 2);
 
-    lineBlockLayout->addWidget(statusLbl, 2, 0);
-    lineBlockLayout->addWidget(replaceBtn, 2, 2);
+    lineBlockLayout->addWidget(m_statusLbl, 2, 0);
+    lineBlockLayout->addWidget(m_replaceBtn, 2, 2);
 
-    lineBlockLayout->addWidget(directionLbl, 3, 0);
-    lineBlockLayout->addWidget(optionsLbl, 3, 1);
-    lineBlockLayout->addWidget(replaceAllBtn, 3, 2);
-    lineBlockLayout->addWidget(downBtn, 4, 0);
-    lineBlockLayout->addWidget(caseSensitiveBox, 4, 1);
-    lineBlockLayout->addWidget(upBtn, 5, 0);
-    lineBlockLayout->addWidget(wholeWordsBox, 5, 1);
+    lineBlockLayout->addWidget(m_directionLbl, 3, 0);
+    lineBlockLayout->addWidget(m_optionsLbl, 3, 1);
+    lineBlockLayout->addWidget(m_replaceAllBtn, 3, 2);
+    lineBlockLayout->addWidget(m_downBtn, 4, 0);
+    lineBlockLayout->addWidget(m_caseSensitiveBox, 4, 1);
+    lineBlockLayout->addWidget(m_upBtn, 5, 0);
+    lineBlockLayout->addWidget(m_wholeWordsBox, 5, 1);
 
-    if (mode)
-    {
-        textReplaceLbl->setVisible(true);
-        textReplaceEdit->setVisible(true);
-        replaceBtn->setVisible(true);
-        replaceAllBtn->setVisible(true);
-    }
+    m_textReplaceLbl->setVisible(false);
+    m_textReplaceEdit->setVisible(false);
+    m_replaceBtn->setVisible(false);
+    m_replaceAllBtn->setVisible(false);
 
     QHBoxLayout *mainLayout = new QHBoxLayout();
     mainLayout->addLayout(lineBlockLayout);
@@ -79,32 +76,83 @@ FindReplaceText::FindReplaceText(bool mode, QWidget *parent)
     setFixedSize(380, 180);
     setLayout(mainLayout);
 
-    connect(closeBtn, &QPushButton::clicked, this, &FindReplaceText::close);
-    connect(findBtn, &QPushButton::clicked, this, &FindReplaceText::findTextSlot);
-    //connect(replaceBtn, &QPushButton::clicked, this, &FindReplaceText::);
+    connect(m_closeBtn, &QPushButton::clicked, this, &FindReplaceText::close);
+    connect(m_findBtn, &QPushButton::clicked, this, &FindReplaceText::findSlot);
+    connect(m_replaceBtn, &QPushButton::clicked, this, &FindReplaceText::replaceSlot);
+    connect(m_replaceAllBtn, &QPushButton::clicked, this, &FindReplaceText::replaceAllSlot);
+    connect(m_textFindEdit, &QLineEdit::textChanged, this, &FindReplaceText::isEmptyText);
 }
 
-void FindReplaceText::findTextSlot()
+void FindReplaceText::isReplace(bool mode)
+{
+    if (mode) {
+        m_textReplaceLbl->setVisible(true);
+        m_textReplaceEdit->setVisible(true);
+        m_replaceBtn->setVisible(true);
+        m_replaceAllBtn->setVisible(true);
+    }
+}
+
+//find text slot
+void FindReplaceText::findSlot()
+{
+    flags = options();
+    m_newWord = m_textReplaceEdit->text();
+    emit findSignal(m_textFindEdit->text(), flags);
+}
+
+//replace button slot
+void FindReplaceText::replaceSlot()
+{
+    flags = options();
+    m_newWord = m_textReplaceEdit->text();
+    emit replaceSignal(m_textFindEdit->text(), flags, m_newWord);
+}
+
+//replaceAll button slot
+void FindReplaceText::replaceAllSlot()
+{
+    flags = options();
+    m_newWord = m_textReplaceEdit->text();
+    emit replaceAllSignal(m_textFindEdit->text(), flags, m_newWord);
+}
+
+//block buttons if text is empty
+void FindReplaceText::isEmptyText(const QString &text)
+{
+    QList<QPushButton*> list = this->findChildren<QPushButton*>();
+    if (text.isEmpty()) {
+        for (int i = 0; i < list.size(); ++i) {
+            list.at(i)->setEnabled(false);
+        }
+    } else {
+        for (int i = 0; i < list.size(); ++i) {
+            list.at(i)->setEnabled(true);
+        }
+    }
+}
+
+QTextDocument::FindFlags FindReplaceText::options() const
 {
     QTextDocument::FindFlags options;
-    if (upBtn->isChecked())
+    if (m_upBtn->isChecked())
         options = QTextDocument::FindBackward;
-    else if (caseSensitiveBox->isChecked())
+    else if (m_caseSensitiveBox->isChecked())
         options = QTextDocument::FindCaseSensitively;
-    else if (caseSensitiveBox->isChecked() && upBtn->isChecked())
+    else if (m_caseSensitiveBox->isChecked() && m_upBtn->isChecked())
         options = QTextDocument::FindCaseSensitively | QTextDocument::FindBackward;
-    else if (wholeWordsBox->isChecked())
+    else if (m_wholeWordsBox->isChecked())
         options = QTextDocument::FindWholeWords;
-    else if (wholeWordsBox->isChecked() && upBtn->isChecked())
+    else if (m_wholeWordsBox->isChecked() && m_upBtn->isChecked())
         options = QTextDocument::FindWholeWords | QTextDocument::FindBackward;
-    else if (caseSensitiveBox->isChecked() && wholeWordsBox->isChecked() && upBtn->isChecked())
+    else if (m_caseSensitiveBox->isChecked() && m_wholeWordsBox->isChecked() && m_upBtn->isChecked())
         options = QTextDocument::FindWholeWords | QTextDocument::FindCaseSensitively | QTextDocument::FindBackward;
-    else if (caseSensitiveBox->isChecked() && wholeWordsBox->isChecked())
-        QTextDocument::FindWholeWords | QTextDocument::FindCaseSensitively;
-    QString wordToReplace = textReplaceEdit->text();
-    emit findTextOptionsSig(textFindEdit->text(), options, wordToReplace);
+    else if (m_caseSensitiveBox->isChecked() && m_wholeWordsBox->isChecked())
+        options = QTextDocument::FindWholeWords | QTextDocument::FindCaseSensitively;
+    return options;
 }
 
+//destructor
 FindReplaceText::~FindReplaceText()
 {
 
