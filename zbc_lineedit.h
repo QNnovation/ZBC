@@ -6,6 +6,10 @@
 class ZBC_LineEdit : public QLineEdit
 {
     Q_OBJECT
+
+private:
+    QPalette        m_pltBackground;
+
 public:
     explicit ZBC_LineEdit(QWidget* pwgt);
 

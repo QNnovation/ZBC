@@ -2,6 +2,7 @@
 #define ZBCSIDEFRAME_H
 
 #include <QFrame>
+#include <QSet>
 
 class QLabel;
 
@@ -21,7 +22,7 @@ private:
     QStringList                 stlSelectedItems;
 
     QHash<QString, int>         m_hashFiles;
-    QSet<QString>*              m_psetDirs;
+    QSet<QString>               m_setDirs;
 
     void setListOfItemsInDir();
     qint64 getSizeOfFiles(QHash<QString, int>) const;
