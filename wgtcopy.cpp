@@ -550,7 +550,6 @@ void FileOperations::remDirsFiles(const QStringList &sList)
 
 void FileOperations::moveToRecycleBin(const QStringList &list)
 {
-//http://forum.vingrad.ru/topic-308409.html
 #ifndef Q_WS_WIN
     SHFILEOPSTRUCT  fileStruct;
     LPCTSTR source;
@@ -570,6 +569,7 @@ void FileOperations::moveToRecycleBin(const QStringList &list)
                 | FOF_NOCONFIRMATION;
         SHFileOperation(&fileStruct);
     }
+    emit formClose(true);
 #endif
 }
 
