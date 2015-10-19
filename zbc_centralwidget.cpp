@@ -127,7 +127,7 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
     m_pactNewFolder->setShortcut(QKeySequence(Qt::Key_F7));
     q->addAction(m_pactNewFolder);
 
-//Delete
+//Delete to trash
     m_pactDelete    = new QAction(q);
     QList<QKeySequence> shortcuts;
     shortcuts.push_back(QKeySequence(Qt::Key_F8));
@@ -136,7 +136,8 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
 //    m_pactDelete->setShortcut(QKeySequence(Qt::Key_F8));
     q->addAction(m_pactDelete);
 
-//Delete
+//Delete permanently
+    QKeySequence(Qt::Key_Shift + Qt::Key_Delete);
 
 
 //Create Connections

@@ -52,6 +52,7 @@ private:
     QAction*            m_pactMove;
     QAction*            m_pactNewFolder;
     QAction*            m_pactDelete;
+
 };
 
 #endif // ZBC_CENTRALWIDGET_P_H
