@@ -557,7 +557,7 @@ void FileOperations::moveToRecycleBin(const QStringList &list)
     for (int i = 0; i < list.size(); ++i) {
         //fill structure
         qDebug() << list.at(i);
-        path =list.at(i);
+        path = list.at(i);
         path.append("\0\0");
         source = (wchar_t*)(path.utf16());
         fileStruct.wFunc = FO_DELETE;
@@ -567,7 +567,8 @@ void FileOperations::moveToRecycleBin(const QStringList &list)
                 | FOF_SILENT
                 | FOF_NOERRORUI
                 | FOF_NOCONFIRMATION;
-        SHFileOperation(&fileStruct);
+        qDebug() << SHFileOperation(&fileStruct);
+        path.clear();
     }
     emit formClose(true);
 #endif
