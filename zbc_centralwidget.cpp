@@ -129,8 +129,14 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
 
 //Delete
     m_pactDelete    = new QAction(q);
-    m_pactDelete->setShortcut(QKeySequence(Qt::Key_F8));
+    QList<QKeySequence> shortcuts;
+    shortcuts.push_back(QKeySequence(Qt::Key_F8));
+    shortcuts.push_back(QKeySequence(Qt::Key_Delete));
+    m_pactDelete->setShortcuts(shortcuts);
+//    m_pactDelete->setShortcut(QKeySequence(Qt::Key_F8));
     q->addAction(m_pactDelete);
+
+//Delete
 
 
 //Create Connections
@@ -258,7 +264,8 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
             &QAction::triggered,
             [this](){
                 FileOperationWgt* wgtDelete = new FileOperationWgt;
-                wgtDelete->removeFileOperation(m_psfwActive->getListOfSelectedItems());
+                wgtDelete->moveToRecycleBin(m_psfwActive->getListOfSelectedItems());
+//                wgtDelete->removeFileOperation(m_psfwActive->getListOfSelectedItems());
                 wgtDelete->setModal(true);
                 wgtDelete->show();
             });
@@ -267,7 +274,8 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
             &ZBC_PushButton::clicked,
             [this](){
                 FileOperationWgt* wgtDelete = new FileOperationWgt;
-                wgtDelete->removeFileOperation(m_psfwActive->getListOfSelectedItems());
+                wgtDelete->moveToRecycleBin(m_psfwActive->getListOfSelectedItems());
+//                wgtDelete->removeFileOperation(m_psfwActive->getListOfSelectedItems());
                 wgtDelete->setModal(true);
                 wgtDelete->show();
             });

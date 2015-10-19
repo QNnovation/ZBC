@@ -48,7 +48,8 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
     pcbxVolumes->setMaximumSize(pcbxVolumes->sizeHint());
 
 //Current path
-    m_sCurPath = pfsmModel->rootPath().replace('/', QDir::separator());
+//    m_sCurPath = pfsmModel->rootPath().replace('/', QDir::separator());
+    m_sCurPath = QDir::toNativeSeparators(pfsmModel->rootPath());
 
 //LineEdit with current path
     ZBC_LineEdit* pledCurPath      = new ZBC_LineEdit(this);
@@ -103,9 +104,10 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
         else{
              ptreeView->setRootIndex(QModelIndex( psfpModel->mapFromSource(pfsmModel->index(pledCurPath->text()))));
         }
-         m_sCurPath = pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex())).replace('/', QDir::separator());
-         stlSelectedItems.clear();
-         setTextForLblDirInfo(plblDirInfo);
+//         m_sCurPath = pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex())).replace('/', QDir::separator());
+        m_sCurPath = QDir::toNativeSeparators( pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex())) );
+        stlSelectedItems.clear();
+        setTextForLblDirInfo(plblDirInfo);
 
     });
 
@@ -126,7 +128,8 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                             ptreeView->setRootIndex(psfpModel->mapFromSource(pfsmModel->index(pfsmModel->filePath(psfpModel->mapToSource(_index)))));
 
                         }
-                        m_sCurPath = pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex())).replace('/', QDir::separator());
+//                        m_sCurPath = pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex())).replace('/', QDir::separator());
+                        m_sCurPath = QDir::toNativeSeparators( pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex())) );
                         pledCurPath->setText(getCurrentPath());
                         stlSelectedItems.clear();
                         setTextForLblDirInfo(plblDirInfo);
@@ -145,9 +148,11 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                     if ( (pfsmModel->filePath(psfpModel->mapToSource(index)).right(2)) == QLatin1String("..") )
                         continue;
                     if ( pfsmModel->isDir(psfpModel->mapToSource(index)) )
-                        stlSelectedItems.push_back(pfsmModel->filePath(psfpModel->mapToSource(index)).replace('/', QDir::separator()) + QDir::separator());
+//                        stlSelectedItems.push_back(pfsmModel->filePath(psfpModel->mapToSource(index)).replace('/', QDir::separator()) + QDir::separator());
+                        stlSelectedItems.push_back(QDir::toNativeSeparators(pfsmModel->filePath(psfpModel->mapToSource(index))) + QDir::separator());
                     else
-                        stlSelectedItems.push_back(pfsmModel->filePath(psfpModel->mapToSource(index)).replace('/', QDir::separator()));
+                        stlSelectedItems.push_back(QDir::toNativeSeparators(pfsmModel->filePath(psfpModel->mapToSource(index))));
+//                        stlSelectedItems.push_back(pfsmModel->filePath(psfpModel->mapToSource(index)).replace('/', QDir::separator()));
                 }
                 setTextForLblDirInfo(plblDirInfo);
             });
@@ -199,7 +204,8 @@ void ZBC_SideFrame::setListOfItemsInDir()
                                                    | QDir::NoDotAndDotDot);
     while (pdirIter->hasNext()){
         pdirIter->next();
-        m_hashFiles.insert(pdirIter->filePath().replace('/', QDir::separator()), pdirIter->fileInfo().size() / KBytes);
+        m_hashFiles.insert( QDir::toNativeSeparators(pdirIter->filePath()), pdirIter->fileInfo().size() / KBytes);
+//        m_hashFiles.insert(pdirIter->filePath().replace('/', QDir::separator()), pdirIter->fileInfo().size() / KBytes);
     }
     delete pdirIter;
 
@@ -208,7 +214,7 @@ void ZBC_SideFrame::setListOfItemsInDir()
                                                    | QDir::NoSymLinks
                                                    | QDir::NoDotAndDotDot);
     while (pdirIter->hasNext())
-        m_setDirs.insert(pdirIter->next().replace('/', QDir::separator()) + QDir::separator());
+        m_setDirs.insert( QDir::toNativeSeparators(pdirIter->next()) + QDir::separator());
     delete pdirIter;
 }
 
