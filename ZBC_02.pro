@@ -1,6 +1,5 @@
 QT += widgets
 
-#QMAKE_CXXFLAGS += -std=c++11
 CONFIG += c++11
 
 win32 {
