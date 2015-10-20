@@ -15,8 +15,8 @@ public:
     explicit ZBC_CentralWidget(QWidget* pwgt = 0);
     virtual ~ZBC_CentralWidget();
 
-private:
-    void createView();
+protected:
+    virtual void keyPressEvent(QKeyEvent* pe) override;
 };
 
 #endif // ZBC_CENTRALWIDGET_H
