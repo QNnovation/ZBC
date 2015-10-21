@@ -1,5 +1,6 @@
 #include <QDebug>
 
+#include "zbc_drivebutton.h"
 #include "zbc_sideframe.h"
 #include "zbc_lineedit.h"
 #include "zbc_treeview.h"
@@ -12,6 +13,7 @@
 #include <QLabel>
 #include <QMessageBox>
 #include <QModelIndex>
+#include <QPushButton>
 #include <QSortFilterProxyModel>
 #include <QUrl>
 
@@ -47,8 +49,15 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
     pcbxVolumes->setModel(psfpModel);
     pcbxVolumes->setMaximumSize(pcbxVolumes->sizeHint());
 
+//Buttons with Drives
+    QList<QPushButton*> lstBtnDrives;
+    for( QFileInfo file : QDir::drives() ){
+        qDebug() << file.filePath().left(2);
+        lstBtnDrives.push_back(new ZBC_DriveButton(file.filePath().left(2), this));
+        lstBtnDrives.last()->setFixedSize(lstBtnDrives.last()->sizeHint());
+    }
+
 //Current path
-//    m_sCurPath = pfsmModel->rootPath().replace('/', QDir::separator());
     m_sCurPath = QDir::toNativeSeparators(pfsmModel->rootPath());
 
 //LineEdit with current path
@@ -65,7 +74,12 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 //Layout
     QGridLayout* pgrdLayout = new QGridLayout(this);
     pgrdLayout->setMargin(5);
-    pgrdLayout->addWidget(pcbxVolumes, 0, 0, 1, 2);
+    pgrdLayout->addWidget(pcbxVolumes, 0, 0);
+    int* pnCounter = new int(0);
+    for( QPushButton* pBtn : lstBtnDrives ){
+       pgrdLayout->addWidget(pBtn, 0, ++*pnCounter);
+    }
+    delete pnCounter;
     pgrdLayout->addWidget(pledCurPath,1, 0, 1, 20);
     pgrdLayout->addWidget(ptreeView, 2, 0, 20, 20);
     pgrdLayout->addWidget(plblDirInfo, 22, 0, 1, 20);
@@ -98,18 +112,15 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
     connect(pledCurPath,
             &ZBC_LineEdit::pressedEnter,
             [=](QString oldVal){
-        QDir tmpDir(pledCurPath->text());
-        if (!tmpDir.exists())
-            pledCurPath->setText(oldVal);
-        else{
-             ptreeView->setRootIndex(QModelIndex( psfpModel->mapFromSource(pfsmModel->index(pledCurPath->text()))));
-        }
-//         m_sCurPath = pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex())).replace('/', QDir::separator());
-        m_sCurPath = QDir::toNativeSeparators( pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex())) );
-        stlSelectedItems.clear();
-        setTextForLblDirInfo(plblDirInfo);
-
-    });
+                QDir tmpDir(pledCurPath->text());
+                if (!tmpDir.exists())
+                    pledCurPath->setText(oldVal);
+                else
+                    ptreeView->setRootIndex(QModelIndex( psfpModel->mapFromSource(pfsmModel->index(pledCurPath->text()))));
+                m_sCurPath = QDir::toNativeSeparators( pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex())) );
+                stlSelectedItems.clear();
+                setTextForLblDirInfo(plblDirInfo);
+            });
 
 //Double click on item at QTreeView(change dir or open file)
     connect(ptreeView,
@@ -128,7 +139,6 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                             ptreeView->setRootIndex(psfpModel->mapFromSource(pfsmModel->index(pfsmModel->filePath(psfpModel->mapToSource(_index)))));
 
                         }
-//                        m_sCurPath = pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex())).replace('/', QDir::separator());
                         m_sCurPath = QDir::toNativeSeparators( pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex())) );
                         pledCurPath->setText(getCurrentPath());
                         stlSelectedItems.clear();
@@ -148,11 +158,9 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                     if ( (pfsmModel->filePath(psfpModel->mapToSource(index)).right(2)) == QLatin1String("..") )
                         continue;
                     if ( pfsmModel->isDir(psfpModel->mapToSource(index)) )
-//                        stlSelectedItems.push_back(pfsmModel->filePath(psfpModel->mapToSource(index)).replace('/', QDir::separator()) + QDir::separator());
                         stlSelectedItems.push_back(QDir::toNativeSeparators(pfsmModel->filePath(psfpModel->mapToSource(index))) + QDir::separator());
                     else
                         stlSelectedItems.push_back(QDir::toNativeSeparators(pfsmModel->filePath(psfpModel->mapToSource(index))));
-//                        stlSelectedItems.push_back(pfsmModel->filePath(psfpModel->mapToSource(index)).replace('/', QDir::separator()));
                 }
                 setTextForLblDirInfo(plblDirInfo);
             });
@@ -205,7 +213,6 @@ void ZBC_SideFrame::setListOfItemsInDir()
     while (pdirIter->hasNext()){
         pdirIter->next();
         m_hashFiles.insert( QDir::toNativeSeparators(pdirIter->filePath()), pdirIter->fileInfo().size() / KBytes);
-//        m_hashFiles.insert(pdirIter->filePath().replace('/', QDir::separator()), pdirIter->fileInfo().size() / KBytes);
     }
     delete pdirIter;
 

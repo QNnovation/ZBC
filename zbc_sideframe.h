@@ -27,8 +27,6 @@ private:
     void setListOfItemsInDir();
     qint64 getSizeOfFiles(QHash<QString, int>) const;
     qint64 getSizeOfSelectedFiles( bool retSum = true );
-
-
     void setTextForLblDirInfo(QLabel*);
 
 signals:
