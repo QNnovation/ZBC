@@ -1,18 +1,16 @@
 #ifndef ZBC_DRIVEBUTTON_H
 #define ZBC_DRIVEBUTTON_H
 
-#include <QPushButton>
+#include <QWidget>
 
-class ZBC_DriveButton : public QPushButton
+class ZBC_DriveButton : public QWidget
 {
+    Q_OBJECT
 public:
-    explicit ZBC_DriveButton(QString sPath, QWidget* pwgt = 0);
-
-protected:
-    virtual void mousePressEvent(QMouseEvent* pe) override;
+    explicit ZBC_DriveButton(const QStringList& lstPath, QWidget* pwgt = 0);
 
 signals:
-//    virtual voi
+    void clicked(const QString&);
 };
 
 #endif // ZBC_DRIVEBUTTON_H
