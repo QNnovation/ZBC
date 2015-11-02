@@ -550,26 +550,24 @@ void FileOperations::remDirsFiles(const QStringList &sList)
 
 void FileOperations::moveToRecycleBin(const QStringList &list)
 {
-//http://forum.vingrad.ru/topic-308409.html
 #ifndef Q_WS_WIN
     SHFILEOPSTRUCT  fileStruct;
-    LPCTSTR source;
-    QString path;
+    std::wstring path;
     for (int i = 0; i < list.size(); ++i) {
         //fill structure
-        qDebug() << list.at(i);
-        path =list.at(i);
-        path.append("\0\0");
-        source = (wchar_t*)(path.utf16());
+        path = list.at(i).toStdWString();
+        path.append(1, L'\0');
         fileStruct.wFunc = FO_DELETE;
-        fileStruct.pFrom = source;
+        fileStruct.pFrom = path.c_str();
         fileStruct.pTo = NULL;
         fileStruct.fFlags = FOF_ALLOWUNDO
                 | FOF_SILENT
                 | FOF_NOERRORUI
                 | FOF_NOCONFIRMATION;
         SHFileOperation(&fileStruct);
+        path.clear();
     }
+    emit formClose(true);
 #endif
 }
 
