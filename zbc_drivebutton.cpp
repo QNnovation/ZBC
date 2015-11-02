@@ -1,5 +1,3 @@
-#include <QDebug>
-
 #include "zbc_drivebutton.h"
 
 #include <QPushButton>

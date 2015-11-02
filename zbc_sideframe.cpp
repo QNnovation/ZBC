@@ -1,5 +1,3 @@
-#include <QDebug>
-
 #include "zbc_drivebutton.h"
 #include "zbc_sideframe.h"
 #include "zbc_lineedit.h"
@@ -53,7 +51,6 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 
 //ComboBox as View
     QComboBox*  pcbxVolumes         = new QComboBox(this);
-//    pcbxVolumes->setModel(psfpModel);
     pcbxVolumes->addItems(lstDrives);
     pcbxVolumes->setCurrentIndex(lstDrives.indexOf(path.left(3)));
     pcbxVolumes->setMaximumSize(pcbxVolumes->sizeHint());
@@ -77,13 +74,6 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
     pgrdLayout->setMargin(5);
     pgrdLayout->addWidget(pcbxVolumes, 0, 0);
     pgrdLayout->addWidget(pdrvButtons, 0, 1);
-/*
-    int* pnCounter = new int(0);
-    for( QPushButton* pBtn : lstBtnDrives ){
-       pgrdLayout->addWidget(pBtn, 0, ++*pnCounter);
-    }
-    delete pnCounter;
-*/
     pgrdLayout->addWidget(pledCurPath,1, 0, 1, 20);
     pgrdLayout->addWidget(ptreeView, 2, 0, 20, 20);
     pgrdLayout->addWidget(plblDirInfo, 22, 0, 1, 20);
@@ -210,9 +200,6 @@ void ZBC_SideFrame::clearListOfSelectedItems()
 //Return current path
 QString ZBC_SideFrame::getCurrentPath()
 {
-//    if(m_sCurPath.length() == 3)
-//        return m_sCurPath;
-//    return (m_sCurPath + QDir::separator());
     return  QDir::toNativeSeparators(m_sCurPath) ;
 }
 
@@ -260,7 +247,6 @@ qint64 ZBC_SideFrame::getSizeOfFiles(QHash<QString, int> _hash) const
 //Stupid solution ( cause I don't now STL( )
 qint64 ZBC_SideFrame::getSizeOfSelectedFiles( bool retSum )
 {
-
     QHash<QString, int> tmpHash;
     QHashIterator<QString, int> iterHash(m_hashFiles);
 
@@ -310,24 +296,3 @@ void ZBC_SideFrame::setTextForLblDirInfo(QLabel * plbl)
     m_hashFiles.clear();
     m_setDirs.clear();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
