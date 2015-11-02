@@ -44,26 +44,20 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
     ptreeView->sortByColumn(0, Qt::AscendingOrder);
     ptreeView->setRootIndex( psfpModel->mapFromSource(pfsmModel->index(path)) );
 
-//ComboBox as View
-    QComboBox*  pcbxVolumes         = new QComboBox(this);
-    pcbxVolumes->setModel(psfpModel);
-    pcbxVolumes->setMaximumSize(pcbxVolumes->sizeHint());
-
 //Buttons with Drives
     QStringList     lstDrives;
     for( QFileInfo file : QDir::drives() ){
-        lstDrives.push_back(file.filePath().left(2));
+        lstDrives.push_back(file.filePath().left(2) + QDir::separator());
     }
-
     ZBC_DriveButton* pdrvButtons    = new ZBC_DriveButton(lstDrives, this);
-/*
-    QList<QPushButton*> lstBtnDrives;
-    for( QFileInfo file : QDir::drives() ){
-        qDebug() << file.filePath().left(2);
-        lstBtnDrives.push_back(new ZBC_DriveButton(file.filePath().left(2), this));
-        lstBtnDrives.last()->setFixedSize(lstBtnDrives.last()->sizeHint());
-    }
-*/
+
+//ComboBox as View
+    QComboBox*  pcbxVolumes         = new QComboBox(this);
+//    pcbxVolumes->setModel(psfpModel);
+    pcbxVolumes->addItems(lstDrives);
+    pcbxVolumes->setCurrentIndex(lstDrives.indexOf(path.left(3)));
+    pcbxVolumes->setMaximumSize(pcbxVolumes->sizeHint());
+
 //Current path
     m_sCurPath = QDir::toNativeSeparators(pfsmModel->rootPath());
 
@@ -122,13 +116,11 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
     connect(pdrvButtons,
             &ZBC_DriveButton::clicked,
             [=](QString sDrvPath){
-        m_sCurPath = QDir::toNativeSeparators(sDrvPath);
-
-        qDebug() << getCurrentPath();
-
-//        pledCurPath->setText(m_sCurPath);
-        ptreeView->setRootIndex(psfpModel->mapFromSource(pfsmModel->index(m_sCurPath)));
-//        setTextForLblDirInfo(plblDirInfo);
+        m_sCurPath = sDrvPath;
+        pledCurPath->setText(m_sCurPath);
+        pcbxVolumes->setCurrentIndex(lstDrives.indexOf(sDrvPath));
+        ptreeView->setRootIndex(psfpModel->mapFromSource(pfsmModel->index(pledCurPath->text())));
+        setTextForLblDirInfo(plblDirInfo);
     });
 
 //Enter pressed on LineEdit with current path
