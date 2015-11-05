@@ -3,13 +3,16 @@
 
 #include <QMainWindow>
 #include <QTextDocument>
+#include <QPlainTextEdit>
 #include "wgtfindreplacetext.h"
 
 class QMenu;
 class QToolBar;
 class QAction;
-class QPlainTextEdit;
+class QLabel;
+class editor;
 
+//mainwindow
 class wgtTextView : public QMainWindow
 {
     Q_OBJECT
@@ -40,7 +43,8 @@ private:
     void createMenu();
     void createActions();
 
-    QPlainTextEdit  *m_textView;
+    editor  *m_textView;
+    QLabel  *m_statusLbl;
 
     QString pathToFile;
     FindReplaceText *m_findReplace;
@@ -57,6 +61,50 @@ private slots:
     void replaceSlot(const QString &, QTextDocument::FindFlags, const QString &);
     void replaceAllSlot(const QString &, QTextDocument::FindFlags, const QString &);
 
+};
+
+//widget
+class editor : public QPlainTextEdit
+{
+    Q_OBJECT
+
+public:
+    editor(QWidget *parent = 0);
+    void lineNumberPaint(QPaintEvent *);
+    int linesNumberWidth();
+    QString getInfo();
+
+private slots:
+    void updateLinesWidth(int);
+    void updateLineNumberArea(const QRect &, int);
+
+protected:
+    void resizeEvent(QResizeEvent *);
+
+private:
+    QWidget *m_editorPaintArea;
+};
+
+//paint
+class editorPaintArea : public QWidget
+{
+
+public:
+    editorPaintArea(editor *data) : QWidget(data) {
+        m_editor = data;
+    }
+
+    QSize sizeHint() const {
+        return QSize(m_editor->linesNumberWidth(), 0);
+    }
+
+protected:
+    void paintEvent(QPaintEvent *event) {
+        m_editor->lineNumberPaint(event);
+    }
+
+private:
+    editor *m_editor;
 };
 
 #endif // WGTTEXTVIEW_H
