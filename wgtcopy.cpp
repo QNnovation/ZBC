@@ -31,6 +31,12 @@ FileOperationWgt::FileOperationWgt(QWidget *parent)
     : QDialog(parent)
     ,d_ptr(new FileOperationWgtPrivate())
 {
+    //stylesheet load http://doc.qt.io/qt-5/stylesheet-examples.html
+    QFile file(":/qss/stylesheet.qss");
+    qDebug() <<  file.open(QFile::ReadOnly);
+    QString strCss = QLatin1String(file.readAll());
+    this->setStyleSheet(strCss);
+
     Q_D(FileOperationWgt);
     d->q_ptr = this;
 

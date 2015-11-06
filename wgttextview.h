@@ -44,7 +44,8 @@ private:
     void createActions();
 
     editor  *m_textView;
-    QLabel  *m_statusLbl;
+    QLabel  *m_docInfoLbl;
+    QLabel  *m_fileInfoLbl;
 
     QString pathToFile;
     FindReplaceText *m_findReplace;
@@ -72,14 +73,17 @@ public:
     editor(QWidget *parent = 0);
     void lineNumberPaint(QPaintEvent *);
     int linesNumberWidth();
-    QString getInfo();
 
 private slots:
     void updateLinesWidth(int);
     void updateLineNumberArea(const QRect &, int);
+    void docInfo();
 
 protected:
     void resizeEvent(QResizeEvent *);
+
+signals:
+    void info(QString);
 
 private:
     QWidget *m_editorPaintArea;

@@ -36,3 +36,6 @@ SOURCES += \
     zbc_mainwindow.cpp \
     zbc_lineedit.cpp \
     zbc_drivebutton.cpp
+
+RESOURCES += \
+    res.qrc

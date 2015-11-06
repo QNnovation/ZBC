@@ -14,6 +14,8 @@
 #include <QLabel>
 #include <QFileInfo>
 
+qint32 const kiloByte = 1024;
+
 //constructor
 wgtTextView::wgtTextView(QWidget *parent)
     :QMainWindow(parent)
@@ -30,10 +32,13 @@ wgtTextView::wgtTextView(QWidget *parent)
     this->m_textView->setPalette(p);
 
     m_findReplace = new FindReplaceText();
+    m_docInfoLbl = new QLabel(tr("empty"));
+    m_fileInfoLbl = new QLabel(tr("empty"));
 
-    m_statusLbl = new QLabel(tr("status"));
-    m_statusLbl->setText(m_textView->getInfo());
-    statusBar()->addWidget(m_statusLbl);
+    connect(m_textView, &editor::info, m_docInfoLbl, &QLabel::setText);
+
+    statusBar()->addWidget(m_docInfoLbl);
+    statusBar()->addWidget(m_fileInfoLbl);
 
     createActions();
     createMenu();
@@ -113,6 +118,9 @@ void wgtTextView::replaceAll(const QString &word, const QString &newWord, QTextD
 bool wgtTextView::loadFile(const QString &filePath, char mode)
 {
     pathToFile = filePath;
+    m_fileInfoLbl->setText("File: " + QFileInfo(pathToFile).fileName()
+                           + " Size: " + QString::number(QFileInfo(pathToFile).size() / kiloByte)
+                           + " Kb");
     if (mode == 'w')
         m_rwMode = false;
 
@@ -227,7 +235,8 @@ editor::editor(QWidget *parent) : QPlainTextEdit(parent)
 
     connect(this, &QPlainTextEdit::blockCountChanged, this, &editor::updateLinesWidth);
     connect(this, &QPlainTextEdit::updateRequest, this, &editor::updateLineNumberArea);
-    //connect(m_textFindEdit, &QLineEdit::textChanged, this, &FindReplaceText::isEmptyText);
+    connect(this, &QPlainTextEdit::cursorPositionChanged, this, &editor::docInfo);
+
     updateLinesWidth(0);
 }
 
@@ -271,14 +280,6 @@ int editor::linesNumberWidth()
     return size;
 }
 
-QString editor::getInfo()
-{
-    //int number1 = 0; //blockCount();
-    QString info;
-
-    return info;
-}
-
 void editor::updateLinesWidth(int)
 {
     setViewportMargins(linesNumberWidth(), 0, 0, 0);
@@ -293,6 +294,20 @@ void editor::updateLineNumberArea(const QRect &rect, int dy)
 
     if (rect.contains(viewport()->rect()))
         updateLinesWidth(0);
+}
+
+void editor::docInfo()
+{
+    QString data;
+    //number of lines
+    int linesArea = blockCount();
+    data += "Lines: " + (QString::number(linesArea));
+    //current line and column
+    QTextCursor cursor = this->textCursor();
+    int y = cursor.blockNumber() + 1;
+    int x = cursor.columnNumber() + 1;
+    data += " Ln: " + QString::number(y) + " Col: " + QString::number(x);
+    emit info(data);
 }
 
 void editor::resizeEvent(QResizeEvent *event)
