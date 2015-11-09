@@ -1,3 +1,5 @@
+#include <QDebug>
+
 #include "zbc_centralwidget.h"
 #include "zbc_centralwidget_p.h"
 #include "zbc_newfolder.h"
@@ -80,12 +82,19 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
 
 //Bottom Buttons
     m_pbtnView      = new ZBC_PushButton("F3 View", m_pfrmBottomButtons);
+    m_pbtnView->setFocusPolicy(Qt::NoFocus);
     m_pbtnEdit      = new ZBC_PushButton("F4 Edit", m_pfrmBottomButtons);
+    m_pbtnEdit->setFocusPolicy(Qt::NoFocus);
     m_pbtnCopy      = new ZBC_PushButton("F5 Copy", m_pfrmBottomButtons);
+    m_pbtnCopy->setFocusPolicy(Qt::NoFocus);
     m_pbtnMove      = new ZBC_PushButton("F6 Move", m_pfrmBottomButtons);
+    m_pbtnMove->setFocusPolicy(Qt::NoFocus);
     m_pbtnNewFolder = new ZBC_PushButton("F7 NewFolder", m_pfrmBottomButtons);
+    m_pbtnNewFolder->setFocusPolicy(Qt::NoFocus);
     m_pbtnDelete    = new ZBC_PushButton("F8 Delete", m_pfrmBottomButtons);
+    m_pbtnDelete->setFocusPolicy(Qt::NoFocus);
     m_pbtnExit      = new ZBC_PushButton("Alt+F4 Exit", m_pfrmBottomButtons);
+    m_pbtnExit->setFocusPolicy(Qt::NoFocus);
 
 //Layout Buttons
     m_phblBoxLayout = new QHBoxLayout(m_pfrmBottomButtons);
@@ -208,8 +217,13 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
             [this](){
                 FileOperationWgt* wgtCopy   = new FileOperationWgt;
                 wgtCopy->copyFileOperation(m_psfwActive->getListOfSelectedItems(),
-                                            m_psfwNotActive->getCurrentPath());
+                                           m_psfwNotActive->getCurrentPath());
                 m_psfwActive->clearListOfSelectedItems();
+
+                qDebug() << m_psfwActive->getListOfSelectedItems();
+                qDebug() << "!!!!!";
+                qDebug() << m_psfwNotActive->getCurrentPath();
+
                 wgtCopy->setModal(true);
                 wgtCopy->show();
             });
