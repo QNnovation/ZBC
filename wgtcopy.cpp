@@ -16,6 +16,7 @@
 #include <QProgressBar>
 #include <QPushButton>
 #include <QLabel>
+#include <QKeyEvent>
 
 #ifndef Q_WS_WIN
 #include <windows.h>
@@ -33,7 +34,7 @@ FileOperationWgt::FileOperationWgt(QWidget *parent)
 {
     //stylesheet load http://doc.qt.io/qt-5/stylesheet-examples.html
     QFile file(":/qss/stylesheet.qss");
-    qDebug() <<  file.open(QFile::ReadOnly);
+    file.open(QFile::ReadOnly);
     QString strCss = QLatin1String(file.readAll());
     this->setStyleSheet(strCss);
 
@@ -139,16 +140,19 @@ void FileOperationWgt::moveToRecycleBin(const QStringList &files)
 
 bool FileOperationWgt::confirmOperation()
 {
-    QMessageBox::StandardButton confirmBox;
-    confirmBox = QMessageBox::question(this, "Confirm operation",
-                                       "Are you sure ?",
-                                       QMessageBox::Ok | QMessageBox::Cancel);
-    if (confirmBox == QMessageBox::Ok)
+    QMessageBox *pmbx =
+            new QMessageBox(QMessageBox::Question,
+                            tr("Confirm operation"),
+                            tr("Are you sure ?"),
+                            QMessageBox::Ok | QMessageBox::Cancel);
+    int n = pmbx->exec();
+    if (n == QMessageBox::Ok)
         return true;
-    else
+    else {
         this->close();
-    return false;
-
+        return false;
+    }
+    delete pmbx;
 }
 
 void FileOperationWgt::threadPauseResume()
@@ -183,6 +187,14 @@ void FileOperationWgt::closeEvent(QCloseEvent *)
 {
     Q_D(FileOperationWgt);
     d->fileoperations->Stop();
+}
+
+void FileOperationWgt::keyPressEvent(QKeyEvent *event)
+{
+    switch(event->key()) {
+    case Qt::Key_Escape:
+        this->closeWgt();
+    }
 }
 
 void FileOperationWgt::toBackground()
@@ -325,11 +337,14 @@ void FileOperations::loadFiles(QStringList files_Path, const QString files_Desti
         return;
 
     d_ptr->fileDestination = files_Destination;
+    if (!d_ptr->fileDestination.endsWith("\\")) {
+        d_ptr->fileDestination.append("\\");
+    }
 
     for (int i = 0; i < files_Path.size(); ++i) {
         if (QFileInfo(files_Path.at(i)).isFile()) {
             d_ptr->filesPath.push_back(files_Path.at(i));
-            d_ptr->filesDestination.push_back(files_Destination + QFileInfo(files_Path.at(i)).fileName());
+            d_ptr->filesDestination.push_back(d_ptr->fileDestination + QFileInfo(files_Path.at(i)).fileName());
         } else {
             d_ptr->filesPath.push_back(files_Path.at(i));
             d_ptr->filesDestination.push_back(files_Destination);
@@ -430,7 +445,7 @@ void FileOperations::process()
                 qDebug()<<"Could not open the input file\n"<<d_ptr->inputFile.fileName();
             }
             //initialization path to copy
-            destination = d_ptr->filesDestination.at(i); // + fileInfo.fileName();
+            destination = d_ptr->filesDestination.at(i);
             emit currentFile("From: " + QDir::toNativeSeparators(d_ptr->inputFile.fileName()));
             emit currentPath("To: " + QDir::toNativeSeparators(destination));
 
@@ -445,7 +460,6 @@ void FileOperations::process()
                 {
                     qDebug()<<"Could not open the output file\n"<<d_ptr->outputFile.fileName();
                 }
-
                 QByteArray dataFromFile;
                 quint64 span = 0;
 
