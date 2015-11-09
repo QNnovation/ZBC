@@ -52,6 +52,9 @@ private:
     QAction*            m_pactMove;
     QAction*            m_pactNewFolder;
     QAction*            m_pactDelete;
+    QAction*            m_pactShiftDelete;
+
+    void shiftDeletePressed(QKeyEvent* pe);
 };
 
 #endif // ZBC_CENTRALWIDGET_P_H

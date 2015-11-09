@@ -1,5 +1,4 @@
-#include <QDebug>
-
+#include "zbc_drivebutton.h"
 #include "zbc_sideframe.h"
 #include "zbc_lineedit.h"
 #include "zbc_treeview.h"
@@ -12,6 +11,7 @@
 #include <QLabel>
 #include <QMessageBox>
 #include <QModelIndex>
+#include <QPushButton>
 #include <QSortFilterProxyModel>
 #include <QUrl>
 
@@ -42,13 +42,20 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
     ptreeView->sortByColumn(0, Qt::AscendingOrder);
     ptreeView->setRootIndex( psfpModel->mapFromSource(pfsmModel->index(path)) );
 
+//Buttons with Drives
+    QStringList     lstDrives;
+    for( QFileInfo file : QDir::drives() ){
+        lstDrives.push_back(file.filePath().left(2) + QDir::separator());
+    }
+    ZBC_DriveButton* pdrvButtons    = new ZBC_DriveButton(lstDrives, this);
+
 //ComboBox as View
-    QComboBox*  pcbxVolumes     = new QComboBox(this);
-    pcbxVolumes->setModel(psfpModel);
+    QComboBox*  pcbxVolumes         = new QComboBox(this);
+    pcbxVolumes->addItems(lstDrives);
+    pcbxVolumes->setCurrentIndex(lstDrives.indexOf(path.left(3)));
     pcbxVolumes->setMaximumSize(pcbxVolumes->sizeHint());
 
 //Current path
-//    m_sCurPath = pfsmModel->rootPath().replace('/', QDir::separator());
     m_sCurPath = QDir::toNativeSeparators(pfsmModel->rootPath());
 
 //LineEdit with current path
@@ -65,7 +72,8 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 //Layout
     QGridLayout* pgrdLayout = new QGridLayout(this);
     pgrdLayout->setMargin(5);
-    pgrdLayout->addWidget(pcbxVolumes, 0, 0, 1, 2);
+    pgrdLayout->addWidget(pcbxVolumes, 0, 0);
+    pgrdLayout->addWidget(pdrvButtons, 0, 1);
     pgrdLayout->addWidget(pledCurPath,1, 0, 1, 20);
     pgrdLayout->addWidget(ptreeView, 2, 0, 20, 20);
     pgrdLayout->addWidget(plblDirInfo, 22, 0, 1, 20);
@@ -94,22 +102,30 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                 setTextForLblDirInfo(plblDirInfo);}
             );
 
+//Drive buttons clicked
+    connect(pdrvButtons,
+            &ZBC_DriveButton::clicked,
+            [=](QString sDrvPath){
+        m_sCurPath = sDrvPath;
+        pledCurPath->setText(m_sCurPath);
+        pcbxVolumes->setCurrentIndex(lstDrives.indexOf(sDrvPath));
+        ptreeView->setRootIndex(psfpModel->mapFromSource(pfsmModel->index(pledCurPath->text())));
+        setTextForLblDirInfo(plblDirInfo);
+    });
+
 //Enter pressed on LineEdit with current path
     connect(pledCurPath,
             &ZBC_LineEdit::pressedEnter,
             [=](QString oldVal){
-        QDir tmpDir(pledCurPath->text());
-        if (!tmpDir.exists())
-            pledCurPath->setText(oldVal);
-        else{
-             ptreeView->setRootIndex(QModelIndex( psfpModel->mapFromSource(pfsmModel->index(pledCurPath->text()))));
-        }
-//         m_sCurPath = pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex())).replace('/', QDir::separator());
-        m_sCurPath = QDir::toNativeSeparators( pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex())) );
-        stlSelectedItems.clear();
-        setTextForLblDirInfo(plblDirInfo);
-
-    });
+                QDir tmpDir(pledCurPath->text());
+                if (!tmpDir.exists())
+                    pledCurPath->setText(oldVal);
+                else
+                    ptreeView->setRootIndex(QModelIndex( psfpModel->mapFromSource(pfsmModel->index(pledCurPath->text()))));
+                m_sCurPath = QDir::toNativeSeparators( pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex())) );
+                stlSelectedItems.clear();
+                setTextForLblDirInfo(plblDirInfo);
+            });
 
 //Double click on item at QTreeView(change dir or open file)
     connect(ptreeView,
@@ -128,7 +144,6 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                             ptreeView->setRootIndex(psfpModel->mapFromSource(pfsmModel->index(pfsmModel->filePath(psfpModel->mapToSource(_index)))));
 
                         }
-//                        m_sCurPath = pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex())).replace('/', QDir::separator());
                         m_sCurPath = QDir::toNativeSeparators( pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex())) );
                         pledCurPath->setText(getCurrentPath());
                         stlSelectedItems.clear();
@@ -148,11 +163,9 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                     if ( (pfsmModel->filePath(psfpModel->mapToSource(index)).right(2)) == QLatin1String("..") )
                         continue;
                     if ( pfsmModel->isDir(psfpModel->mapToSource(index)) )
-//                        stlSelectedItems.push_back(pfsmModel->filePath(psfpModel->mapToSource(index)).replace('/', QDir::separator()) + QDir::separator());
                         stlSelectedItems.push_back(QDir::toNativeSeparators(pfsmModel->filePath(psfpModel->mapToSource(index))) + QDir::separator());
                     else
                         stlSelectedItems.push_back(QDir::toNativeSeparators(pfsmModel->filePath(psfpModel->mapToSource(index))));
-//                        stlSelectedItems.push_back(pfsmModel->filePath(psfpModel->mapToSource(index)).replace('/', QDir::separator()));
                 }
                 setTextForLblDirInfo(plblDirInfo);
             });
@@ -187,9 +200,7 @@ void ZBC_SideFrame::clearListOfSelectedItems()
 //Return current path
 QString ZBC_SideFrame::getCurrentPath()
 {
-    if(m_sCurPath.length() == 3)
-        return m_sCurPath;
-    return (m_sCurPath + QDir::separator());
+    return  QDir::toNativeSeparators(m_sCurPath) ;
 }
 
 
@@ -205,7 +216,6 @@ void ZBC_SideFrame::setListOfItemsInDir()
     while (pdirIter->hasNext()){
         pdirIter->next();
         m_hashFiles.insert( QDir::toNativeSeparators(pdirIter->filePath()), pdirIter->fileInfo().size() / KBytes);
-//        m_hashFiles.insert(pdirIter->filePath().replace('/', QDir::separator()), pdirIter->fileInfo().size() / KBytes);
     }
     delete pdirIter;
 
@@ -237,7 +247,6 @@ qint64 ZBC_SideFrame::getSizeOfFiles(QHash<QString, int> _hash) const
 //Stupid solution ( cause I don't now STL( )
 qint64 ZBC_SideFrame::getSizeOfSelectedFiles( bool retSum )
 {
-
     QHash<QString, int> tmpHash;
     QHashIterator<QString, int> iterHash(m_hashFiles);
 
@@ -287,24 +296,3 @@ void ZBC_SideFrame::setTextForLblDirInfo(QLabel * plbl)
     m_hashFiles.clear();
     m_setDirs.clear();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

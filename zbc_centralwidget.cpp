@@ -1,5 +1,3 @@
-#include <QDebug>
-
 #include "zbc_centralwidget.h"
 #include "zbc_centralwidget_p.h"
 #include "zbc_newfolder.h"
@@ -12,6 +10,7 @@
 #include <QHBoxLayout>
 #include <QModelIndex>
 #include <QFileSystemModel>
+#include <QKeyEvent>
 #include <QSplitter>
 #include <QSettings>
 #include <QVBoxLayout>
@@ -29,6 +28,15 @@ ZBC_CentralWidget::ZBC_CentralWidget(QWidget* pwgt) :
 ZBC_CentralWidget::~ZBC_CentralWidget()
 {
 }
+
+
+//Override keyPressEvent
+void ZBC_CentralWidget::keyPressEvent(QKeyEvent* pe)
+{
+    d_ptr->shiftDeletePressed(pe);
+    QFrame::keyPressEvent(pe);
+}
+
 
 
 //C-tor
@@ -127,17 +135,13 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
     m_pactNewFolder->setShortcut(QKeySequence(Qt::Key_F7));
     q->addAction(m_pactNewFolder);
 
-//Delete
+//Delete to trash
     m_pactDelete    = new QAction(q);
     QList<QKeySequence> shortcuts;
     shortcuts.push_back(QKeySequence(Qt::Key_F8));
     shortcuts.push_back(QKeySequence(Qt::Key_Delete));
     m_pactDelete->setShortcuts(shortcuts);
-//    m_pactDelete->setShortcut(QKeySequence(Qt::Key_F8));
     q->addAction(m_pactDelete);
-
-//Delete
-
 
 //Create Connections
 //Active Side
@@ -160,7 +164,7 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
             &QAction::triggered,
             [this](){
                 if ( QFileInfo(this->m_psfwActive->getListOfSelectedItems().at(0)).isFile() ){
-                    wgtTextView* TextView   = new wgtTextView(qobject_cast<QWidget*>(this)); //Must be setted WA_DeleteOnClose
+                    wgtTextView* TextView   = new wgtTextView(qobject_cast<QWidget*>(this));
                     TextView->loadFile(this->m_psfwActive->getListOfSelectedItems().at(0));
                     TextView->show();
                 }
@@ -170,7 +174,7 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
             &ZBC_PushButton::clicked,
             [this](){
                 if ( QFileInfo(this->m_psfwActive->getListOfSelectedItems().at(0)).isFile() ){
-                    wgtTextView* TextView   = new wgtTextView(qobject_cast<QWidget*>(this));  //Must be setted WA_DeleteOnClose
+                    wgtTextView* TextView   = new wgtTextView(qobject_cast<QWidget*>(this));
                     TextView->loadFile(this->m_psfwActive->getListOfSelectedItems().at(0));
                     TextView->show();
                 }
@@ -181,7 +185,7 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
             &QAction::triggered,
             [this](){
                 if ( QFileInfo(this->m_psfwActive->getListOfSelectedItems().at(0)).isFile() ){
-                    wgtTextView* TextView   = new wgtTextView(qobject_cast<QWidget*>(this));  //Must be setted WA_DeleteOnClose
+                    wgtTextView* TextView   = new wgtTextView(qobject_cast<QWidget*>(this));
                     TextView->loadFile(this->m_psfwActive->getListOfSelectedItems().at(0), 'w');
                     TextView->show();
                 }
@@ -192,7 +196,7 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
             &ZBC_PushButton::clicked,
             [this](){
         if ( QFileInfo(this->m_psfwActive->getListOfSelectedItems().at(0)).isFile() ){
-            wgtTextView* TextView   = new wgtTextView(qobject_cast<QWidget*>(this));  //Must be setted WA_DeleteOnClose
+            wgtTextView* TextView   = new wgtTextView(qobject_cast<QWidget*>(this));
             TextView->loadFile(this->m_psfwActive->getListOfSelectedItems().at(0), 'w');
             TextView->show();
         }
@@ -265,7 +269,6 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
             [this](){
                 FileOperationWgt* wgtDelete = new FileOperationWgt;
                 wgtDelete->moveToRecycleBin(m_psfwActive->getListOfSelectedItems());
-//                wgtDelete->removeFileOperation(m_psfwActive->getListOfSelectedItems());
                 wgtDelete->setModal(true);
                 wgtDelete->show();
             });
@@ -275,7 +278,6 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
             [this](){
                 FileOperationWgt* wgtDelete = new FileOperationWgt;
                 wgtDelete->moveToRecycleBin(m_psfwActive->getListOfSelectedItems());
-//                wgtDelete->removeFileOperation(m_psfwActive->getListOfSelectedItems());
                 wgtDelete->setModal(true);
                 wgtDelete->show();
             });
@@ -302,4 +304,22 @@ ZBC_CentralWidgetPrivate::~ZBC_CentralWidgetPrivate()
     m_psettings->endGroup();
     m_psettings->endGroup();
     delete m_psettings;
+}
+
+
+//Invoked by ZBC_CentralWidget::keyPressedEvent(QKeyEvent* pe)
+void ZBC_CentralWidgetPrivate::shiftDeletePressed(QKeyEvent *pe)
+{
+    switch (pe->key()) {
+    case Qt::Key_Delete:
+        if (pe->modifiers() & Qt::ShiftModifier){
+            FileOperationWgt* wgtDelete = new FileOperationWgt;
+            wgtDelete->removeFileOperation(m_psfwActive->getListOfSelectedItems());
+            wgtDelete->setModal(true);
+            wgtDelete->show();
+        }
+        break;
+    default:
+        break;
+    }
 }

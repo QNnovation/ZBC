@@ -8,13 +8,20 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QPainter>
+#include <QTextBlock>
+#include <QStatusBar>
+#include <QLabel>
+#include <QFileInfo>
+
+qint32 const kiloByte = 1024;
 
 //constructor
 wgtTextView::wgtTextView(QWidget *parent)
     :QMainWindow(parent)
 {
     this->setAttribute(Qt::WA_DeleteOnClose, true);
-    m_textView = new QPlainTextEdit;
+    m_textView = new editor;
 
     //color theme
     QPalette p = this->m_textView->palette();
@@ -25,6 +32,13 @@ wgtTextView::wgtTextView(QWidget *parent)
     this->m_textView->setPalette(p);
 
     m_findReplace = new FindReplaceText();
+    m_docInfoLbl = new QLabel(tr("empty"));
+    m_fileInfoLbl = new QLabel(tr("empty"));
+
+    connect(m_textView, &editor::info, m_docInfoLbl, &QLabel::setText);
+
+    statusBar()->addWidget(m_docInfoLbl);
+    statusBar()->addWidget(m_fileInfoLbl);
 
     createActions();
     createMenu();
@@ -58,6 +72,7 @@ void wgtTextView::createActions()
     m_quitAct = new QAction(tr("&Quit"), this);
     m_quitAct->setStatusTip(tr("Close window"));
     m_quitAct->setShortcut(QKeySequence::Close);
+    m_quitAct->setShortcut(Qt::Key_Escape);
     connect(m_quitAct, &QAction::triggered, this, &wgtTextView::close);
 
     m_fileSaveAsAct = new QAction(tr("Save as..."), this);
@@ -103,6 +118,9 @@ void wgtTextView::replaceAll(const QString &word, const QString &newWord, QTextD
 bool wgtTextView::loadFile(const QString &filePath, char mode)
 {
     pathToFile = filePath;
+    m_fileInfoLbl->setText("File: " + QFileInfo(pathToFile).fileName()
+                           + " Size: " + QString::number(QFileInfo(pathToFile).size() / kiloByte)
+                           + " Kb");
     if (mode == 'w')
         m_rwMode = false;
 
@@ -146,6 +164,7 @@ void wgtTextView::closeEvent(QCloseEvent *)
         m_findReplace->close();
     }
 }
+
 
 //slot saveAs
 bool wgtTextView::saveAs()
@@ -208,3 +227,93 @@ wgtTextView::~wgtTextView()
     delete m_findReplace;
 }
 
+
+//editor class implementation
+editor::editor(QWidget *parent) : QPlainTextEdit(parent)
+{
+    m_editorPaintArea = new editorPaintArea(this);
+
+    connect(this, &QPlainTextEdit::blockCountChanged, this, &editor::updateLinesWidth);
+    connect(this, &QPlainTextEdit::updateRequest, this, &editor::updateLineNumberArea);
+    connect(this, &QPlainTextEdit::cursorPositionChanged, this, &editor::docInfo);
+
+    updateLinesWidth(0);
+}
+
+void editor::lineNumberPaint(QPaintEvent *event)
+{
+    QPainter painter(m_editorPaintArea);
+
+    painter.fillRect(event->rect(), Qt::gray);
+
+    QTextBlock block = firstVisibleBlock();
+    int blockNumber = block.blockNumber();
+    int top = (int) blockBoundingGeometry(block).translated(contentOffset()).top();
+    int bottom = top + (int) blockBoundingRect(block).height();
+
+    while (block.isValid() && top <= event->rect().bottom()) {
+        if (block.isVisible() && bottom >= event->rect().top()) {
+            QString number = QString::number(blockNumber + 1);
+            QFont fnt("Arial", 8, QFont::Bold);
+            painter.setPen(Qt::darkBlue);
+            painter.setFont(fnt);
+            painter.drawText(0, top, m_editorPaintArea->width(), fontMetrics().height(),
+                             Qt::AlignCenter, number);
+        }
+
+        block = block.next();
+        top = bottom;
+        bottom = top + (int) blockBoundingRect(block).height();
+        ++blockNumber;
+    }
+}
+
+int editor::linesNumberWidth()
+{
+    int areaWidth = blockCount();
+    int cnt = 1;
+    while (areaWidth >= 10) {
+        areaWidth /= 10;
+        ++cnt;
+    }
+    int size = (fontMetrics().width(QLatin1Char('9')) * cnt) + 3;
+    return size;
+}
+
+void editor::updateLinesWidth(int)
+{
+    setViewportMargins(linesNumberWidth(), 0, 0, 0);
+}
+
+void editor::updateLineNumberArea(const QRect &rect, int dy)
+{
+    if (dy)
+        m_editorPaintArea->scroll(0, dy);
+    else
+        m_editorPaintArea->update(0, rect.y(), m_editorPaintArea->width(), rect.height());
+
+    if (rect.contains(viewport()->rect()))
+        updateLinesWidth(0);
+}
+
+void editor::docInfo()
+{
+    QString data;
+    //number of lines
+    int linesArea = blockCount();
+    data += "Lines: " + (QString::number(linesArea));
+    //current line and column
+    QTextCursor cursor = this->textCursor();
+    int y = cursor.blockNumber() + 1;
+    int x = cursor.columnNumber() + 1;
+    data += " Ln: " + QString::number(y) + " Col: " + QString::number(x);
+    emit info(data);
+}
+
+void editor::resizeEvent(QResizeEvent *event)
+{
+    QPlainTextEdit::resizeEvent(event);
+    QRect content = contentsRect();
+    m_editorPaintArea->setGeometry(QRect(content.left(), content.top(),
+                                         linesNumberWidth(), content.height()));
+}

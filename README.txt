@@ -9,3 +9,6 @@
 		In normal state it shows current path. Double click
 		enable edit mode.
 
+2015.11.02
+	ADDED:
+		Buttons with logical drives.

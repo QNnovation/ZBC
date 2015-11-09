@@ -83,6 +83,7 @@ protected:
     QScopedPointer<FileOperationWgtPrivate> const d_ptr;
     FileOperationWgt(FileOperationWgtPrivate &dd, QWidget *parent);
     virtual void closeEvent(QCloseEvent *);
+    void keyPressEvent(QKeyEvent *);
 
 signals:
     void finishOperation();
