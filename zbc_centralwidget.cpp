@@ -1,5 +1,3 @@
-#include <QDebug>
-
 #include "zbc_centralwidget.h"
 #include "zbc_centralwidget_p.h"
 #include "zbc_newfolder.h"
@@ -219,11 +217,6 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
                 wgtCopy->copyFileOperation(m_psfwActive->getListOfSelectedItems(),
                                            m_psfwNotActive->getCurrentPath());
                 m_psfwActive->clearListOfSelectedItems();
-
-                qDebug() << m_psfwActive->getListOfSelectedItems();
-                qDebug() << "!!!!!";
-                qDebug() << m_psfwNotActive->getCurrentPath();
-
                 wgtCopy->setModal(true);
                 wgtCopy->show();
             });

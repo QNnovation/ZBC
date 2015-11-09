@@ -1,5 +1,3 @@
-#include <QDebug>
-
 #include "zbc_drivebutton.h"
 #include "zbc_sideframe.h"
 #include "zbc_lineedit.h"
@@ -65,7 +63,7 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
     ZBC_LineEdit* pledCurPath      = new ZBC_LineEdit(this);
     pledCurPath->setReadOnly(true);
     pledCurPath->setFocusPolicy(Qt::NoFocus);
-    pledCurPath->setText(this->getCurrentPath());
+    pledCurPath->setText(this->m_sCurPath);
 
 //Label with info about files and dirs
     QLabel* plblDirInfo         = new QLabel(this);
@@ -102,7 +100,7 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                 }
 
                 m_sCurPath = sCurDisk;
-                pledCurPath->setText(getCurrentPath());
+                pledCurPath->setText(m_sCurPath);
                 ptreeView->setRootIndex(psfpModel->mapFromSource(pfsmModel->index(sCurDisk)));
 
                 setTextForLblDirInfo(plblDirInfo);
@@ -153,7 +151,7 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 
                         }
                         m_sCurPath = QDir::toNativeSeparators( pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex())) );
-                        pledCurPath->setText(getCurrentPath());
+                        pledCurPath->setText(m_sCurPath);
                         stlSelectedItems.clear();
                         setTextForLblDirInfo(plblDirInfo);
                     }
@@ -168,18 +166,13 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
             &QItemSelectionModel::selectionChanged,
             [=](){
                 stlSelectedItems.clear();
-//                qDebug() << "*****";
                 for ( const QModelIndex& index:ptreeView->selectionModel()->selectedRows()){
                     if ( (pfsmModel->filePath(psfpModel->mapToSource(index)).right(2)) == QLatin1String("..") )
                         continue;
-                    if ( pfsmModel->isDir(psfpModel->mapToSource(index)) ){
+                    if ( pfsmModel->isDir(psfpModel->mapToSource(index)) )
                         stlSelectedItems.push_back(QDir::toNativeSeparators(pfsmModel->filePath(psfpModel->mapToSource(index))) + QDir::separator());
-//                        qDebug() << stlSelectedItems;
-                    }
-                    else{
+                    else
                         stlSelectedItems.push_back(QDir::toNativeSeparators(pfsmModel->filePath(psfpModel->mapToSource(index))));
-//                        qDebug() << stlSelectedItems;
-                    }
                 }
                 setTextForLblDirInfo(plblDirInfo);
             });
@@ -200,7 +193,6 @@ ZBC_SideFrame::~ZBC_SideFrame()
 //Return list of selected files
 QStringList ZBC_SideFrame::getListOfSelectedItems() const
 {
-    qDebug() << stlSelectedItems;
     return stlSelectedItems;
 }
 
@@ -215,7 +207,7 @@ void ZBC_SideFrame::clearListOfSelectedItems()
 //Return current path
 QString ZBC_SideFrame::getCurrentPath()
 {
-    return  QDir::toNativeSeparators(m_sCurPath) ;
+    return  QDir::toNativeSeparators(m_sCurPath) + QDir::separator();
 }
 
 
