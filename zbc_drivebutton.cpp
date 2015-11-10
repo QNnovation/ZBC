@@ -1,35 +1,47 @@
+#include <QDebug>
+
 #include "zbc_drivebutton.h"
 
-#include <QPushButton>
-#include <QSignalMapper>
-#include <QHBoxLayout>
+#include <QPainter>
+#include <QBrush>
+#include <QColor>
 
 
 //C-tor
-ZBC_DriveButton::ZBC_DriveButton(const QStringList& lstPath, QWidget* pwgt) : QWidget(pwgt)
+ZBC_DriveButton::ZBC_DriveButton(const QString& sPath, QWidget* pwgt) : QPushButton(sPath, pwgt)
 {
-    QSignalMapper* psglMapper   = new QSignalMapper(this);
-    QHBoxLayout* pLayout        = new QHBoxLayout(this);
-
-    for( QString sPath : lstPath ){
-        QPushButton* pBtn   = new QPushButton(sPath, this);
-        pBtn->setFocusPolicy(Qt::NoFocus);
-        pBtn->setFixedSize(pBtn->sizeHint());
-        connect(pBtn,
-                &QPushButton::clicked,
-                psglMapper,
-                static_cast<void (QSignalMapper::*)()>(&QSignalMapper::map));
-        psglMapper->setMapping(pBtn, sPath);
-        pLayout->addWidget(pBtn);
-    }
-
-    connect(psglMapper,
-            static_cast<void (QSignalMapper::*)(const QString&)>(&QSignalMapper::mapped),
-            this,
-            &ZBC_DriveButton::clicked);
-
-    setLayout(pLayout);
+    QPalette    palette = this->palette();
+    palette.setColor(QPalette::Button, Qt::red);
+    this->autoFillBackground();
+    this->setPalette(palette);
+    this->update();
+//    QLinearGradient gradient(rect().topLeft(), rect().bottomRight());
+//    gradient.setColorAt(0, Qt::red);
+//    gradient.setColorAt(1, Qt::green);
+//    QColor color(gradient);
+//    QBrush brush(gradient);
+//    QColor color(brush);
+//    pltBackground.setBrush(QPalette::Base, brush );
+//    pltBackground.setColor(QPalette::Window, Qt::red );
+//    this->setPalette(pltBackground);
+    qDebug() << "There";
 }
 
+/*
+void ZBC_DriveButton::paintEvent(QPaintEvent *pe)
+{
+//    QRectF ellipseRect(width()*0.25, height()*0.25, width()*0.5, height()*0.5);
 
+    QLinearGradient gradient(rect().topLeft(), rect().bottomRight());
+    gradient.setColorAt(0, Qt::red);
+    gradient.setColorAt(1, Qt::green);
 
+    QPainter painter;
+    painter.begin(this);
+    painter.fillRect(rect(), QBrush(gradient));
+    painter.setBrush(QBrush(gradient));
+    painter.end();
+
+    QPushButton::paintEvent(pe);
+}
+*/
