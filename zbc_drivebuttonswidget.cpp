@@ -1,3 +1,5 @@
+#include <QDebug>
+
 #include "zbc_drivebutton.h"
 #include "zbc_drivebuttonswidget.h"
 
@@ -17,6 +19,15 @@ ZBC_DriveButtonsWidget::ZBC_DriveButtonsWidget(const QStringList& lstPath, QWidg
         ZBC_DriveButton* pBtn   = new ZBC_DriveButton(sPath, this);
         pBtn->setFocusPolicy(Qt::NoFocus);
         pBtn->setFixedSize(pBtn->sizeHint());
+
+        QPalette palette(pBtn->palette());
+        qDebug() << palette.button();
+        palette.setBrush(QPalette::ButtonText, QBrush(Qt::red));
+        qDebug() << palette.button();
+
+        pBtn->setAutoFillBackground(true);
+        pBtn->setPalette(palette);
+
         connect(pBtn,
                 &QPushButton::clicked,
                 psglMapper,
@@ -32,6 +43,3 @@ ZBC_DriveButtonsWidget::ZBC_DriveButtonsWidget(const QStringList& lstPath, QWidg
 
     setLayout(pLayout);
 }
-
-
-
