@@ -32,12 +32,6 @@ FileOperationWgt::FileOperationWgt(QWidget *parent)
     : QDialog(parent)
     ,d_ptr(new FileOperationWgtPrivate())
 {
-    //stylesheet load http://doc.qt.io/qt-5/stylesheet-examples.html
-    QFile file(":/qss/stylesheet.qss");
-    file.open(QFile::ReadOnly);
-    QString strCss = QLatin1String(file.readAll());
-    this->setStyleSheet(strCss);
-
     Q_D(FileOperationWgt);
     d->q_ptr = this;
 
@@ -45,6 +39,9 @@ FileOperationWgt::FileOperationWgt(QWidget *parent)
     this->setWindowModality(Qt::ApplicationModal);
     setWindowTitle("ZBC Copying");
     setFixedSize(450, 128); //125 175
+
+    QPalette pal(Qt::red, Qt::black);
+    this->setPalette(pal);
 
     setLayout(d->mainLayout);
 
@@ -146,13 +143,13 @@ bool FileOperationWgt::confirmOperation()
                             tr("Are you sure ?"),
                             QMessageBox::Ok | QMessageBox::Cancel);
     int n = pmbx->exec();
+    delete pmbx;
     if (n == QMessageBox::Ok)
         return true;
     else {
         this->close();
         return false;
     }
-    delete pmbx;
 }
 
 void FileOperationWgt::threadPauseResume()
