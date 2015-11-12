@@ -1,6 +1,5 @@
 #include <QDebug>
 
-#include "zbc_drivebutton.h"
 #include "zbc_drivebuttonswidget.h"
 
 #include <QPushButton>
@@ -16,15 +15,12 @@ ZBC_DriveButtonsWidget::ZBC_DriveButtonsWidget(const QStringList& lstPath, QWidg
 
 
     for( QString sPath : lstPath ){
-        ZBC_DriveButton* pBtn   = new ZBC_DriveButton(sPath, this);
+        QPushButton* pBtn   = new QPushButton(sPath, this);
         pBtn->setFocusPolicy(Qt::NoFocus);
         pBtn->setFixedSize(pBtn->sizeHint());
 
-        QPalette palette(pBtn->palette());
-        qDebug() << palette.button();
-        palette.setBrush(QPalette::ButtonText, QBrush(Qt::red));
-        qDebug() << palette.button();
-
+        QPalette palette;//(this->palette());
+        palette.setBrush(QPalette::Button, QBrush(Qt::red));
         pBtn->setAutoFillBackground(true);
         pBtn->setPalette(palette);
 
