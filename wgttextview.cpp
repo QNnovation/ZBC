@@ -13,6 +13,15 @@
 #include <QStatusBar>
 #include <QLabel>
 #include <QFileInfo>
+#include <QSettings>
+
+#include <QtPrintSupport/QPrintDialog>
+#include <QtPrintSupport/QPrintPreviewDialog>
+#include <QtPrintSupport/QPrinter>
+#include <QtPrintSupport/QPrintPreviewWidget>
+#include <QPainter>
+#include <QPaintDevice>
+#include <QFontDialog>
 
 qint32 const kiloByte = 1024;
 
@@ -44,8 +53,7 @@ wgtTextView::wgtTextView(QWidget *parent)
     createMenu();
 
     m_rwMode = true;
-
-    resize(500, 500);
+    readSettings();
     setCentralWidget(m_textView);
     setWindowTitle("ZBC viewer/editor");
 }
@@ -58,17 +66,35 @@ void wgtTextView::createMenu()
     m_menu->addAction(m_saveAct);
     m_menu->addAction(m_fileSaveAsAct);
     m_menu->addSeparator();
+    m_menu->addAction(m_previewAct);
+    m_menu->addAction(m_printAct);
+    m_menu->addSeparator();
     m_menu->addAction(m_quitAct);
 
     m_editMenu = this->menuBar()->addMenu(tr("&Edit"));
     m_editMenu->addAction(m_findAtTextAct);
     m_editMenu->addAction(m_undoAct);
     m_editMenu->addAction(m_redoAct);
+    m_editMenu->addSeparator();
+    m_editMenu->addAction(m_fontAct);
 }
 
 //function for Actions
 void wgtTextView::createActions()
 {
+    m_fontAct = new QAction(tr("Font"), this);
+    m_fontAct->setStatusTip(tr("Change font of document"));
+    connect(m_fontAct, &QAction::triggered, this, &wgtTextView::changeFont);
+
+    m_previewAct = new QAction(tr("Preview document"), this);
+    m_previewAct->setStatusTip(tr("Watch the document before print"));
+    connect(m_previewAct, &QAction::triggered, this, &wgtTextView::previewDialog);
+
+    m_printAct = new QAction(tr("&Print"), this);
+    m_printAct->setStatusTip(tr("Print document"));
+    m_printAct->setShortcut(QKeySequence::Print);
+    connect(m_printAct, &QAction::triggered, this, &wgtTextView::printDoc);
+
     m_quitAct = new QAction(tr("&Quit"), this);
     m_quitAct->setStatusTip(tr("Close window"));
     m_quitAct->setShortcut(QKeySequence::Close);
@@ -148,6 +174,37 @@ void wgtTextView::editFile(const QString &filePath)
     loadFile(filePath, 'w');
 }
 
+void wgtTextView::writeSettings()
+{
+    QFont editorFont = m_textView->font();
+    m_settings.beginGroup("/Settings/TextViewEdit");
+    m_settings.setValue("editor.Width", width());
+    m_settings.setValue("editor.Height", height());
+    m_settings.setValue("editor.Font", editorFont.toString());
+    m_settings.setValue("editor.FontSize", editorFont.pointSize());
+    m_settings.setValue("editor.FontBold", editorFont.bold());
+    m_settings.setValue("editor.Italic", editorFont.italic());
+    m_settings.endGroup();
+}
+
+void wgtTextView::readSettings()
+{
+    m_settings.beginGroup("/Settings/TextViewEdit");
+    //read properties
+    int nWidth = m_settings.value("editor.Width", width()).toInt();
+    int nHeight = m_settings.value("editor.Height", height()).toInt();
+    QString fontFamily = m_settings.value("editor.Font", m_textView->font()).toString();
+    int fontSize = m_settings.value("editor.FontSize", 12).toInt();
+    bool fontIsBold = m_settings.value("editor.FontBold", false).toBool();
+    bool fontIsItalic = m_settings.value("editor.Italic", false).toBool();
+    //set properties
+    QFont editorFont(fontFamily, fontSize, QFont::Bold, fontIsItalic);
+    editorFont.setBold(fontIsBold);
+    resize(nWidth, nHeight);
+    m_textView->setFont(editorFont);
+    m_settings.endGroup();
+}
+
 void wgtTextView::closeEvent(QCloseEvent *)
 {
     QMessageBox::StandardButton reply = QMessageBox::No;
@@ -195,6 +252,37 @@ bool wgtTextView::saveFile()
     }
 }
 
+bool wgtTextView::printDoc()
+{
+    QPrintDialog printDialog(&printer, this);
+    if (printDialog.exec()) {
+        m_textView->print(&printer);
+        return true;
+    }
+    return false;
+}
+
+void wgtTextView::previewDialog()
+{
+    QPrintPreviewDialog preview(&printer, this, Qt::WindowFullscreenButtonHint
+                                | Qt::WindowSystemMenuHint | Qt::WindowMinMaxButtonsHint
+                                | Qt::WindowCloseButtonHint);
+    connect(&preview, QPrintPreviewDialog::paintRequested, this, &wgtTextView::paintPreview);
+    preview.exec();
+}
+
+void wgtTextView::paintPreview(QPrinter *printer)
+{
+    m_textView->print(printer);
+}
+
+void wgtTextView::changeFont()
+{
+    bool ok;
+    QFont fnt = QFontDialog::getFont(&ok);
+    m_textView->setFont(fnt);
+}
+
 //find slot
 void wgtTextView::find()
 {
@@ -225,6 +313,7 @@ void wgtTextView::replaceAllSlot(const QString &word, QTextDocument::FindFlags f
 wgtTextView::~wgtTextView()
 {
     delete m_findReplace;
+    writeSettings();
 }
 
 
