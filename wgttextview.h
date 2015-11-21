@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QTextDocument>
 #include <QPlainTextEdit>
+#include <QPrinter>
+#include <QSettings>
 #include "wgtfindreplacetext.h"
 
 class QMenu;
@@ -13,8 +15,7 @@ class QLabel;
 class editor;
 
 //mainwindow
-class wgtTextView : public QMainWindow
-{
+class wgtTextView : public QMainWindow {
     Q_OBJECT
 
 public:
@@ -22,6 +23,8 @@ public:
     bool loadFile(const QString &, char mode = 'r');
     void viewFile(const QString &);
     void editFile(const QString &);
+    void writeSettings();
+    void readSettings();
     ~wgtTextView();
 
 protected:
@@ -33,12 +36,15 @@ private:
     QMenu           *m_menu;
     QMenu           *m_editMenu;
 
-    QAction         *m_quitAct;
     QAction         *m_saveAct;
     QAction         *m_fileSaveAsAct;
+    QAction         *m_previewAct;
+    QAction         *m_printAct;
+    QAction         *m_quitAct;
     QAction         *m_findAtTextAct;
     QAction         *m_undoAct;
     QAction         *m_redoAct;
+    QAction         *m_fontAct;
 
     void createMenu();
     void createActions();
@@ -46,6 +52,9 @@ private:
     editor  *m_textView;
     QLabel  *m_docInfoLbl;
     QLabel  *m_fileInfoLbl;
+
+    QPrinter printer;
+    QSettings m_settings;
 
     QString pathToFile;
     FindReplaceText *m_findReplace;
@@ -55,6 +64,10 @@ private:
 private slots:
     bool saveAs();
     bool saveFile();
+    bool printDoc();
+    void previewDialog();
+    void paintPreview(QPrinter *);
+    void changeFont();
 
     //slots for wgtfindreplacetext
     void find();
@@ -90,8 +103,7 @@ private:
 };
 
 //paint
-class editorPaintArea : public QWidget
-{
+class editorPaintArea : public QWidget {
 
 public:
     editorPaintArea(editor *data) : QWidget(data) {

@@ -13,6 +13,7 @@ ZBC_DriveButton::ZBC_DriveButton(const QStringList& lstPath, QWidget* pwgt) : QW
 
     for( QString sPath : lstPath ){
         QPushButton* pBtn   = new QPushButton(sPath, this);
+        pBtn->setFocusPolicy(Qt::NoFocus);
         pBtn->setFixedSize(pBtn->sizeHint());
         connect(pBtn,
                 &QPushButton::clicked,

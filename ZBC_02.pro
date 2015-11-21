@@ -1,6 +1,10 @@
+win32:RC_FILE = file.rc
+
 QT += widgets
 
 CONFIG += c++11
+
+QT += printsupport
 
 win32 {
 QMAKE_CXXFLAGS = -Wall -Wextra -Werror
@@ -37,5 +41,4 @@ SOURCES += \
     zbc_lineedit.cpp \
     zbc_drivebutton.cpp
 
-RESOURCES += \
-    res.qrc
+RESOURCES +=
