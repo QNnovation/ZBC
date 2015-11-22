@@ -57,6 +57,7 @@ private:
     QSettings m_settings;
 
     QString pathToFile;
+    QStringList m_lastOpenFiles;
     FindReplaceText *m_findReplace;
     void replace(const QString &, const QString &, QTextDocument::FindFlags);
     void replaceAll(const QString &, const QString &, QTextDocument::FindFlags);

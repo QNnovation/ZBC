@@ -150,18 +150,42 @@ bool wgtTextView::loadFile(const QString &filePath, char mode)
     if (mode == 'w')
         m_rwMode = false;
 
-    QByteArray dataFromFile;
+    QStringList encodeS = { "Big5", "Big5-HKSCS", "CP949", "EUC-JP" "EUC-KR", "GB18030", "HP-ROMAN8",
+                            "IBM 850", "IBM 866", "IBM 874", "ISO 2022-JP", "ISO 8859-1", "8859-2", "8859-3",
+                            "8859-4", "8859-5", "8859-6", "8859-7", "8859-8", "8859-9", "8859-10", "ISO 8859-13",
+                            "ISO 8859-14", "ISO 8859-15", "ISO 8859-16", "KOI8-R", "KOI8-U", "Macintosh",
+                            "Shift-JIS", "TIS-620", "TSCII", "UTF-8", "UTF-16", "UTF-16BE", "UTF-16LE", "UTF-32",
+                            "UTF-32BE", "UTF-32LE", "Windows-1250", "Windows-1251", "Windows-1252", "Windows-1253",
+                            "Windows-1254", "Windows-1255", "Windows-1256", "Windows-1257", "Windows-1258" };
     QFile inputFile(pathToFile);
-    if (!inputFile.open(QFile::ReadOnly))
+
+#ifndef Q_WS_WIN
+QString encode("Windows-1251");
+#endif
+    if (!inputFile.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         qDebug()<<"Could not open the input file\n"<<pathToFile;
         return false;
     } else {
-        dataFromFile = inputFile.readAll();
-        m_textView->setReadOnly(m_rwMode);
-        m_textView->setPlainText(dataFromFile);
-        return true;
+        m_lastOpenFiles.push_back(filePath);
+        while(!inputFile.atEnd())
+        {
+            QString buf = inputFile.readLine();
+            for (int i = 0; i < encodeS.size(); ++i) {
+                if (buf.contains(encodeS.at(i))) {
+                    encode.clear();
+                    encode = encodeS.at(i);
+                    break;
+                }
+            }
+        }
     }
+    inputFile.seek(0);
+    QTextStream dataFromFile(&inputFile);
+    dataFromFile.setCodec(encode.toLatin1());
+    m_textView->setReadOnly(m_rwMode);
+    m_textView->setPlainText(dataFromFile.readAll());
+    return true;
 }
 
 void wgtTextView::viewFile(const QString &filePath)
@@ -184,6 +208,7 @@ void wgtTextView::writeSettings()
     m_settings.setValue("editor.FontSize", editorFont.pointSize());
     m_settings.setValue("editor.FontBold", editorFont.bold());
     m_settings.setValue("editor.Italic", editorFont.italic());
+    m_settings.setValue("editor.lastOpenFiles", m_lastOpenFiles);
     m_settings.endGroup();
 }
 
@@ -193,6 +218,7 @@ void wgtTextView::readSettings()
     //read properties
     int nWidth = m_settings.value("editor.Width", width()).toInt();
     int nHeight = m_settings.value("editor.Height", height()).toInt();
+    //m_lastOpenFiles = m_settings.value("editor.lastOpenFiles");
     QString fontFamily = m_settings.value("editor.Font", m_textView->font()).toString();
     int fontSize = m_settings.value("editor.FontSize", 12).toInt();
     bool fontIsBold = m_settings.value("editor.FontBold", false).toBool();
