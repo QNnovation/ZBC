@@ -40,9 +40,6 @@ FileOperationWgt::FileOperationWgt(QWidget *parent)
     setWindowTitle("ZBC Copying");
     setFixedSize(450, 128); //125 175
 
-    QPalette pal(Qt::red, Qt::black);
-    this->setPalette(pal);
-
     setLayout(d->mainLayout);
 
     connect(d->quitBtn, SIGNAL(clicked()), this, SLOT(closeWgt()));
@@ -537,7 +534,7 @@ void FileOperations::remDirsFiles(const QStringList &sList)
 {
     for (int i = 0; i < sList.size(); ++i) {
         if (QFileInfo(sList.at(i)).isFile()) {
-            qDebug() << "File: " << sList.at(i);
+            //qDebug() << "File: " << sList.at(i);
             QFile(sList.at(i)).remove();
         }
         else {

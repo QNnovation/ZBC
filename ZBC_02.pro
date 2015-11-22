@@ -1,3 +1,5 @@
+win32:RC_FILE = file.rc
+
 QT += widgets
 
 CONFIG += c++11
