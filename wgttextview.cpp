@@ -159,13 +159,6 @@ void wgtTextView::replaceAll(const QString &word, const QString &newWord, QTextD
 bool wgtTextView::loadFile(const QString &filePath, char mode)
 {
     pathToFile = filePath;
-    int maxSize = 5;
-    if (m_lastOpenFiles.size() > maxSize) {
-        for (int i = m_lastOpenFiles.size(); i > maxSize; --i) {
-            m_lastOpenFiles.removeAt(i);
-        }
-    }
-    m_lastOpenFiles.push_front(filePath);
     m_fileInfoLbl->setText("File: " + QFileInfo(pathToFile).fileName()
                            + " Size: " + QString::number(QFileInfo(pathToFile).size() / kiloByte)
                            + " Kb");
@@ -208,6 +201,7 @@ bool wgtTextView::loadFile(const QString &filePath, char mode)
     m_textView->setReadOnly(m_rwMode);
     m_openAct->setEnabled(!m_rwMode);
     m_textView->setPlainText(dataFromFile.readAll());
+    updateRecentFileAction();
     return true;
 }
 
@@ -267,6 +261,40 @@ void wgtTextView::readSettings()
     resize(nWidth, nHeight);
     m_textView->setFont(editorFont);
     m_settings.endGroup();
+}
+
+void wgtTextView::updateRecentFileAction()
+{
+    //remove duplicates
+    for (int i = 0; i < m_lastOpenFiles.size(); ++i) {
+        if (m_lastOpenFiles.at(i).contains(pathToFile))
+            m_lastOpenFiles.removeAt(i);
+    }
+    m_lastOpenFiles.push_front(pathToFile);
+    //cut to size
+    if (m_lastOpenFiles.size() > maxRecentFiles) {
+        for (int i = m_lastOpenFiles.size(); i >= maxRecentFiles; --i)
+            m_lastOpenFiles.removeAt(i);
+    }
+    QMutableStringListIterator i(m_lastOpenFiles);
+    //if dont exist's, remove from list
+    while (i.hasNext()) {
+        if (!QFile::exists(i.next()))
+            i.remove();
+    }
+    for (int j = 0; j < maxRecentFiles; ++j) {
+        if (j < m_lastOpenFiles.size()) {
+            QString text = tr("&%1 %2")
+                    .arg(j + 1)
+                    .arg(QFileInfo(m_lastOpenFiles[j]).fileName());
+            m_recentFileAction[j]->setText(text);
+            m_recentFileAction[j]->setData(m_lastOpenFiles[j]);
+            if (!m_rwMode)
+            m_recentFileAction[j]->setVisible(true);
+        } else {
+            m_recentFileAction[j]->setVisible(false);
+        }
+    }
 }
 
 void wgtTextView::closeEvent(QCloseEvent *)
