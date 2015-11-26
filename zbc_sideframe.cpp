@@ -1,4 +1,4 @@
-#include "zbc_drivebutton.h"
+#include "zbc_drivebuttonswidget.h"
 #include "zbc_sideframe.h"
 #include "zbc_lineedit.h"
 #include "zbc_treeview.h"
@@ -47,7 +47,7 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
     for( QFileInfo file : QDir::drives() ){
         lstDrives.push_back(file.filePath().left(2) + QDir::separator());
     }
-    ZBC_DriveButton* pdrvButtons    = new ZBC_DriveButton(lstDrives, this);
+    ZBC_DriveButtonsWidget* pdrvButtons    = new ZBC_DriveButtonsWidget(lstDrives, this);
 
 //ComboBox as View
     QComboBox*  pcbxVolumes         = new QComboBox(this);
@@ -109,7 +109,7 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 
 //Drive buttons clicked
     connect(pdrvButtons,
-            &ZBC_DriveButton::clicked,
+            &ZBC_DriveButtonsWidget::clicked,
             [=](QString sDrvPath){
         m_sCurPath = sDrvPath;
         pledCurPath->setText(m_sCurPath);

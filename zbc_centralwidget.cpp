@@ -202,10 +202,10 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
     connect(m_pbtnEdit,
             &ZBC_PushButton::clicked,
             [this](){
-        if ( QFileInfo(this->m_psfwActive->getListOfSelectedItems().at(0)).isFile() ){
-            wgtTextView* TextView   = new wgtTextView(qobject_cast<QWidget*>(this));
-            TextView->loadFile(this->m_psfwActive->getListOfSelectedItems().at(0), 'w');
-            TextView->show();
+                if ( QFileInfo(this->m_psfwActive->getListOfSelectedItems().at(0)).isFile() ){
+                    wgtTextView* TextView   = new wgtTextView(qobject_cast<QWidget*>(this));
+                    TextView->loadFile(this->m_psfwActive->getListOfSelectedItems().at(0), 'w');
+                    TextView->show();
         }
             });
 
