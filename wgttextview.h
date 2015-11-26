@@ -25,6 +25,7 @@ public:
     void editFile(const QString &);
     void writeSettings();
     void readSettings();
+    void updateRecentFileAction();
     ~wgtTextView();
 
 protected:
@@ -37,6 +38,7 @@ private:
     QMenu           *m_editMenu;
 
     QAction         *m_saveAct;
+    QAction         *m_openAct;
     QAction         *m_fileSaveAsAct;
     QAction         *m_previewAct;
     QAction         *m_printAct;
@@ -45,6 +47,10 @@ private:
     QAction         *m_undoAct;
     QAction         *m_redoAct;
     QAction         *m_fontAct;
+
+    enum { maxRecentFiles = 5 };
+    QAction *m_recentFileAction[maxRecentFiles];
+    QStringList m_lastOpenFiles;
 
     void createMenu();
     void createActions();
@@ -62,12 +68,15 @@ private:
     void replaceAll(const QString &, const QString &, QTextDocument::FindFlags);
 
 private slots:
+    bool openFile();
     bool saveAs();
     bool saveFile();
     bool printDoc();
     void previewDialog();
     void paintPreview(QPrinter *);
     void changeFont();
+    void openRecentFile();
+
 
     //slots for wgtfindreplacetext
     void find();

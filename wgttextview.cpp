@@ -63,8 +63,12 @@ void wgtTextView::createMenu()
 {
 
     m_menu = this->menuBar()->addMenu(tr("&File"));
+    m_menu->addAction(m_openAct);
     m_menu->addAction(m_saveAct);
     m_menu->addAction(m_fileSaveAsAct);
+    m_menu->addSeparator();
+    for (int i = 0; i < maxRecentFiles; ++i)
+        m_menu->addAction(m_recentFileAction[i]);
     m_menu->addSeparator();
     m_menu->addAction(m_previewAct);
     m_menu->addAction(m_printAct);
@@ -82,6 +86,17 @@ void wgtTextView::createMenu()
 //function for Actions
 void wgtTextView::createActions()
 {
+    for (int i = 0; i < maxRecentFiles; ++i) {
+        m_recentFileAction[i] = new QAction(this);
+        m_recentFileAction[i]->setVisible(false);
+        connect(m_recentFileAction[i], &QAction::triggered, this, &wgtTextView::openRecentFile);
+    }
+
+    m_openAct = new QAction(tr("Open..."), this);
+    m_openAct->setStatusTip(tr("Open file"));
+    m_openAct->setShortcut(QKeySequence::Open);
+    connect(m_openAct, &QAction::triggered, this, &wgtTextView::openFile);
+
     m_fontAct = new QAction(tr("Font"), this);
     m_fontAct->setStatusTip(tr("Change font of document"));
     connect(m_fontAct, &QAction::triggered, this, &wgtTextView::changeFont);
@@ -150,18 +165,44 @@ bool wgtTextView::loadFile(const QString &filePath, char mode)
     if (mode == 'w')
         m_rwMode = false;
 
-    QByteArray dataFromFile;
+    QStringList encodeS = { "Big5", "Big5-HKSCS", "CP949", "EUC-JP" "EUC-KR", "GB18030", "HP-ROMAN8",
+                            "IBM 850", "IBM 866", "IBM 874", "ISO 2022-JP", "ISO 8859-1", "8859-2", "8859-3",
+                            "8859-4", "8859-5", "8859-6", "8859-7", "8859-8", "8859-9", "8859-10", "ISO 8859-13",
+                            "ISO 8859-14", "ISO 8859-15", "ISO 8859-16", "KOI8-R", "KOI8-U", "Macintosh",
+                            "Shift-JIS", "TIS-620", "TSCII", "UTF-8", "UTF-16", "UTF-16BE", "UTF-16LE", "UTF-32",
+                            "UTF-32BE", "UTF-32LE", "Windows-1250", "Windows-1251", "Windows-1252", "Windows-1253",
+                            "Windows-1254", "Windows-1255", "Windows-1256", "Windows-1257", "Windows-1258" };
     QFile inputFile(pathToFile);
-    if (!inputFile.open(QFile::ReadOnly))
+
+#ifndef Q_WS_WIN
+    QString encode("Windows-1251");
+#endif
+    if (!inputFile.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         qDebug()<<"Could not open the input file\n"<<pathToFile;
         return false;
     } else {
-        dataFromFile = inputFile.readAll();
-        m_textView->setReadOnly(m_rwMode);
-        m_textView->setPlainText(dataFromFile);
-        return true;
+        m_lastOpenFiles.push_back(filePath);
+        while(!inputFile.atEnd())
+        {
+            QString buf = inputFile.readLine();
+            for (int i = 0; i < encodeS.size(); ++i) {
+                if (buf.contains(encodeS.at(i))) {
+                    encode.clear();
+                    encode = encodeS.at(i);
+                    break;
+                }
+            }
+        }
     }
+    inputFile.seek(0);
+    QTextStream dataFromFile(&inputFile);
+    dataFromFile.setCodec(encode.toLatin1());
+    m_textView->setReadOnly(m_rwMode);
+    m_openAct->setEnabled(!m_rwMode);
+    m_textView->setPlainText(dataFromFile.readAll());
+    updateRecentFileAction();
+    return true;
 }
 
 void wgtTextView::viewFile(const QString &filePath)
@@ -180,10 +221,19 @@ void wgtTextView::writeSettings()
     m_settings.beginGroup("/Settings/TextViewEdit");
     m_settings.setValue("editor.Width", width());
     m_settings.setValue("editor.Height", height());
+
+    m_settings.beginWriteArray("editor.lastOpenFiles");
+    for (int i = 0 ; i < m_lastOpenFiles.size(); ++i) {
+        m_settings.setArrayIndex(i);
+        m_settings.setValue("path", m_lastOpenFiles.at(i));
+    }
+    m_settings.endArray();
+
     m_settings.setValue("editor.Font", editorFont.toString());
     m_settings.setValue("editor.FontSize", editorFont.pointSize());
     m_settings.setValue("editor.FontBold", editorFont.bold());
     m_settings.setValue("editor.Italic", editorFont.italic());
+    m_settings.setValue("editor.lastOpenFiles", m_lastOpenFiles);
     m_settings.endGroup();
 }
 
@@ -193,6 +243,14 @@ void wgtTextView::readSettings()
     //read properties
     int nWidth = m_settings.value("editor.Width", width()).toInt();
     int nHeight = m_settings.value("editor.Height", height()).toInt();
+
+    int size = m_settings.beginReadArray("editor.lastOpenFiles");
+    for (int i = 0; i < size; ++i) {
+        m_settings.setArrayIndex(i);
+        m_lastOpenFiles.append(m_settings.value("path").toString());
+    }
+    m_settings.endArray();
+
     QString fontFamily = m_settings.value("editor.Font", m_textView->font()).toString();
     int fontSize = m_settings.value("editor.FontSize", 12).toInt();
     bool fontIsBold = m_settings.value("editor.FontBold", false).toBool();
@@ -203,6 +261,40 @@ void wgtTextView::readSettings()
     resize(nWidth, nHeight);
     m_textView->setFont(editorFont);
     m_settings.endGroup();
+}
+
+void wgtTextView::updateRecentFileAction()
+{
+    //remove duplicates
+    for (int i = 0; i < m_lastOpenFiles.size(); ++i) {
+        if (m_lastOpenFiles.at(i).contains(pathToFile))
+            m_lastOpenFiles.removeAt(i);
+    }
+    m_lastOpenFiles.push_front(pathToFile);
+    //cut to size
+    if (m_lastOpenFiles.size() > maxRecentFiles) {
+        for (int i = m_lastOpenFiles.size(); i >= maxRecentFiles; --i)
+            m_lastOpenFiles.removeAt(i);
+    }
+    QMutableStringListIterator i(m_lastOpenFiles);
+    //if dont exist's, remove from list
+    while (i.hasNext()) {
+        if (!QFile::exists(i.next()))
+            i.remove();
+    }
+    for (int j = 0; j < maxRecentFiles; ++j) {
+        if (j < m_lastOpenFiles.size()) {
+            QString text = tr("&%1 %2")
+                    .arg(j + 1)
+                    .arg(QFileInfo(m_lastOpenFiles[j]).fileName());
+            m_recentFileAction[j]->setText(text);
+            m_recentFileAction[j]->setData(m_lastOpenFiles[j]);
+            if (!m_rwMode)
+            m_recentFileAction[j]->setVisible(true);
+        } else {
+            m_recentFileAction[j]->setVisible(false);
+        }
+    }
 }
 
 void wgtTextView::closeEvent(QCloseEvent *)
@@ -222,6 +314,17 @@ void wgtTextView::closeEvent(QCloseEvent *)
     }
 }
 
+bool wgtTextView::openFile()
+{
+    QString fileName = QFileDialog::getOpenFileName(this,
+                                                    QObject::tr("Open File"),
+                                                    pathToFile,
+                                                    QObject::tr("Text files (*.*)"));
+    if (loadFile(fileName, 'w'))
+        return true;
+    else
+        return false;
+}
 
 //slot saveAs
 bool wgtTextView::saveAs()
@@ -281,6 +384,13 @@ void wgtTextView::changeFont()
     bool ok;
     QFont fnt = QFontDialog::getFont(&ok);
     m_textView->setFont(fnt);
+}
+
+void wgtTextView::openRecentFile()
+{
+    QAction *action = qobject_cast<QAction *>(sender());
+    if (action)
+        loadFile(action->data().toString(), 'w');
 }
 
 //find slot
