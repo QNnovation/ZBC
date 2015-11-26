@@ -24,7 +24,8 @@ HEADERS += \
     zbc_treeview.h \
     zbc_mainwindow.h \
     zbc_lineedit.h \
-    zbc_drivebuttonswidget.h
+    zbc_drivebuttonswidget.h \
+    zbc_styles.h
     zbc_newfolder.h
 
 SOURCES += \
@@ -39,6 +40,7 @@ SOURCES += \
     zbc_treeview.cpp \
     zbc_mainwindow.cpp \
     zbc_lineedit.cpp \
-    zbc_drivebuttonswidget.cpp
+    zbc_drivebuttonswidget.cpp \
+    zbc_styles.cpp
 
 RESOURCES +=

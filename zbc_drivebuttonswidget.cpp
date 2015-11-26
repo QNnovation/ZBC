@@ -19,10 +19,12 @@ ZBC_DriveButtonsWidget::ZBC_DriveButtonsWidget(const QStringList& lstPath, QWidg
         pBtn->setFocusPolicy(Qt::NoFocus);
         pBtn->setFixedSize(pBtn->sizeHint());
 
+/*
         QPalette palette;//(this->palette());
         palette.setBrush(QPalette::Button, QBrush(Qt::red));
         pBtn->setAutoFillBackground(true);
         pBtn->setPalette(palette);
+*/
 
         connect(pBtn,
                 &QPushButton::clicked,
