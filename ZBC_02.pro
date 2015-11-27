@@ -43,4 +43,3 @@ SOURCES += \
     zbc_drivebuttonswidget.cpp \
     zbc_styles.cpp
 
-RESOURCES +=
