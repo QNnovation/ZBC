@@ -21,13 +21,13 @@ wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(p
     if (path.isEmpty())
         return;
     else
-        dirPath = path;
+        m_dirPath = path;
 
     m_searchFileLbl = new QLabel(tr("Files:"), this);
     m_pathToFileLbl = new QLabel(tr("Path:"), this);
     m_searchFileEdit = new QLineEdit(this);
     m_pathToFileEdit = new QLineEdit(this);
-    m_pathToFileEdit->setText(dirPath);
+    m_pathToFileEdit->setText(m_dirPath);
 
     m_withTextLbl = new QLabel(tr("With text:"), this);
     m_withTextEdit = new QLineEdit(this);
@@ -64,7 +64,7 @@ wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(p
     m_upTopLayout = new QHBoxLayout();
     m_upTopLayout->addWidget(m_tabWgt);
 
-    m_rightBtnLayout = new QVBoxLayout(this);
+    m_rightBtnLayout = new QVBoxLayout();
     m_btnSearch = new QPushButton(tr("Search"), this);
     m_btnCancel = new QPushButton(tr("Cancel"), this);
     m_rightBtnLayout->addSpacing(20);

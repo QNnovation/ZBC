@@ -13,6 +13,7 @@ class QPushButton;
 class QVBoxLayout;
 class QListWidget;
 class QString;
+class QThread;
 
 class wgtFilesSearch : public QDialog
 {
@@ -66,7 +67,8 @@ private:
     QPushButton *m_btnNewSearch;
     //GUI end
 
-    QString dirPath;
+    QString m_dirPath;
+    QThread *m_fileSearchThread;
 };
 
 #endif // WGTFILESSEARCH_H
