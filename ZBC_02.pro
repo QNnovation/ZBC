@@ -22,6 +22,7 @@ HEADERS += \
     zbc_centralwidget.h \
     zbc_centralwidget_p.h \
     zbc_treeview.h \
+    wgtfilessearch.h \
     zbc_mainwindow.h \
     zbc_lineedit.h \
     zbc_drivebuttonswidget.h \
@@ -33,6 +34,7 @@ SOURCES += \
     wgtcopy.cpp \
     main.cpp \
     zbc_newfolder.cpp \
+    wgtfilessearch.cpp \
     wgtfindreplacetext.cpp \
     zbc_sideframe.cpp \
     zbc_pushbutton.cpp \
