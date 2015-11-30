@@ -5,8 +5,10 @@
 #include "zbc_centralwidget.h"
 
 #include <QApplication>
+#include <QDir>
 #include <QMenuBar>
 #include <QPalette>
+#include <QProcess>
 #include <QToolBar>
 #include <QSettings>
 #include <QStyleFactory>
@@ -21,10 +23,8 @@ ZBC_MainWindow::ZBC_MainWindow(QWidget* pwgt) : QMainWindow(pwgt)
     QAction* pactQuit       = new QAction("Quit", this);
     QAction* pactBack       = new QAction(QIcon(":/buttons/toolbar/resource/left32.ico"), tr("Back"), this);
     QAction* pactForward    = new QAction(QIcon(":/buttons/toolbar/resource/right32.ico"), tr("Forward"), this);
+    QAction* pactCMD        = new QAction(QIcon(":/buttons/toolbar/resource/cmd.ico"), tr("Run cmd.exe"), this);
 
-//    qDebug() << pactBack->icon().
-//    QAction* pactBack       = new QAction("Back", this);
-//    QAction* pactForward    = new QAction("Forward", this);
 
 //Menu Bar
     QMenu* pmnuFile = menuBar()->addMenu("File");
@@ -75,11 +75,24 @@ ZBC_MainWindow::ZBC_MainWindow(QWidget* pwgt) : QMainWindow(pwgt)
     ptbrGo->addAction(pactBack);
     ptbrGo->addAction(pactForward);
 
+    QToolBar* ptbrTools = addToolBar(tr("Tools"));
+    ptbrTools->setMovable(false);
+    ptbrTools->addAction(pactCMD);
+
 //Connections
+//Quit
     connect(pactQuit,
             &QAction::triggered,
             this,
             &QMainWindow::close);
+//Run cmd.exe
+    connect(pactCMD,
+            &QAction::triggered,
+            [=](){
+                QProcess* pprcCmd   = new QProcess(this);
+                pprcCmd->startDetached("cmd.exe");
+            });
+
 
 //Central Widget
     ZBC_CentralWidget* pzbcCwgt = new ZBC_CentralWidget(this);
