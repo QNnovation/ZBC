@@ -1,5 +1,3 @@
-win32:RC_FILE = file.rc
-
 QT += widgets
 
 CONFIG += c++11
@@ -42,4 +40,7 @@ SOURCES += \
     zbc_lineedit.cpp \
     zbc_drivebuttonswidget.cpp \
     zbc_styles.cpp
+
+RESOURCES += \
+    zbc_res.qrc
 
