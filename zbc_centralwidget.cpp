@@ -3,6 +3,7 @@
 #include "zbc_newfolder.h"
 
 #include "wgtcopy.h"
+#include "wgtfilessearch.h"
 #include "wgttextview.h"
 
 #include <QAction>
@@ -324,6 +325,18 @@ void ZBC_CentralWidgetPrivate::shiftDeletePressed(QKeyEvent *pe)
             wgtDelete->removeFileOperation(m_psfwActive->getListOfSelectedItems());
             wgtDelete->setModal(true);
             wgtDelete->show();
+        }
+    case Qt::Key_F7:
+        if (pe->modifiers() & Qt::AltModifier){
+            wgtFilesSearch* wgtSearch   = new wgtFilesSearch(m_psfwActive->getCurrentPath(), q_ptr);
+/*
+            connect(wgtSearch,
+                    &wgtFilesSearch::filePath,
+                    [=](){
+                        m_psfwActive->set
+                    });
+*/
+            wgtSearch->show();
         }
         break;
     default:
