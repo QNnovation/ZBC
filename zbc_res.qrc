@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/buttons/toolbar">
+        <file>resource/right32.ico</file>
+        <file>resource/left32.ico</file>
+    </qresource>
+    <qresource prefix="/mainwindow/icons">
+        <file>resource/app.ico</file>
+    </qresource>
+</RCC>

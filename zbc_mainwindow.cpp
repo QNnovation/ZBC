@@ -1,3 +1,5 @@
+#include <QDebug>
+
 #include "zbc_styles.h"
 #include "zbc_mainwindow.h"
 #include "zbc_centralwidget.h"
@@ -13,8 +15,16 @@
 //C-tor
 ZBC_MainWindow::ZBC_MainWindow(QWidget* pwgt) : QMainWindow(pwgt)
 {
+    this->setWindowIcon(QIcon(":/mainwindow/icons/resource/app.ico"));
+
 //Actions
     QAction* pactQuit       = new QAction("Quit", this);
+    QAction* pactBack       = new QAction(QIcon(":/buttons/toolbar/resource/left32.ico"), tr("Back"), this);
+    QAction* pactForward    = new QAction(QIcon(":/buttons/toolbar/resource/right32.ico"), tr("Forward"), this);
+
+//    qDebug() << pactBack->icon().
+//    QAction* pactBack       = new QAction("Back", this);
+//    QAction* pactForward    = new QAction("Forward", this);
 
 //Menu Bar
     QMenu* pmnuFile = menuBar()->addMenu("File");
@@ -57,7 +67,13 @@ ZBC_MainWindow::ZBC_MainWindow(QWidget* pwgt) : QMainWindow(pwgt)
 
 //Tool Bar
     QToolBar* ptbrFile = addToolBar("File");
+    ptbrFile->setMovable(false);
     ptbrFile->addAction(pactQuit);
+
+    QToolBar* ptbrGo = addToolBar("Go");
+    ptbrGo->setMovable(false);
+    ptbrGo->addAction(pactBack);
+    ptbrGo->addAction(pactForward);
 
 //Connections
     connect(pactQuit,
