@@ -16,6 +16,7 @@ public:
     void clearListOfSelectedItems();
     QString getCurrentPath();
     QStringList getListOfSelectedItems() const;
+    const QStringList& getListofPathHistory() const;
 
 private:
     QString                     m_sCurPath;
@@ -23,6 +24,7 @@ private:
 
     QHash<QString, int>         m_hashFiles;
     QSet<QString>               m_setDirs;
+    QStringList                 m_lstPathHistory;
 
     void setListOfItemsInDir();
     qint64 getSizeOfFiles(QHash<QString, int>) const;
@@ -31,6 +33,8 @@ private:
 
 signals:
     void Active();
+    void DirChanged(const QString&);
+
 };
 
 #endif // ZBCSIDEFRAME_H
