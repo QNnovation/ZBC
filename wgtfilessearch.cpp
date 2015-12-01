@@ -11,6 +11,9 @@
 #include <QVBoxLayout>
 #include <QListWidget>
 #include <QDebug>
+#include <QDirIterator>
+#include <QThread>
+#include <QFileInfo>
 
 wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(parent)
 {
@@ -66,16 +69,18 @@ wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(p
 
     m_rightBtnLayout = new QVBoxLayout();
     m_btnSearch = new QPushButton(tr("Search"), this);
+    m_btnStop = new QPushButton(tr("Stop"), this);
+    m_btnStop->setEnabled(false);
     m_btnCancel = new QPushButton(tr("Cancel"), this);
     m_rightBtnLayout->addSpacing(20);
     m_rightBtnLayout->addWidget(m_btnSearch);
+    m_rightBtnLayout->addWidget(m_btnStop);
     m_rightBtnLayout->addWidget(m_btnCancel);
     m_rightBtnLayout->addStretch();
     m_upTopLayout->addLayout(m_rightBtnLayout);
 
     m_mainBoxLayout = new QVBoxLayout(this);
     m_foundFileList = new QListWidget(this);
-    m_foundFileList->addItem("d:/");
     //listWgt->setVisible(false);
     m_mainBoxLayout->addLayout(m_upTopLayout);
     m_searchPathLbl = new QLabel(tr(":"), this);
@@ -103,8 +108,58 @@ wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(p
     //connect
     connect(m_btnCancel, &QPushButton::clicked, this, &QDialog::close);
     connect(m_withTextOption, &QCheckBox::toggled, this, &wgtFilesSearch::withTextOptionSlot);
-    connect(m_btnSearch, &QPushButton::pressed, this, &wgtFilesSearch::searchForFiles);
+    connect(m_btnSearch, &QPushButton::pressed, this, &wgtFilesSearch::startSearchFiles);
+    connect(m_btnStop, QPushButton::pressed, this, &wgtFilesSearch::stopSearchFiles);
     connect (m_foundFileList, &QListWidget::itemDoubleClicked, this, &wgtFilesSearch::listOfFilesClicked);
+
+    //thread
+    m_fileSearchThread = new QThread();
+    m_searchEngine = new filesSearchEngine();           //<<search class
+    m_searchEngine->moveToThread(m_fileSearchThread);
+
+    //start class in thread
+    connect(m_fileSearchThread, &QThread::started,
+            m_searchEngine, &filesSearchEngine::process);
+    //close thread
+    connect(m_searchEngine, &filesSearchEngine::finished,
+            m_fileSearchThread, QThread::quit);
+    //delete class after work
+    connect(m_searchEngine, &filesSearchEngine::finished,
+            m_searchEngine, &filesSearchEngine::deleteLater);
+    //delete thread after work
+    connect(m_fileSearchThread, &QThread::finished,
+            m_fileSearchThread, &QThread::deleteLater);
+
+    //data from thread
+    connect(m_searchEngine, &filesSearchEngine::currentSearchPatch,
+            m_searchPathLbl, &QLabel::setText);
+    connect(m_searchEngine, &filesSearchEngine::foundFilePatch,
+            this, &wgtFilesSearch::addItemToFileList);
+}
+
+void wgtFilesSearch::startSearchFiles()
+{
+    m_searchEngine->loadSearchData(m_searchFileEdit->text(), m_pathToFileEdit->text());
+    m_fileSearchThread->start();
+    m_btnSearch->setEnabled(false);
+    m_btnStop->setEnabled(true);
+}
+
+void wgtFilesSearch::stopSearchFiles()
+{
+    m_fileSearchThread->wait();
+    m_fileSearchThread->quit();
+    m_btnSearch->setEnabled(true);
+}
+
+void wgtFilesSearch::resultToList()
+{
+    QStringList fdPath;
+    for(int i = 0; i < m_foundFileList->count(); ++i)
+    {
+        fdPath.append(m_foundFileList->item(i)->text());
+    }
+    qDebug() << "Size: " << fdPath.size();
 }
 
 void wgtFilesSearch::withTextOptionSlot(bool state)
@@ -114,15 +169,53 @@ void wgtFilesSearch::withTextOptionSlot(bool state)
     m_wholeWordsOption->setEnabled(state);
 }
 
-void wgtFilesSearch::searchForFiles()
-{
-    if (m_btnSearch->text() == "Search")
-        m_btnSearch->setText(tr("Stop"));
-    else
-        m_btnSearch->setText(tr("Search"));
-}
-
 void wgtFilesSearch::listOfFilesClicked()
 {
     emit(m_foundFileList->currentItem()->text());
 }
+
+void wgtFilesSearch::addItemToFileList(QString data)
+{
+    m_foundFileList->addItem(data);
+}
+
+//filesearch engine implementation
+filesSearchEngine::filesSearchEngine(QWidget *parent) : QObject(parent)
+{
+
+}
+
+void filesSearchEngine::loadSearchData(const QString &files, const QString &path)
+{
+    m_strFileNames = files;
+    m_dirPath = path;
+}
+
+void filesSearchEngine::process()
+{
+    QDirIterator it(m_dirPath, QDir::Files, QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        it.next();
+        emit currentSearchPatch(it.filePath());
+        if (it.fileName() == m_strFileNames) {
+            emit foundFilePatch(it.filePath());
+        }
+        else if (m_strFileNames.isEmpty()) {
+            emit foundFilePatch(it.filePath());
+        }
+    }
+    emit currentSearchPatch(":");
+    emit finished();
+}
+
+
+
+
+
+
+
+
+
+
+
+
