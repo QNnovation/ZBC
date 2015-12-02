@@ -296,6 +296,20 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
             [q](){
             q->parentWidget()->close();
     });
+
+//Signals From MainWindow
+//Go Back
+    connect(q_ptr,
+            &ZBC_CentralWidget::goBack,
+            m_psfwActive,
+            &ZBC_SideFrame::goBack);
+
+/*
+    connect(m_psfwActive,
+            &ZBC_SideFrame::backAtEnd,
+            q_ptr,
+            &ZBC_CentralWidget::backAtEnd);
+*/
 }
 
 

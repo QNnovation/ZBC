@@ -91,12 +91,26 @@ ZBC_MainWindow::ZBC_MainWindow(QWidget* pwgt) : QMainWindow(pwgt)
     ptbrTools->addAction(pactTaskmgr);
 //    ptbrTools->addAction(pactRegedit);
 
+//Central Widget
+    ZBC_CentralWidget* pzbcCwgt = new ZBC_CentralWidget(this);
+    this->setCentralWidget(pzbcCwgt);
+
+
 //Connections
 //Quit
     connect(pactQuit,
             &QAction::triggered,
             this,
             &QMainWindow::close);
+
+//Go Back
+    connect(pactBack,
+            &QAction::triggered,
+            pzbcCwgt,
+            &ZBC_CentralWidget::goBack
+            );
+
+
 //Run cmd.exe
     connect(pactCMD,
             &QAction::triggered,
@@ -148,9 +162,6 @@ ZBC_MainWindow::ZBC_MainWindow(QWidget* pwgt) : QMainWindow(pwgt)
                 });
 */
 
-//Central Widget
-    ZBC_CentralWidget* pzbcCwgt = new ZBC_CentralWidget(this);
-    this->setCentralWidget(pzbcCwgt);
 
 //Settings
     QSettings Settings;
