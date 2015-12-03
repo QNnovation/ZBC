@@ -13,8 +13,6 @@ class QSplitter;
 
 class ZBC_CentralWidget;
 
-
-
 class ZBC_CentralWidgetPrivate : public QObject
 {
     Q_OBJECT
@@ -55,6 +53,7 @@ private:
     QAction*            m_pactShiftDelete;
 
     void shiftDeletePressed(QKeyEvent* pe);
+
 };
 
 #endif // ZBC_CENTRALWIDGET_P_H

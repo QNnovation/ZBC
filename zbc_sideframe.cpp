@@ -1,3 +1,5 @@
+#include <QDebug>
+
 #include "zbc_drivebuttonswidget.h"
 #include "zbc_sideframe.h"
 #include "zbc_lineedit.h"
@@ -52,12 +54,14 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 //ComboBox as View
     QComboBox*  pcbxVolumes         = new QComboBox(this);
     pcbxVolumes->setFocusPolicy(Qt::NoFocus);
-    pcbxVolumes->addItems(lstDrives);
+    for (QString sDrive : lstDrives)
+        pcbxVolumes->addItem(QIcon(":/buttons/drives/resource/logicaldrive.ico"), sDrive);
     pcbxVolumes->setCurrentIndex(lstDrives.indexOf(path.left(3)));
     pcbxVolumes->setMaximumSize(pcbxVolumes->sizeHint());
 
 //Current path
     m_sCurPath = QDir::toNativeSeparators(pfsmModel->rootPath());
+    emit DirChanged(m_sCurPath);
 
 //LineEdit with current path
     ZBC_LineEdit* pledCurPath      = new ZBC_LineEdit(this);
@@ -86,6 +90,10 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 //Style
     this->setFrameStyle(QFrame::WinPanel | QFrame::Sunken);
 
+//Path history
+    m_lstPathHistory = QStringList();
+    m_iterPathHistory = m_lstPathHistory.constBegin();
+
 //Connections
 //Change value of QComboBox with drives
     connect(pcbxVolumes,
@@ -99,7 +107,12 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                     sCurDisk.remove(')');
                 }
 
+                m_lstPathHistory.push_front(m_sCurPath);
+                m_iterPathHistory = m_lstPathHistory.constBegin();
+                qDebug() << "CBX: " << m_lstPathHistory;
+                qDebug() << *m_iterPathHistory;
                 m_sCurPath = sCurDisk;
+                emit DirChanged(m_sCurPath);
                 pledCurPath->setText(m_sCurPath);
                 ptreeView->setRootIndex(psfpModel->mapFromSource(pfsmModel->index(sCurDisk)));
 
@@ -111,12 +124,16 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
     connect(pdrvButtons,
             &ZBC_DriveButtonsWidget::clicked,
             [=](QString sDrvPath){
-        m_sCurPath = sDrvPath;
-        pledCurPath->setText(m_sCurPath);
-        pcbxVolumes->setCurrentIndex(lstDrives.indexOf(sDrvPath));
-        ptreeView->setRootIndex(psfpModel->mapFromSource(pfsmModel->index(pledCurPath->text())));
-        setTextForLblDirInfo(plblDirInfo);
-    });
+                m_lstPathHistory.push_front(m_sCurPath);
+                m_iterPathHistory = m_lstPathHistory.constBegin();
+                qDebug() << "DRV: " << m_lstPathHistory;
+                qDebug() << *m_iterPathHistory;
+                m_sCurPath = sDrvPath;
+                pledCurPath->setText(m_sCurPath);
+                pcbxVolumes->setCurrentIndex(lstDrives.indexOf(sDrvPath));
+                ptreeView->setRootIndex(psfpModel->mapFromSource(pfsmModel->index(pledCurPath->text())));
+                setTextForLblDirInfo(plblDirInfo);
+            });
 
 //Enter pressed on LineEdit with current path
     connect(pledCurPath,
@@ -127,7 +144,12 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                     pledCurPath->setText(oldVal);
                 else
                     ptreeView->setRootIndex(QModelIndex( psfpModel->mapFromSource(pfsmModel->index(pledCurPath->text()))));
+                m_lstPathHistory.push_front(m_sCurPath);
+                m_iterPathHistory = m_lstPathHistory.constBegin();
+                qDebug() << "LED: " << m_lstPathHistory;
+                qDebug() << *m_iterPathHistory;
                 m_sCurPath = QDir::toNativeSeparators( pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex())) );
+                emit DirChanged(m_sCurPath);
                 stlSelectedItems.clear();
                 setTextForLblDirInfo(plblDirInfo);
                 emit Active();
@@ -150,8 +172,13 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                             ptreeView->setRootIndex(psfpModel->mapFromSource(pfsmModel->index(pfsmModel->filePath(psfpModel->mapToSource(_index)))));
 
                         }
+                        m_lstPathHistory.push_front(m_sCurPath);
+                        m_iterPathHistory = m_lstPathHistory.constBegin();
+                        qDebug() << "TRV: " << m_lstPathHistory;
+                        qDebug() << *m_iterPathHistory;
                         m_sCurPath = QDir::toNativeSeparators( pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex())) );
                         pledCurPath->setText(m_sCurPath);
+                        emit DirChanged(m_sCurPath);
                         stlSelectedItems.clear();
                         setTextForLblDirInfo(plblDirInfo);
                     }
@@ -182,6 +209,37 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
             &ZBC_TreeView::Active,
             this,
             &ZBC_SideFrame::Active);
+
+//Signal from MainWindow
+//Go Back
+    connect(this,
+            &ZBC_SideFrame::goBack,
+            [=](){
+                if ( m_iterPathHistory != m_lstPathHistory.constEnd() && ++m_iterPathHistory != m_lstPathHistory.constEnd() ){
+                    ptreeView->setRootIndex(QModelIndex( psfpModel->mapFromSource(pfsmModel->index(*m_iterPathHistory))));
+                    m_sCurPath = QDir::toNativeSeparators( pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex())) );
+                    pledCurPath->setText(m_sCurPath);
+                    stlSelectedItems.clear();
+                    setTextForLblDirInfo(plblDirInfo);
+                    qDebug() << "Back" << m_lstPathHistory;
+                    qDebug() << *m_iterPathHistory;
+                }
+            });
+
+//Go Forward
+    connect(this,
+            &ZBC_SideFrame::goForward,
+            [=](){
+                if( m_iterPathHistory != m_lstPathHistory.constBegin() && --m_iterPathHistory != m_lstPathHistory.constBegin() ){
+                    ptreeView->setRootIndex(QModelIndex( psfpModel->mapFromSource(pfsmModel->index(*m_iterPathHistory))));
+                    m_sCurPath = QDir::toNativeSeparators( pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex())) );
+                    pledCurPath->setText(m_sCurPath);
+                    stlSelectedItems.clear();
+                    setTextForLblDirInfo(plblDirInfo);
+                    qDebug() << "Forward" << m_lstPathHistory;
+                    qDebug() << *m_iterPathHistory;
+                }
+            });
 }
 
 

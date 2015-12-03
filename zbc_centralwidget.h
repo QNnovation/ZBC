@@ -17,6 +17,10 @@ public:
 
 protected:
     virtual void keyPressEvent(QKeyEvent* pe) override;
+
+signals:
+    void goBack();
+    void goForward();
 };
 
 #endif // ZBC_CENTRALWIDGET_H
