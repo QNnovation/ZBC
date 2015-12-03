@@ -216,15 +216,24 @@ void filesSearchEngine::loadSearchData(const QString &files, const QString &path
 
 void filesSearchEngine::process()
 {
+    QStringList nameFilter;
     int starCnt = 0;
     if (m_strFileNames.contains("*")) {
-        //1
+        //если есть звёзды то считаем их
         for (int i = 0; i < m_strFileNames.size(); ++i)
             if (m_strFileNames.at(i) == '*')
                 ++starCnt;
+        //если количество звёзд равно 1 то создаём фильтр
+        if (starCnt == 1 && m_strFileNames.at(0) == '*') {
+            nameFilter.append(m_strFileNames);
+            m_strFileNames.clear();
+        }
+        //если количество звёзд > 1;
+        else if (starCnt == 2 && m_strFileNames == "*.*") {
+            m_strFileNames.clear();
+        }
     }
-    qDebug() << "Stars: " << starCnt;
-    QDirIterator it(m_dirPath, QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+    QDirIterator it(m_dirPath, nameFilter, QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
     while (it.hasNext()) {
         it.next();
         emit currentSearchPatch(it.filePath());
