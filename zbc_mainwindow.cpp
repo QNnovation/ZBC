@@ -1,24 +1,79 @@
+#include <QDebug>
+
+#include "zbc_styles.h"
 #include "zbc_mainwindow.h"
 #include "zbc_centralwidget.h"
 
+#include <QApplication>
 #include <QMenuBar>
+#include <QPalette>
 #include <QToolBar>
 #include <QSettings>
+#include <QStyleFactory>
 
 
 //C-tor
 ZBC_MainWindow::ZBC_MainWindow(QWidget* pwgt) : QMainWindow(pwgt)
 {
+    this->setWindowIcon(QIcon(":/mainwindow/icons/resource/app.ico"));
+
 //Actions
-    QAction* pactQuit   = new QAction("Quit", this);
+    QAction* pactQuit       = new QAction("Quit", this);
+    QAction* pactBack       = new QAction(QIcon(":/buttons/toolbar/resource/left32.ico"), tr("Back"), this);
+    QAction* pactForward    = new QAction(QIcon(":/buttons/toolbar/resource/right32.ico"), tr("Forward"), this);
+
+//    qDebug() << pactBack->icon().
+//    QAction* pactBack       = new QAction("Back", this);
+//    QAction* pactForward    = new QAction("Forward", this);
 
 //Menu Bar
     QMenu* pmnuFile = menuBar()->addMenu("File");
     pmnuFile->addAction(pactQuit);
 
+    QMenu* pmnuView = menuBar()->addMenu("View");
+    QMenu* pmnuSetStyle     = new QMenu("Set Style", this);
+    pmnuView->addMenu(pmnuSetStyle);
+    for( QString styleName : QStyleFactory::keys() )
+    {
+        if (styleName == "Fusion"){
+            QMenu* pmnuFusion   = new QMenu("Fusion");
+            pmnuSetStyle->addMenu(pmnuFusion);
+            QAction* pactFusionDefault  = new QAction("Default", this);
+            QAction* pactFusionDark  = new QAction("Dark", this);
+            pmnuFusion->addAction(pactFusionDefault);
+            pmnuFusion->addAction(pactFusionDark);
+            connect(pactFusionDefault,
+                    &QAction::triggered,
+                    [=](){
+                    QApplication::setStyle(QStyleFactory::create("Fusion"));
+            });
+            connect(pactFusionDark,
+                    &QAction::triggered,
+                    [=](){
+                    QApplication::setStyle(new ZBC_SimpleStyle);
+            });
+        }
+        else{
+            QAction* pactStyle  = new QAction(styleName, this);
+            pmnuSetStyle->addAction(pactStyle);
+            connect(pactStyle,
+                    &QAction::triggered,
+                    [=](){
+                    QApplication::setStyle(QStyleFactory::create(styleName));
+                    });
+        }
+    }
+
+
 //Tool Bar
     QToolBar* ptbrFile = addToolBar("File");
+    ptbrFile->setMovable(false);
     ptbrFile->addAction(pactQuit);
+
+    QToolBar* ptbrGo = addToolBar("Go");
+    ptbrGo->setMovable(false);
+    ptbrGo->addAction(pactBack);
+    ptbrGo->addAction(pactForward);
 
 //Connections
     connect(pactQuit,

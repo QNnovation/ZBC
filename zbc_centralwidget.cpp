@@ -3,6 +3,7 @@
 #include "zbc_newfolder.h"
 
 #include "wgtcopy.h"
+#include "wgtfilessearch.h"
 #include "wgttextview.h"
 
 #include <QAction>
@@ -202,10 +203,10 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
     connect(m_pbtnEdit,
             &ZBC_PushButton::clicked,
             [this](){
-        if ( QFileInfo(this->m_psfwActive->getListOfSelectedItems().at(0)).isFile() ){
-            wgtTextView* TextView   = new wgtTextView(qobject_cast<QWidget*>(this));
-            TextView->loadFile(this->m_psfwActive->getListOfSelectedItems().at(0), 'w');
-            TextView->show();
+                if ( QFileInfo(this->m_psfwActive->getListOfSelectedItems().at(0)).isFile() ){
+                    wgtTextView* TextView   = new wgtTextView(qobject_cast<QWidget*>(this));
+                    TextView->loadFile(this->m_psfwActive->getListOfSelectedItems().at(0), 'w');
+                    TextView->show();
         }
             });
 
@@ -324,6 +325,18 @@ void ZBC_CentralWidgetPrivate::shiftDeletePressed(QKeyEvent *pe)
             wgtDelete->removeFileOperation(m_psfwActive->getListOfSelectedItems());
             wgtDelete->setModal(true);
             wgtDelete->show();
+        }
+    case Qt::Key_F7:
+        if (pe->modifiers() & Qt::AltModifier){
+            wgtFilesSearch* wgtSearch   = new wgtFilesSearch(m_psfwActive->getCurrentPath(), q_ptr);
+/*
+            connect(wgtSearch,
+                    &wgtFilesSearch::filePath,
+                    [=](){
+                        m_psfwActive->set
+                    });
+*/
+            wgtSearch->show();
         }
         break;
     default:

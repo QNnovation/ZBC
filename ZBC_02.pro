@@ -1,5 +1,3 @@
-win32:RC_FILE = file.rc
-
 QT += widgets
 
 CONFIG += c++11
@@ -25,7 +23,8 @@ HEADERS += \
     wgtfilessearch.h \
     zbc_mainwindow.h \
     zbc_lineedit.h \
-    zbc_drivebutton.h
+    zbc_drivebuttonswidget.h \
+    zbc_styles.h
     zbc_newfolder.h
 
 SOURCES += \
@@ -41,6 +40,9 @@ SOURCES += \
     zbc_treeview.cpp \
     zbc_mainwindow.cpp \
     zbc_lineedit.cpp \
-    zbc_drivebutton.cpp
+    zbc_drivebuttonswidget.cpp \
+    zbc_styles.cpp
 
-RESOURCES +=
+RESOURCES += \
+    zbc_res.qrc
+

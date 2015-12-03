@@ -1,4 +1,6 @@
-#include "zbc_drivebutton.h"
+#include <QDebug>
+
+#include "zbc_drivebuttonswidget.h"
 
 #include <QPushButton>
 #include <QSignalMapper>
@@ -6,15 +8,24 @@
 
 
 //C-tor
-ZBC_DriveButton::ZBC_DriveButton(const QStringList& lstPath, QWidget* pwgt) : QWidget(pwgt)
+ZBC_DriveButtonsWidget::ZBC_DriveButtonsWidget(const QStringList& lstPath, QWidget* pwgt) : QWidget(pwgt)
 {
     QSignalMapper* psglMapper   = new QSignalMapper(this);
     QHBoxLayout* pLayout        = new QHBoxLayout(this);
+
 
     for( QString sPath : lstPath ){
         QPushButton* pBtn   = new QPushButton(sPath, this);
         pBtn->setFocusPolicy(Qt::NoFocus);
         pBtn->setFixedSize(pBtn->sizeHint());
+
+/*
+        QPalette palette;//(this->palette());
+        palette.setBrush(QPalette::Button, QBrush(Qt::red));
+        pBtn->setAutoFillBackground(true);
+        pBtn->setPalette(palette);
+*/
+
         connect(pBtn,
                 &QPushButton::clicked,
                 psglMapper,
@@ -26,10 +37,7 @@ ZBC_DriveButton::ZBC_DriveButton(const QStringList& lstPath, QWidget* pwgt) : QW
     connect(psglMapper,
             static_cast<void (QSignalMapper::*)(const QString&)>(&QSignalMapper::mapped),
             this,
-            &ZBC_DriveButton::clicked);
+            &ZBC_DriveButtonsWidget::clicked);
 
     setLayout(pLayout);
 }
-
-
-
