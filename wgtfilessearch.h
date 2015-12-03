@@ -30,9 +30,10 @@ private slots:
     void listOfFilesClicked();
     void addItemToFileList(QString);
     void resultToList();
+    void enableBtn();
 
 signals:
-    void filePath(QString);
+    void filePathSignal(QString);
 
 private:
     //GUI start
