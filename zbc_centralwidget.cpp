@@ -304,6 +304,12 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
             m_psfwActive,
             &ZBC_SideFrame::goBack);
 
+//Go Forward
+    connect(q_ptr,
+            &ZBC_CentralWidget::goForward,
+            m_psfwActive,
+            &ZBC_SideFrame::goForward);
+
 /*
     connect(m_psfwActive,
             &ZBC_SideFrame::backAtEnd,

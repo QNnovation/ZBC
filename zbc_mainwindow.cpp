@@ -110,6 +110,12 @@ ZBC_MainWindow::ZBC_MainWindow(QWidget* pwgt) : QMainWindow(pwgt)
             &ZBC_CentralWidget::goBack
             );
 
+//Go Forward
+    connect(pactForward,
+            &QAction::triggered,
+            pzbcCwgt,
+            &ZBC_CentralWidget::goForward);
+
 
 //Run cmd.exe
     connect(pactCMD,

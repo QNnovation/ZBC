@@ -20,7 +20,6 @@ protected:
 
 signals:
     void goBack();
-//    void backAtEnd();
     void goForward();
 };
 
