@@ -2,6 +2,8 @@
 #define WGTFILESSEARCH_H
 
 #include <QDialog>
+#include <QMutex>
+#include <QWaitCondition>
 
 class QTabWidget;
 class QLabel;
@@ -87,6 +89,11 @@ class filesSearchEngine : public QObject
 public:
     explicit filesSearchEngine(QWidget *parent = 0);
     void loadSearchData(const QString&, const QString&);
+    bool thread_Pause;
+    bool thread_Break;
+    bool Stop();
+    QMutex sync;
+    QWaitCondition pauseCond;
 
 public slots:
     void process();

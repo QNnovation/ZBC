@@ -109,7 +109,7 @@ wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(p
     connect(m_btnCancel, &QPushButton::clicked, this, &QDialog::close);
     connect(m_withTextOption, &QCheckBox::toggled, this, &wgtFilesSearch::withTextOptionSlot);
     connect(m_btnSearch, &QPushButton::pressed, this, &wgtFilesSearch::startSearchFiles);
-    connect(m_btnStop, QPushButton::pressed, this, &wgtFilesSearch::stopSearchFiles);
+    connect(m_btnStop, &QPushButton::pressed, this, &wgtFilesSearch::stopSearchFiles);
     connect (m_foundFileList, &QListWidget::itemDoubleClicked, this, &wgtFilesSearch::listOfFilesClicked);
 
 }
@@ -141,6 +141,8 @@ void wgtFilesSearch::startSearchFiles()
             this, &wgtFilesSearch::addItemToFileList);
     connect(m_fileSearchThread, &QThread::finished,
             this, &wgtFilesSearch::enableBtn);
+    connect(m_btnStop, &QPushButton::pressed,
+            m_searchEngine, &filesSearchEngine::Stop);
 
     m_searchEngine->loadSearchData(m_searchFileEdit->text(), m_pathToFileEdit->text());
     m_fileSearchThread->start();
@@ -151,10 +153,7 @@ void wgtFilesSearch::startSearchFiles()
 
 void wgtFilesSearch::stopSearchFiles()
 {
-
-    //m_fileSearchThread->wait();
-    //m_fileSearchThread->quit();
-    //m_btnSearch->setEnabled(true);
+    m_btnSearch->setEnabled(true);
 }
 
 void wgtFilesSearch::resultToList()
@@ -205,13 +204,25 @@ void wgtFilesSearch::addItemToFileList(QString data)
 //filesearch engine implementation
 filesSearchEngine::filesSearchEngine(QWidget *parent) : QObject(parent)
 {
-
+    thread_Pause = false;
+    thread_Break = false;
 }
 
 void filesSearchEngine::loadSearchData(const QString &files, const QString &path)
 {
     m_strFileNames = files;
     m_dirPath = path;
+}
+
+bool filesSearchEngine::Stop()
+{
+    sync.lock();
+    thread_Pause = false;
+    sync.unlock();
+    pauseCond.wakeAll();
+    thread_Break = true;
+    return thread_Break;
+
 }
 
 void filesSearchEngine::process()
@@ -236,6 +247,15 @@ void filesSearchEngine::process()
     QDirIterator it(m_dirPath, nameFilter, QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
     while (it.hasNext()) {
         it.next();
+
+        //break thread
+        if (thread_Break)
+            break;
+        sync.lock();
+        if (thread_Pause)
+            pauseCond.wait(&sync);
+        sync.unlock();
+
         emit currentSearchPatch(it.filePath());
         if (it.fileName().contains(m_strFileNames)) {
             emit foundFilePatch(it.filePath());
