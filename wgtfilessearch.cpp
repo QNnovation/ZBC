@@ -17,7 +17,7 @@
 
 wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(parent)
 {
-    this->resize(450, 170);
+    this->resize(650, 170);
     this->setWindowTitle("File search");
     this->setModal(true);
 
@@ -61,6 +61,7 @@ wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(p
 
     //tab
     m_tabWgt = new QTabWidget(this);
+    m_tabWgt->setFixedHeight(172);
     m_tabWgt->addTab(m_generalTab, QString(tr("General")));
     m_tabWgt->addTab(new QLabel(tr("2")), QString(tr("Options")));
 
@@ -125,47 +126,52 @@ void wgtFilesSearch::startSearchFiles()
     //start class in thread
     connect(m_fileSearchThread, &QThread::started,
             m_searchEngine, &filesSearchEngine::process);
+
     //close thread
     connect(m_searchEngine, &filesSearchEngine::finished,
             m_fileSearchThread, QThread::quit);
+
     //delete class after work
     connect(m_searchEngine, &filesSearchEngine::finished,
             m_searchEngine, &filesSearchEngine::deleteLater);
+
     //delete thread after work
     connect(m_fileSearchThread, &QThread::finished,
             m_fileSearchThread, &QThread::deleteLater);
+
     //data from thread
     connect(m_searchEngine, &filesSearchEngine::currentSearchPatch,
             m_searchPathLbl, &QLabel::setText);
     connect(m_searchEngine, &filesSearchEngine::foundFilePatch,
-            this, &wgtFilesSearch::addItemToFileList);
+            this, &wgtFilesSearch::addItemToStrList);
     connect(m_fileSearchThread, &QThread::finished,
             this, &wgtFilesSearch::enableBtn);
-    connect(m_btnStop, &QPushButton::pressed,
-            m_searchEngine, &filesSearchEngine::Stop);
 
     m_searchEngine->loadSearchData(m_searchFileEdit->text(), m_pathToFileEdit->text());
     m_fileSearchThread->start();
     m_btnSearch->setEnabled(false);
     m_btnStop->setEnabled(true);
-
+    m_searchPathLbl->resize(width(), 10);
 }
 
 void wgtFilesSearch::stopSearchFiles()
 {
+    m_fileSearchThread->quit();
+    m_fileSearchThread->wait();
+    delete m_fileSearchThread;
     m_btnSearch->setEnabled(true);
+}
+
+void wgtFilesSearch::addItemToStrList(QString data)
+{
+    m_listOfFounfFiles.append(data);
 }
 
 void wgtFilesSearch::resultToList()
 {
-    QStringList fdPath;
-    for(int i = 0; i < m_foundFileList->count(); ++i)
-    {
-        fdPath.append(m_foundFileList->item(i)->text());
-    }
     int dry = 0, fls = 0;
-    for (int j = 0; j < fdPath.size(); ++j) {
-        if (QFileInfo(fdPath.at(j)).isDir())
+    for (int j = 0; j < m_listOfFounfFiles.size(); ++j) {
+        if (QFileInfo(m_listOfFounfFiles.at(j)).isDir())
             ++dry;
         else
             ++fls;
@@ -173,8 +179,8 @@ void wgtFilesSearch::resultToList()
     QString total = "[ Files: " + QString::number(fls) + " Directory: " + QString::number(dry) + " ]";
     m_foundFileList->clear();
     m_foundFileList->addItem(total);
-    for (int k = 0; k < fdPath.size(); ++k) {
-        m_foundFileList->addItem(fdPath.at(k));
+    for (int k = 0; k < m_listOfFounfFiles.size(); ++k) {
+        m_foundFileList->addItem(m_listOfFounfFiles.at(k));
     }
 }
 
@@ -182,6 +188,11 @@ void wgtFilesSearch::enableBtn()
 {
     m_btnSearch->setEnabled(true);
     resultToList();
+}
+
+wgtFilesSearch::~wgtFilesSearch()
+{
+    qDebug() << "Size: " << m_tabWgt->size();
 }
 
 void wgtFilesSearch::withTextOptionSlot(bool state)
@@ -196,16 +207,10 @@ void wgtFilesSearch::listOfFilesClicked()
     emit(m_foundFileList->currentItem()->text());
 }
 
-void wgtFilesSearch::addItemToFileList(QString data)
-{
-    m_foundFileList->addItem(data);
-}
-
 //filesearch engine implementation
 filesSearchEngine::filesSearchEngine(QWidget *parent) : QObject(parent)
 {
-    thread_Pause = false;
-    thread_Break = false;
+    m_threadStop = false;
 }
 
 void filesSearchEngine::loadSearchData(const QString &files, const QString &path)
@@ -214,47 +219,40 @@ void filesSearchEngine::loadSearchData(const QString &files, const QString &path
     m_dirPath = path;
 }
 
-bool filesSearchEngine::Stop()
-{
-    sync.lock();
-    thread_Pause = false;
-    sync.unlock();
-    pauseCond.wakeAll();
-    thread_Break = true;
-    return thread_Break;
-
-}
-
 void filesSearchEngine::process()
 {
     QStringList nameFilter;
     int starCnt = 0;
-    if (m_strFileNames.contains("*")) {
-        //если есть звёзды то считаем их
-        for (int i = 0; i < m_strFileNames.size(); ++i)
-            if (m_strFileNames.at(i) == '*')
-                ++starCnt;
-        //если количество звёзд равно 1 то создаём фильтр
-        if (starCnt == 1 && m_strFileNames.at(0) == '*') {
-            nameFilter.append(m_strFileNames);
-            m_strFileNames.clear();
-        }
-        //если количество звёзд > 1;
-        else if (starCnt == 2 && m_strFileNames == "*.*") {
-            m_strFileNames.clear();
+    if (!m_strFileNames.isEmpty()) {
+        if (m_strFileNames.contains("*")) {
+            //если есть звёзды то считаем их
+            for (int i = 0; i < m_strFileNames.size(); ++i)
+                if (m_strFileNames.at(i) == '*')
+                    ++starCnt;
+            //если количество звёзд равно 1 то создаём фильтр
+            if (starCnt == 1 && m_strFileNames.at(0) == '*') {
+                nameFilter.append(m_strFileNames);
+                m_strFileNames.clear();
+            }
+            //если количество звёзд > 1;
+            else if (starCnt == 2 && m_strFileNames == "*.*") {
+                m_strFileNames.clear();
+            }
         }
     }
     QDirIterator it(m_dirPath, nameFilter, QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
     while (it.hasNext()) {
         it.next();
-
-        //break thread
-        if (thread_Break)
+        if (m_threadStop)
             break;
-        sync.lock();
-        if (thread_Pause)
-            pauseCond.wait(&sync);
-        sync.unlock();
+
+        //        //break thread
+        //        if (m_threadBreak)
+        //            break;
+        //        sync.lock();
+        //        if (thread_Pause)
+        //            pauseCond.wait(&sync);
+        //        sync.unlock();
 
         emit currentSearchPatch(it.filePath());
         if (it.fileName().contains(m_strFileNames)) {

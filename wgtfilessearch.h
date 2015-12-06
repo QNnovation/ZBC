@@ -17,6 +17,8 @@ class QListWidget;
 class QString;
 class QThread;
 class filesSearchEngine;
+class QListView;
+class QStringListModel;
 
 class wgtFilesSearch : public QDialog
 {
@@ -24,18 +26,16 @@ class wgtFilesSearch : public QDialog
 
 public:
     explicit wgtFilesSearch(const QString &path, QWidget *parent = 0);
+    ~wgtFilesSearch();
 
 private slots:
     void withTextOptionSlot(bool);
     void startSearchFiles();
     void stopSearchFiles();
     void listOfFilesClicked();
-    void addItemToFileList(QString);
+    void addItemToStrList(QString);
     void resultToList();
     void enableBtn();
-
-signals:
-    void filePathSignal(QString);
 
 private:
     //GUI start
@@ -78,6 +78,8 @@ private:
     QString m_dirPath;
     QThread *m_fileSearchThread;
     filesSearchEngine *m_searchEngine;
+    QStringList m_listOfFounfFiles;
+    QStringListModel *model;
 };
 
 #endif // WGTFILESSEARCH_H
@@ -89,11 +91,14 @@ class filesSearchEngine : public QObject
 public:
     explicit filesSearchEngine(QWidget *parent = 0);
     void loadSearchData(const QString&, const QString&);
-    bool thread_Pause;
-    bool thread_Break;
-    bool Stop();
-    QMutex sync;
-    QWaitCondition pauseCond;
+    bool m_threadStop;
+    void setStop() { m_threadStop = true; }
+
+    //bool thread_Pause;
+    // bool thread_Break;
+    //bool Stop();
+    //QMutex sync;
+    //QWaitCondition pauseCond;
 
 public slots:
     void process();
