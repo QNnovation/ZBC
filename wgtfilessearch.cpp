@@ -14,12 +14,15 @@
 #include <QDirIterator>
 #include <QThread>
 #include <QFileInfo>
+#include <QCalendarWidget>
+#include <QComboBox>
 
 wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(parent)
 {
     this->resize(650, 170);
     this->setWindowTitle("File search");
     this->setModal(true);
+    this->setWindowFlags(windowFlags()|Qt::WindowMaximizeButtonHint | Qt::WindowMinimizeButtonHint);
 
     if (path.isEmpty())
         return;
@@ -39,6 +42,7 @@ wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(p
     m_caseSensOption = new QCheckBox(tr("Case sensitive"), this);
     m_wholeWordsOption = new QCheckBox(tr("Only whole words"), this);
 
+    //general tab
     m_upGridLayout = new QGridLayout(this);
     m_upGridLayout->addWidget(m_searchFileLbl, 0, 0);
     m_upGridLayout->addWidget(m_searchFileEdit, 0, 1);
@@ -55,17 +59,63 @@ wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(p
     m_upGridLayout->addWidget(m_caseSensOption, 4, 0);
     m_upGridLayout->addWidget(m_wholeWordsOption, 5, 0);
 
+    //options tab
+    m_optionsDateLbl = new QLabel(tr("Date: "), this);
+    m_optionsDateCBox = new QCheckBox(this);
+    m_optionsFromLbl = new QLabel(tr("From: "));
+    m_optionsCalendar1 = new QCalendarWidget(this);
+    m_optionsCalendar1->setEnabled(false);
+    m_optionsToLbl = new QLabel(tr("To: "));
+    m_optionsCalendar2 = new QCalendarWidget(this);
+    m_optionsCalendar2->setEnabled(false);
+    m_optionsHLayout_1 = new QHBoxLayout();
+    m_optionsHLayout_1->addWidget(m_optionsDateLbl);
+    m_optionsHLayout_1->addWidget(m_optionsDateCBox);
+    m_optionsHLayout_1->addWidget(m_optionsFromLbl);
+    m_optionsHLayout_1->addWidget(m_optionsCalendar1);
+    m_optionsHLayout_1->addWidget(m_optionsToLbl);
+    m_optionsHLayout_1->addWidget(m_optionsCalendar2);
+
+    m_optionsSizeLbl = new QLabel(tr("Size: "), this);
+    m_optionsSizeCBox = new QCheckBox(this);
+    m_optionsEqual = new QComboBox(this);
+    m_optionsEqual->setEnabled(false);
+    QStringList optionsEqual;
+    optionsEqual << "=" << "<" << ">";
+    m_optionsEqual->addItems(optionsEqual);
+    m_optionsSizeLEdit = new QLineEdit(this);
+    m_optionsSizeLEdit->setEnabled(false);
+    m_optionsParams = new QComboBox(this);
+    QStringList optionsParams;
+    optionsParams << "Kb" << "Mb";
+    m_optionsParams->addItems(optionsParams);
+    m_optionsParams->setEnabled(false);
+
+    m_optionsHLayout_2 = new QHBoxLayout();
+    m_optionsHLayout_2->addWidget(m_optionsSizeLbl);
+    m_optionsHLayout_2->addWidget(m_optionsSizeCBox);
+    m_optionsHLayout_2->addWidget(m_optionsEqual);
+    m_optionsHLayout_2->addWidget(m_optionsSizeLEdit);
+    m_optionsHLayout_2->addWidget(m_optionsParams);
+
+    m_optionsVBox = new QVBoxLayout();
+    m_optionsVBox->addLayout(m_optionsHLayout_1);
+    m_optionsVBox->addLayout(m_optionsHLayout_2);
     //tab pages
     m_generalTab = new QWidget(this);
     m_generalTab->setLayout(m_upGridLayout);
+    m_optionsTab = new QWidget(this);
+    m_optionsTab->setLayout(m_optionsVBox);
 
     //tab
-    m_tabWgt = new QTabWidget(this);
-    m_tabWgt->setFixedHeight(172);
-    m_tabWgt->addTab(m_generalTab, QString(tr("General")));
-    m_tabWgt->addTab(new QLabel(tr("2")), QString(tr("Options")));
+    m_topWidget = new QWidget(this);
+    m_topWidget->setFixedHeight(250);
 
-    m_upTopLayout = new QHBoxLayout();
+    m_tabWgt = new QTabWidget(this);
+    m_tabWgt->addTab(m_generalTab, QString(tr("General")));
+    m_tabWgt->addTab(m_optionsTab, QString(tr("Options")));
+
+    m_upTopLayout = new QHBoxLayout(m_topWidget);
     m_upTopLayout->addWidget(m_tabWgt);
 
     m_rightBtnLayout = new QVBoxLayout();
@@ -82,11 +132,11 @@ wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(p
 
     m_mainBoxLayout = new QVBoxLayout(this);
     m_foundFileList = new QListWidget(this);
-    //listWgt->setVisible(false);
-    m_mainBoxLayout->addLayout(m_upTopLayout);
+    m_foundFileList->setUniformItemSizes(true);
+
+    m_mainBoxLayout->addWidget(m_topWidget);
     m_searchPathLbl = new QLabel(tr(":"), this);
 
-    m_mainBoxLayout->addWidget(m_searchPathLbl);
     m_mainBoxLayout->addWidget(m_foundFileList);
 
     m_bottomBtnLayout = new QHBoxLayout();
@@ -98,6 +148,7 @@ wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(p
     m_bottomBtnLayout->addWidget(m_btnNewSearch);
 
     m_mainBoxLayout->addLayout(m_bottomBtnLayout);
+    m_mainBoxLayout->addWidget(m_searchPathLbl);
 
     setLayout(m_mainBoxLayout);
 
@@ -112,6 +163,8 @@ wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(p
     connect(m_btnSearch, &QPushButton::pressed, this, &wgtFilesSearch::startSearchFiles);
     connect(m_btnStop, &QPushButton::pressed, this, &wgtFilesSearch::stopSearchFiles);
     connect (m_foundFileList, &QListWidget::itemDoubleClicked, this, &wgtFilesSearch::listOfFilesClicked);
+    connect(m_optionsDateCBox, QCheckBox::toggled, this, &wgtFilesSearch::setOptions);
+    connect(m_optionsSizeCBox, QCheckBox::toggled, this, &wgtFilesSearch::setOptions);
 
 }
 
@@ -164,14 +217,18 @@ void wgtFilesSearch::stopSearchFiles()
 
 void wgtFilesSearch::addItemToStrList(QString data)
 {
-    m_listOfFounfFiles.append(data);
+    m_foundFileList->addItem(data);
 }
 
 void wgtFilesSearch::resultToList()
 {
+    QStringList filesPaths;
+    for (int i = 0; i < m_foundFileList->count(); ++i) {
+        filesPaths.append(m_foundFileList->item(i)->text());
+    }
     int dry = 0, fls = 0;
-    for (int j = 0; j < m_listOfFounfFiles.size(); ++j) {
-        if (QFileInfo(m_listOfFounfFiles.at(j)).isDir())
+    for (int j = 0; j < filesPaths.size(); ++j) {
+        if (QFileInfo(filesPaths.at(j)).isDir())
             ++dry;
         else
             ++fls;
@@ -179,8 +236,8 @@ void wgtFilesSearch::resultToList()
     QString total = "[ Files: " + QString::number(fls) + " Directory: " + QString::number(dry) + " ]";
     m_foundFileList->clear();
     m_foundFileList->addItem(total);
-    for (int k = 0; k < m_listOfFounfFiles.size(); ++k) {
-        m_foundFileList->addItem(m_listOfFounfFiles.at(k));
+    for (int k = 0; k < filesPaths.size(); ++k) {
+        m_foundFileList->addItem(filesPaths.at(k));
     }
 }
 
@@ -192,7 +249,32 @@ void wgtFilesSearch::enableBtn()
 
 wgtFilesSearch::~wgtFilesSearch()
 {
-    qDebug() << "Size: " << m_tabWgt->size();
+    qDebug() << "~wgtFilesSearch";
+}
+
+void wgtFilesSearch::setOptions()
+{
+    //date of file
+    if (m_optionsDateCBox->isChecked())
+    {
+        m_optionsCalendar1->setEnabled(true);
+        m_optionsCalendar2->setEnabled(true);
+    }
+    else {
+        m_optionsCalendar1->setEnabled(false);
+        m_optionsCalendar2->setEnabled(false);
+    }
+    //size of file
+    if (m_optionsSizeCBox->isChecked()) {
+        m_optionsEqual->setEnabled(true);
+        m_optionsSizeLEdit->setEnabled(true);
+        m_optionsParams->setEnabled(true);
+    }
+    else {
+        m_optionsEqual->setEnabled(false);
+        m_optionsSizeLEdit->setEnabled(false);
+        m_optionsParams->setEnabled(false);
+    }
 }
 
 void wgtFilesSearch::withTextOptionSlot(bool state)
@@ -240,25 +322,22 @@ void filesSearchEngine::process()
             }
         }
     }
+    QString _upper = m_strFileNames.toUpper();
+    QString _lower = m_strFileNames.toLower();
+
     QDirIterator it(m_dirPath, nameFilter, QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
     while (it.hasNext()) {
         it.next();
-        if (m_threadStop)
-            break;
-
-        //        //break thread
-        //        if (m_threadBreak)
-        //            break;
-        //        sync.lock();
-        //        if (thread_Pause)
-        //            pauseCond.wait(&sync);
-        //        sync.unlock();
 
         emit currentSearchPatch(it.filePath());
-        if (it.fileName().contains(m_strFileNames)) {
+        if (it.fileName().contains(m_strFileNames)
+                || it.fileName().contains(_upper)
+                || it.fileName().contains(_lower))
+        {
             emit foundFilePatch(it.filePath());
         }
-        else if (m_strFileNames.isEmpty()) {
+        else if (m_strFileNames.isEmpty())
+        {
             emit foundFilePatch(it.filePath());
         }
     }
@@ -266,6 +345,11 @@ void filesSearchEngine::process()
     emit finished();
 }
 
+
+filesSearchEngine::~filesSearchEngine()
+{
+    qDebug() << "~filesSearchEngine";
+}
 
 
 

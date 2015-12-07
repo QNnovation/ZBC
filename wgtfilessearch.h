@@ -18,7 +18,8 @@ class QString;
 class QThread;
 class filesSearchEngine;
 class QListView;
-class QStringListModel;
+class QCalendarWidget;
+class QComboBox;
 
 class wgtFilesSearch : public QDialog
 {
@@ -36,6 +37,7 @@ private slots:
     void addItemToStrList(QString);
     void resultToList();
     void enableBtn();
+    void setOptions();
 
 private:
     //GUI start
@@ -43,14 +45,25 @@ private:
     QLabel *m_pathToFileLbl;
     QLabel *m_withTextLbl;
     QLabel *m_searchPathLbl;
+    QLabel *m_optionsDateLbl;
+    QLabel *m_optionsFromLbl;
+    QLabel *m_optionsToLbl;
+    QLabel *m_optionsSizeLbl;
+
+    //combo box
+    QComboBox *m_optionsEqual;
+    QComboBox *m_optionsParams;
 
     QLineEdit *m_searchFileEdit;
     QLineEdit *m_pathToFileEdit;
     QLineEdit *m_withTextEdit;
+    QLineEdit *m_optionsSizeLEdit;
 
     QCheckBox *m_withTextOption;
     QCheckBox *m_caseSensOption;
     QCheckBox *m_wholeWordsOption;
+    QCheckBox *m_optionsDateCBox;
+    QCheckBox *m_optionsSizeCBox;
 
     QTabWidget *m_tabWgt;
     QListWidget *m_foundFileList;
@@ -58,9 +71,17 @@ private:
     //tab pages
     QWidget *m_generalTab;
     QWidget *m_optionsTab;
+    QWidget *m_topWidget;
+
+    //calendars for options tab
+    QCalendarWidget *m_optionsCalendar1;
+    QCalendarWidget *m_optionsCalendar2;
 
     //layouts
     QGridLayout *m_upGridLayout;
+    QHBoxLayout *m_optionsHLayout_1;
+    QHBoxLayout *m_optionsHLayout_2;
+    QVBoxLayout *m_optionsVBox;
     QHBoxLayout *m_upTopLayout;
     QVBoxLayout *m_rightBtnLayout;
     QVBoxLayout *m_mainBoxLayout;
@@ -78,8 +99,6 @@ private:
     QString m_dirPath;
     QThread *m_fileSearchThread;
     filesSearchEngine *m_searchEngine;
-    QStringList m_listOfFounfFiles;
-    QStringListModel *model;
 };
 
 #endif // WGTFILESSEARCH_H
@@ -93,6 +112,7 @@ public:
     void loadSearchData(const QString&, const QString&);
     bool m_threadStop;
     void setStop() { m_threadStop = true; }
+    ~filesSearchEngine();
 
     //bool thread_Pause;
     // bool thread_Break;
