@@ -1,3 +1,5 @@
+#include <QDebug>
+
 #include "zbc_centralwidget.h"
 #include "zbc_centralwidget_p.h"
 #include "zbc_newfolder.h"
@@ -262,6 +264,7 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
             [this](){
                 ZBC_NewFolder* wgtNewFolder = new ZBC_NewFolder(m_psfwActive->getCurrentPath(), q_ptr);
                 wgtNewFolder->exec();
+                qDebug() <<  m_psfwActive->getCurrentPath();
             });
 
     connect(m_pbtnNewFolder,
@@ -309,13 +312,6 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
             &ZBC_CentralWidget::goForward,
             m_psfwActive,
             &ZBC_SideFrame::goForward);
-
-/*
-    connect(m_psfwActive,
-            &ZBC_SideFrame::backAtEnd,
-            q_ptr,
-            &ZBC_CentralWidget::backAtEnd);
-*/
 }
 
 
@@ -349,13 +345,7 @@ void ZBC_CentralWidgetPrivate::shiftDeletePressed(QKeyEvent *pe)
     case Qt::Key_F7:
         if (pe->modifiers() & Qt::AltModifier){
             wgtFilesSearch* wgtSearch   = new wgtFilesSearch(m_psfwActive->getCurrentPath(), q_ptr);
-/*
-            connect(wgtSearch,
-                    &wgtFilesSearch::filePath,
-                    [=](){
-                        m_psfwActive->set
-                    });
-*/
+            qDebug() <<  m_psfwActive->getCurrentPath();
             wgtSearch->show();
         }
         break;
