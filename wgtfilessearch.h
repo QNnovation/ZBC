@@ -49,6 +49,7 @@ private:
     QLabel *m_optionsFromLbl;
     QLabel *m_optionsToLbl;
     QLabel *m_optionsSizeLbl;
+    QLabel *m_optionsNote;
 
     //combo box
     QComboBox *m_optionsEqual;
@@ -99,6 +100,9 @@ private:
     QString m_dirPath;
     QThread *m_fileSearchThread;
     filesSearchEngine *m_searchEngine;
+
+    //options tab variables
+    bool m_optionsSizeBool;
 };
 
 #endif // WGTFILESSEARCH_H

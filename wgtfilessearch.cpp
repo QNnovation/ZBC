@@ -29,6 +29,8 @@ wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(p
     else
         m_dirPath = path;
 
+    m_optionsSizeBool = true;
+
     m_searchFileLbl = new QLabel(tr("Files:"), this);
     m_pathToFileLbl = new QLabel(tr("Path:"), this);
     m_searchFileEdit = new QLineEdit(this);
@@ -60,6 +62,7 @@ wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(p
     m_upGridLayout->addWidget(m_wholeWordsOption, 5, 0);
 
     //options tab
+    //data options
     m_optionsDateLbl = new QLabel(tr("Date: "), this);
     m_optionsDateCBox = new QCheckBox(this);
     m_optionsFromLbl = new QLabel(tr("From: "));
@@ -68,6 +71,7 @@ wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(p
     m_optionsToLbl = new QLabel(tr("To: "));
     m_optionsCalendar2 = new QCalendarWidget(this);
     m_optionsCalendar2->setEnabled(false);
+
     m_optionsHLayout_1 = new QHBoxLayout();
     m_optionsHLayout_1->addWidget(m_optionsDateLbl);
     m_optionsHLayout_1->addWidget(m_optionsDateCBox);
@@ -75,7 +79,7 @@ wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(p
     m_optionsHLayout_1->addWidget(m_optionsCalendar1);
     m_optionsHLayout_1->addWidget(m_optionsToLbl);
     m_optionsHLayout_1->addWidget(m_optionsCalendar2);
-
+    //size options
     m_optionsSizeLbl = new QLabel(tr("Size: "), this);
     m_optionsSizeCBox = new QCheckBox(this);
     m_optionsEqual = new QComboBox(this);
@@ -84,10 +88,12 @@ wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(p
     optionsEqual << "=" << "<" << ">";
     m_optionsEqual->addItems(optionsEqual);
     m_optionsSizeLEdit = new QLineEdit(this);
+    //QRegExp validator("[0-9]{75}[0-9]{1}");
+    //m_optionsSizeLEdit->setValidator(new QRegExpValidator(validator, this));
     m_optionsSizeLEdit->setEnabled(false);
     m_optionsParams = new QComboBox(this);
     QStringList optionsParams;
-    optionsParams << "Kb" << "Mb";
+    optionsParams << "By" << "Kb" << "Mb" << "Gb";
     m_optionsParams->addItems(optionsParams);
     m_optionsParams->setEnabled(false);
 
@@ -98,9 +104,12 @@ wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(p
     m_optionsHLayout_2->addWidget(m_optionsSizeLEdit);
     m_optionsHLayout_2->addWidget(m_optionsParams);
 
+    m_optionsNote = new QLabel(tr("[ = work's only with bytes ]"), this);
+
     m_optionsVBox = new QVBoxLayout();
     m_optionsVBox->addLayout(m_optionsHLayout_1);
     m_optionsVBox->addLayout(m_optionsHLayout_2);
+    m_optionsVBox->addWidget(m_optionsNote);
     //tab pages
     m_generalTab = new QWidget(this);
     m_generalTab->setLayout(m_upGridLayout);
@@ -222,10 +231,43 @@ void wgtFilesSearch::addItemToStrList(QString data)
 
 void wgtFilesSearch::resultToList()
 {
-    QStringList filesPaths;
+    QStringList filesPaths, tmpSList;
     for (int i = 0; i < m_foundFileList->count(); ++i) {
         filesPaths.append(m_foundFileList->item(i)->text());
     }
+    //file size options enable
+    double optionSizeOfOFile = m_optionsSizeLEdit->text().toDouble();
+    QChar optionsSign = m_optionsParams->currentText().at(0);
+    int bytesToKlMbGb = 0;
+    if (optionsSign == 'B')
+        bytesToKlMbGb = 1;
+    else if (optionsSign == 'K')
+        bytesToKlMbGb = 1024;
+    else if (optionsSign == 'M')
+        bytesToKlMbGb = 1048576;
+    else if (optionsSign == 'G')
+        bytesToKlMbGb = 1073741824;
+
+    if (m_optionsSizeBool) {
+        for (int k = 0; k < filesPaths.size(); ++ k) {
+            if (m_optionsEqual->currentText() == "=") {
+                if (QFileInfo(filesPaths.at(k)).size() == (optionSizeOfOFile * bytesToKlMbGb))
+                    tmpSList.append(filesPaths.at(k));
+            }
+            else if (m_optionsEqual->currentText() == "<") {
+                if (QFileInfo(filesPaths.at(k)).size() < (optionSizeOfOFile * bytesToKlMbGb))
+                    tmpSList.append(filesPaths.at(k));
+            }
+            else if (m_optionsEqual->currentText() == ">") {
+                if (QFileInfo(filesPaths.at(k)).size() > (optionSizeOfOFile * bytesToKlMbGb))
+                    tmpSList.append(filesPaths.at(k));
+            }
+        }
+        filesPaths.clear();
+        filesPaths = tmpSList;
+        tmpSList.clear();
+    }
+
     int dry = 0, fls = 0;
     for (int j = 0; j < filesPaths.size(); ++j) {
         if (QFileInfo(filesPaths.at(j)).isDir())
@@ -259,21 +301,25 @@ void wgtFilesSearch::setOptions()
     {
         m_optionsCalendar1->setEnabled(true);
         m_optionsCalendar2->setEnabled(true);
+        m_optionsSizeBool = true;
     }
     else {
         m_optionsCalendar1->setEnabled(false);
         m_optionsCalendar2->setEnabled(false);
+        m_optionsSizeBool = false;
     }
     //size of file
     if (m_optionsSizeCBox->isChecked()) {
         m_optionsEqual->setEnabled(true);
         m_optionsSizeLEdit->setEnabled(true);
         m_optionsParams->setEnabled(true);
+        m_optionsSizeBool = true;
     }
     else {
         m_optionsEqual->setEnabled(false);
         m_optionsSizeLEdit->setEnabled(false);
         m_optionsParams->setEnabled(false);
+        m_optionsSizeBool = false;
     }
 }
 
