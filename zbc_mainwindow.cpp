@@ -1,4 +1,4 @@
-#include <QDebug>
+//#include <QDebug>
 
 #include "zbc_styles.h"
 #include "zbc_mainwindow.h"
@@ -168,6 +168,10 @@ ZBC_MainWindow::ZBC_MainWindow(QWidget* pwgt) : QMainWindow(pwgt)
                 });
 */
 
+        connect(this,
+                &ZBC_MainWindow::mainWindowClose,
+                pzbcCwgt,
+                &ZBC_CentralWidget::mainWindowClose);
 
 //Settings
     QSettings Settings;
@@ -189,6 +193,7 @@ void ZBC_MainWindow::closeEvent(QCloseEvent *pe)
     Settings.setValue("Geometry", saveGeometry());
     Settings.endGroup();
     Settings.endGroup();
+    emit mainWindowClose();
 
     QMainWindow::closeEvent(pe);
 }

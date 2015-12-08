@@ -65,14 +65,16 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
 //Side Frames
     m_psfwLeft      = new ZBC_SideFrame((m_psettings->value("/LeftPath", "").toString()), m_psplCentral);
     m_psfwRight     = new ZBC_SideFrame((m_psettings->value("/RightPath", "").toString()), m_psplCentral);
+    m_psettings->endGroup();
+    m_psettings->endGroup();
+
     m_psfwNotActive = m_psfwLeft;
     m_psfwActive = m_psfwRight;
+    m_psfwLeft->setPathHistory("Left");
+    m_psfwRight->setPathHistory("Right");
 
     m_psplCentral->addWidget(m_psfwLeft);
     m_psplCentral->addWidget(m_psfwRight);
-
-    m_psettings->endGroup();
-    m_psettings->endGroup();
 
 //Bottom Buttons Frame
     m_pfrmBottomButtons = new QFrame(q);
@@ -114,7 +116,6 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
     m_pvblLayout->addWidget(m_pfrmBottomButtons);
 
     q->setLayout(m_pvblLayout);
-
 
 //Create Actions
 //View
@@ -293,8 +294,8 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
     connect(m_pbtnExit,
             &ZBC_PushButton::clicked,
             [q](){
-            q->parentWidget()->close();
-    });
+                q->parentWidget()->close();
+            });
 
 //Signals From MainWindow
 //Go Back
@@ -309,6 +310,18 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
             &ZBC_CentralWidget::goForward,
             [=](){
                 emit m_psfwActive->goForward();
+            });
+
+    connect(q_ptr,
+            &ZBC_CentralWidget::mainWindowClose,
+            [=](){
+                m_psfwLeft->savePathHistory("Left");
+            });
+
+    connect(q_ptr,
+            &ZBC_CentralWidget::mainWindowClose,
+            [=](){
+                m_psfwRight->savePathHistory("Right");
             });
 }
 
@@ -340,6 +353,7 @@ void ZBC_CentralWidgetPrivate::shiftDeletePressed(QKeyEvent *pe)
             wgtDelete->setModal(true);
             wgtDelete->show();
         }
+        break;
     case Qt::Key_F7:
         if (pe->modifiers() & Qt::AltModifier){
             wgtFilesSearch* wgtSearch   = new wgtFilesSearch(m_psfwActive->getCurrentPath(), q_ptr);
