@@ -2,8 +2,18 @@
     <qresource prefix="/buttons/toolbar">
         <file>resource/right32.ico</file>
         <file>resource/left32.ico</file>
+        <file>resource/cmd.ico</file>
+        <file>resource/notepad.ico</file>
+        <file>resource/paint.ico</file>
+        <file>resource/calc.ico</file>
+        <file>resource/taskmgr.ico</file>
+        <file>resource/regedit.ico</file>
     </qresource>
     <qresource prefix="/mainwindow/icons">
         <file>resource/app.ico</file>
+        <file>resource/close.ico</file>
+    </qresource>
+    <qresource prefix="/buttons/drives">
+        <file>resource/logicaldrive.ico</file>
     </qresource>
 </RCC>

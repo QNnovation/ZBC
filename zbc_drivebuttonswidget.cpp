@@ -15,16 +15,9 @@ ZBC_DriveButtonsWidget::ZBC_DriveButtonsWidget(const QStringList& lstPath, QWidg
 
 
     for( QString sPath : lstPath ){
-        QPushButton* pBtn   = new QPushButton(sPath, this);
+        QPushButton* pBtn   = new QPushButton(QIcon(":/buttons/drives/resource/logicaldrive.ico"), sPath, this);
         pBtn->setFocusPolicy(Qt::NoFocus);
         pBtn->setFixedSize(pBtn->sizeHint());
-
-/*
-        QPalette palette;//(this->palette());
-        palette.setBrush(QPalette::Button, QBrush(Qt::red));
-        pBtn->setAutoFillBackground(true);
-        pBtn->setPalette(palette);
-*/
 
         connect(pBtn,
                 &QPushButton::clicked,
