@@ -1,5 +1,3 @@
-#include <QDebug>
-
 #include "zbc_drivebuttonswidget.h"
 #include "zbc_sideframe.h"
 #include "zbc_lineedit.h"
@@ -14,6 +12,7 @@
 #include <QMessageBox>
 #include <QModelIndex>
 #include <QPushButton>
+#include <QSettings>
 #include <QSortFilterProxyModel>
 #include <QUrl>
 
@@ -61,10 +60,6 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 
 //Current path
     m_sCurPath = QDir::toNativeSeparators(pfsmModel->rootPath());
-    m_lstPathHistory.push_front(m_sCurPath);
-    m_iterPathHistory = m_lstPathHistory.constBegin();
-//    qDebug() << "CTR: " << m_lstPathHistory;
-//    qDebug() << *m_iterPathHistory;
 
 //LineEdit with current path
     ZBC_LineEdit* pledCurPath      = new ZBC_LineEdit(this);
@@ -231,8 +226,8 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
     connect(this,
             &ZBC_SideFrame::goForward,
             [=](){
-                if( m_iterPathHistory != m_lstPathHistory.constBegin() && --m_iterPathHistory != m_lstPathHistory.constBegin() ){
-                    ptreeView->setRootIndex(QModelIndex( psfpModel->mapFromSource(pfsmModel->index(*m_iterPathHistory))));
+                if( m_iterPathHistory != m_lstPathHistory.constBegin()){
+                    ptreeView->setRootIndex(QModelIndex( psfpModel->mapFromSource(pfsmModel->index(*--m_iterPathHistory))));
                     m_sCurPath = QDir::toNativeSeparators( pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex())) );
                     pledCurPath->setText(m_sCurPath);
                     stlSelectedItems.clear();
@@ -364,4 +359,72 @@ void ZBC_SideFrame::setTextForLblDirInfo(QLabel * plbl)
 
     m_hashFiles.clear();
     m_setDirs.clear();
+}
+
+
+//Save list of path history before close
+void ZBC_SideFrame::savePathHistory(const QString& _sSide)
+{
+    QSettings Settings;
+    if ( _sSide == "Left" ) {
+        Settings.beginGroup("/Settings");
+        Settings.beginGroup("/CentralWidget");
+        Settings.beginGroup("/Left");
+        Settings.remove("");
+
+        for (int i = 0; i != m_lstPathHistory.size(); ++i)
+            Settings.setValue("Path" + QString::number(i), m_lstPathHistory.at(i));
+
+        Settings.endGroup();
+        Settings.endGroup();
+        Settings.endGroup();
+    }
+    else if ( _sSide == "Right" ){
+        Settings.beginGroup("/Settings");
+        Settings.beginGroup("/CentralWidget");
+        Settings.beginGroup("/Right");
+        Settings.remove("");
+
+        for (int i = 0; i != m_lstPathHistory.size(); ++i)
+            Settings.setValue("Path" + QString::number(i), m_lstPathHistory.at(i));
+
+        Settings.endGroup();
+        Settings.endGroup();
+        Settings.endGroup();
+    }
+}
+
+
+//Set list of path history at start
+void ZBC_SideFrame::setPathHistory(const QString& _sSide)
+{
+    QSettings Settings;
+    if ( _sSide == "Left" ){
+        Settings.beginGroup("/Settings");
+        Settings.beginGroup("/CentralWidget");
+        Settings.beginGroup("/Left");
+
+        for( QString sPath : Settings.allKeys() ){
+            m_lstPathHistory.push_back( Settings.value(sPath).toString() );
+        }
+
+        Settings.endGroup();
+        Settings.endGroup();
+        Settings.endGroup();
+    }
+    else if ( _sSide == "Right" ){
+        Settings.beginGroup("/Settings");
+        Settings.beginGroup("/CentralWidget");
+        Settings.beginGroup("/Right");
+
+        for( QString sPath : Settings.allKeys() ){
+            m_lstPathHistory.push_back( Settings.value(sPath).toString() );
+        }
+
+        Settings.endGroup();
+        Settings.endGroup();
+        Settings.endGroup();
+    }
+
+    m_iterPathHistory = m_lstPathHistory.constBegin();
 }

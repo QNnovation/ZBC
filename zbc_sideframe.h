@@ -42,6 +42,8 @@ signals:
 
 public slots:
 //    void setCurPath(const QString&);
+    void savePathHistory(const QString&);
+    void setPathHistory(const QString&);
 
 };
 
