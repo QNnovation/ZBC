@@ -14,6 +14,7 @@
 #include <QPushButton>
 #include <QSettings>
 #include <QSortFilterProxyModel>
+#include <QStorageInfo>
 #include <QUrl>
 
 
@@ -50,13 +51,45 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
     }
     ZBC_DriveButtonsWidget* pdrvButtons    = new ZBC_DriveButtonsWidget(lstDrives, this);
 
-//ComboBox as View
-    QComboBox*  pcbxVolumes         = new QComboBox(this);
+
+//Frame for Combobox and Labels with info about current volume
+    QFrame* pwgtCombobox       = new QFrame(this);
+    pwgtCombobox->setFrameStyle(QFrame::Box | QFrame::Sunken);
+
+    //ComboBox as View
+    QComboBox*  pcbxVolumes         = new QComboBox(pwgtCombobox);
     pcbxVolumes->setFocusPolicy(Qt::NoFocus);
     for (QString sDrive : lstDrives)
         pcbxVolumes->addItem(QIcon(":/buttons/drives/resource/logicaldrive.ico"), sDrive);
     pcbxVolumes->setCurrentIndex(lstDrives.indexOf(path.left(3)));
     pcbxVolumes->setMaximumSize(pcbxVolumes->sizeHint());
+
+    //Labels for Volume info
+    QLabel* plblVolInfo     = new QLabel(pwgtCombobox);
+    plblVolInfo->setText( QString("[") +
+                          QStorageInfo(pcbxVolumes->currentText()).displayName() +
+                          QString("]"));
+    plblVolInfo->setMaximumSize(plblVolInfo->sizeHint());
+
+    QLabel* plblVolSize     = new QLabel(pwgtCombobox);
+    plblVolSize->setText( QString::number(QStorageInfo(pcbxVolumes->currentText()).bytesFree() / 1024) +
+                          QString("k of ") +
+                          QString::number(QStorageInfo(pcbxVolumes->currentText()).bytesTotal() / 1024) +
+                          QString(" free"));
+    plblVolSize->setMaximumSize(plblVolSize->sizeHint());
+
+    //Layout
+    QHBoxLayout* phblCombobox       = new QHBoxLayout;
+    phblCombobox->setMargin(0);
+    phblCombobox->setSpacing(10);
+
+    phblCombobox->addWidget(pcbxVolumes);
+    phblCombobox->setSpacing(10);
+    phblCombobox->addWidget(plblVolInfo);
+    phblCombobox->setSpacing(10);
+    phblCombobox->addWidget(plblVolSize);
+
+    pwgtCombobox->setLayout(phblCombobox);
 
 //Current path
     m_sCurPath = QDir::toNativeSeparators(pfsmModel->rootPath());
@@ -76,12 +109,14 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 
 //Layout
     QGridLayout* pgrdLayout = new QGridLayout(this);
-    pgrdLayout->setMargin(5);
-    pgrdLayout->addWidget(pcbxVolumes, 0, 0);
-    pgrdLayout->addWidget(pdrvButtons, 0, 1);
-    pgrdLayout->addWidget(pledCurPath,1, 0, 1, 20);
-    pgrdLayout->addWidget(ptreeView, 2, 0, 20, 20);
-    pgrdLayout->addWidget(plblDirInfo, 22, 0, 1, 20);
+    pgrdLayout->setMargin(1);
+    pgrdLayout->addWidget(pdrvButtons, 0, 0, 1, 20);
+    pgrdLayout->addWidget(pwgtCombobox, 1, 0, 1, 20);
+//    pgrdLayout->addWidget(pcbxVolumes, 1, 0);
+    pgrdLayout->addWidget(pledCurPath,2, 0, 1, 20);
+    pgrdLayout->addWidget(ptreeView, 3, 0, 20, 20);
+    pgrdLayout->addWidget(plblDirInfo, 23, 0, 1, 20);
+
     this->setLayout(pgrdLayout);
 
 //Style
@@ -99,6 +134,15 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                     sCurDisk = _sPath.right(3);
                     sCurDisk.remove(')');
                 }
+                plblVolInfo->setText( QString("[") +
+                                      QStorageInfo(pcbxVolumes->currentText()).displayName() +
+                                      QString("]"));
+                plblVolInfo->setMaximumSize(plblVolInfo->sizeHint());
+                plblVolSize->setText( QString::number(QStorageInfo(pcbxVolumes->currentText()).bytesFree() / 1024) +
+                                      QString("k of ") +
+                                      QString::number(QStorageInfo(pcbxVolumes->currentText()).bytesTotal() / 1024) +
+                                      QString(" free"));
+                plblVolSize->setMaximumSize(plblVolSize->sizeHint());
                 m_sCurPath = sCurDisk;
                 m_lstPathHistory.push_front(m_sCurPath);
                 m_iterPathHistory = m_lstPathHistory.constBegin();
@@ -123,6 +167,15 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 
                 pledCurPath->setText(m_sCurPath);
                 pcbxVolumes->setCurrentIndex(lstDrives.indexOf(sDrvPath));
+                plblVolInfo->setText( QString("[") +
+                                      QStorageInfo(pcbxVolumes->currentText()).displayName() +
+                                      QString("]"));
+                plblVolInfo->setMaximumSize(plblVolInfo->sizeHint());
+                plblVolSize->setText( QString::number(QStorageInfo(pcbxVolumes->currentText()).bytesFree() / 1024) +
+                                      QString("k of ") +
+                                      QString::number(QStorageInfo(pcbxVolumes->currentText()).bytesTotal() / 1024) +
+                                      QString(" free"));
+                plblVolSize->setMaximumSize(plblVolSize->sizeHint());
                 ptreeView->setRootIndex(psfpModel->mapFromSource(pfsmModel->index(pledCurPath->text())));
                 setTextForLblDirInfo(plblDirInfo);
             });

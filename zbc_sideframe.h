@@ -38,10 +38,8 @@ signals:
     void DirChanged(const QString&);
     void goBack();
     void goForward();
-//    void backAtEnd();
 
 public slots:
-//    void setCurPath(const QString&);
     void savePathHistory(const QString&);
     void setPathHistory(const QString&);
 

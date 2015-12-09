@@ -2,13 +2,15 @@
 
 #include "zbc_drivebuttonswidget.h"
 
+#include <QHBoxLayout>
 #include <QPushButton>
 #include <QSignalMapper>
-#include <QHBoxLayout>
+#include <QStorageInfo>
 
+#include <windows.h>
 
 //C-tor
-ZBC_DriveButtonsWidget::ZBC_DriveButtonsWidget(const QStringList& lstPath, QWidget* pwgt) : QWidget(pwgt)
+ZBC_DriveButtonsWidget::ZBC_DriveButtonsWidget(const QStringList& lstPath, QWidget* pwgt) : QFrame(pwgt)
 {
     QSignalMapper* psglMapper   = new QSignalMapper(this);
     QHBoxLayout* pLayout        = new QHBoxLayout(this);
@@ -16,6 +18,10 @@ ZBC_DriveButtonsWidget::ZBC_DriveButtonsWidget(const QStringList& lstPath, QWidg
 
     for( QString sPath : lstPath ){
         QPushButton* pBtn   = new QPushButton(QIcon(":/buttons/drives/resource/logicaldrive.ico"), sPath, this);
+        QStorageInfo* pStorInfo = new QStorageInfo(sPath);
+        pBtn->setToolTip(pStorInfo->displayName());
+//        qDebug() << pStorInfo->device();
+        delete pStorInfo;
         pBtn->setFocusPolicy(Qt::NoFocus);
         pBtn->setFixedSize(pBtn->sizeHint());
 
@@ -24,6 +30,7 @@ ZBC_DriveButtonsWidget::ZBC_DriveButtonsWidget(const QStringList& lstPath, QWidg
                 psglMapper,
                 static_cast<void (QSignalMapper::*)()>(&QSignalMapper::map));
         psglMapper->setMapping(pBtn, sPath);
+        pLayout->setMargin(0);
         pLayout->addWidget(pBtn);
     }
 
@@ -32,5 +39,7 @@ ZBC_DriveButtonsWidget::ZBC_DriveButtonsWidget(const QStringList& lstPath, QWidg
             this,
             &ZBC_DriveButtonsWidget::clicked);
 
+    setFrameStyle(QFrame::Box | QFrame::Sunken);
+    pLayout->setSpacing(1);
     setLayout(pLayout);
 }

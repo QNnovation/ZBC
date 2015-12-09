@@ -1,9 +1,9 @@
 #ifndef ZBC_DRIVEBUTTONSWIDGET_H
 #define ZBC_DRIVEBUTTONSWIDGET_H
 
-#include <QWidget>
+#include <QFrame>
 
-class ZBC_DriveButtonsWidget : public QWidget
+class ZBC_DriveButtonsWidget : public QFrame
 {
     Q_OBJECT
 public:
