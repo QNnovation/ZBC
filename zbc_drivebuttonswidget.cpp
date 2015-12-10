@@ -1,4 +1,4 @@
-#include <QDebug>
+//#include <QDebug>
 
 #include "zbc_drivebuttonswidget.h"
 
@@ -14,10 +14,12 @@ ZBC_DriveButtonsWidget::ZBC_DriveButtonsWidget(const QStringList& lstPath, QWidg
 {
     QSignalMapper* psglMapper   = new QSignalMapper(this);
     QHBoxLayout* pLayout        = new QHBoxLayout(this);
-
+    pLayout->setSpacing(0);
+    pLayout->setMargin(0);
 
     for( QString sPath : lstPath ){
         QPushButton* pBtn   = new QPushButton(QIcon(":/buttons/drives/resource/logicaldrive.ico"), sPath, this);
+        pBtn->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
         QStorageInfo* pStorInfo = new QStorageInfo(sPath);
         pBtn->setToolTip(pStorInfo->displayName());
 //        qDebug() << pStorInfo->device();
@@ -30,7 +32,6 @@ ZBC_DriveButtonsWidget::ZBC_DriveButtonsWidget(const QStringList& lstPath, QWidg
                 psglMapper,
                 static_cast<void (QSignalMapper::*)()>(&QSignalMapper::map));
         psglMapper->setMapping(pBtn, sPath);
-        pLayout->setMargin(0);
         pLayout->addWidget(pBtn);
     }
 
@@ -40,6 +41,6 @@ ZBC_DriveButtonsWidget::ZBC_DriveButtonsWidget(const QStringList& lstPath, QWidg
             &ZBC_DriveButtonsWidget::clicked);
 
     setFrameStyle(QFrame::Box | QFrame::Sunken);
-    pLayout->setSpacing(1);
+    setFixedHeight(minimumSizeHint().height());
     setLayout(pLayout);
 }
