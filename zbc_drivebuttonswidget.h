@@ -9,6 +9,9 @@ class ZBC_DriveButtonsWidget : public QFrame
 public:
     explicit ZBC_DriveButtonsWidget(const QStringList& lstPath, QWidget* pwgt = 0);
 
+public:
+    static QIcon getIcon(const ushort*);
+
 signals:
     void clicked(const QString&);
 };

@@ -53,7 +53,6 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
     }
     ZBC_DriveButtonsWidget* pwgtButtons    = new ZBC_DriveButtonsWidget(lstDrives, this);
 
-
 //Frame for Combobox and Labels with info about current volume
     QFrame* pwgtCombobox       = new QFrame(this);
     pwgtCombobox->setFrameStyle(QFrame::Box | QFrame::Sunken);
@@ -62,7 +61,7 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
     QComboBox*  pcbxVolumes         = new QComboBox(pwgtCombobox);
     pcbxVolumes->setFocusPolicy(Qt::NoFocus);
     for (QString sDrive : lstDrives)
-        pcbxVolumes->addItem(QIcon(":/buttons/drives/resource/logicaldrive.ico"), sDrive);
+        pcbxVolumes->addItem(ZBC_DriveButtonsWidget::getIcon(sDrive.utf16()), sDrive);
     pcbxVolumes->setCurrentIndex(lstDrives.indexOf(path.left(3)));
     pcbxVolumes->setMaximumSize(pcbxVolumes->sizeHint());
 
@@ -84,7 +83,6 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
     phblCombobox->setMargin(0);
     phblCombobox->addWidget(pcbxVolumes);
     phblCombobox->addWidget(plblVolInfo);
-//    pwgtCombobox->setFixedHeight(pwgtCombobox->minimumSizeHint().height());
     pwgtCombobox->setLayout(phblCombobox);
 
 //Current path
@@ -141,9 +139,6 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                 m_sCurPath = sCurDisk;
                 m_lstPathHistory.push_front(m_sCurPath);
                 m_iterPathHistory = m_lstPathHistory.constBegin();
-//                qDebug() << "CBX: " << m_lstPathHistory;
-//                qDebug() << *m_iterPathHistory;
-
                 pledCurPath->setText(m_sCurPath);
                 ptreeView->setRootIndex(psfpModel->mapFromSource(pfsmModel->index(sCurDisk)));
                 setTextForLblDirInfo(plblDirInfo);
@@ -157,9 +152,6 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                 m_sCurPath = sDrvPath;
                 m_lstPathHistory.push_front(m_sCurPath);
                 m_iterPathHistory = m_lstPathHistory.constBegin();
-//                qDebug() << "DRV: " << m_lstPathHistory;
-//                qDebug() << *m_iterPathHistory;
-
                 pledCurPath->setText(m_sCurPath);
                 pcbxVolumes->setCurrentIndex(lstDrives.indexOf(sDrvPath));
                 plblVolInfo->setText( "<b>" +
@@ -190,9 +182,6 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                                                            psfpModel->mapToSource(ptreeView->rootIndex())) );
                 m_lstPathHistory.push_front(m_sCurPath);
                 m_iterPathHistory = m_lstPathHistory.constBegin();
-//                qDebug() << "LED: " << m_lstPathHistory;
-//                qDebug() << *m_iterPathHistory;
-
                 stlSelectedItems.clear();
                 setTextForLblDirInfo(plblDirInfo);
                 emit Active();
@@ -218,9 +207,6 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                         m_sCurPath = QDir::toNativeSeparators( pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex())) );
                         m_lstPathHistory.push_front(m_sCurPath);
                         m_iterPathHistory = m_lstPathHistory.constBegin();
-//                        qDebug() << "TRV: " << m_lstPathHistory;
-//                        qDebug() << *m_iterPathHistory;
-
                         pledCurPath->setText(m_sCurPath);
                         stlSelectedItems.clear();
                         setTextForLblDirInfo(plblDirInfo);
@@ -265,8 +251,6 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                     pledCurPath->setText(m_sCurPath);
                     stlSelectedItems.clear();
                     setTextForLblDirInfo(plblDirInfo);
-//                    qDebug() << "Back" << m_lstPathHistory;
-//                    qDebug() << *m_iterPathHistory;
                 }
             });
 
@@ -280,8 +264,6 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                     pledCurPath->setText(m_sCurPath);
                     stlSelectedItems.clear();
                     setTextForLblDirInfo(plblDirInfo);
-//                    qDebug() << "Forward" << m_lstPathHistory;
-//                    qDebug() << *m_iterPathHistory;
                 }
             });
 }
