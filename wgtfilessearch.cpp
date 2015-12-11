@@ -380,65 +380,73 @@ void filesSearchEngine::loadSearchData(const QString &files, const QString &path
     if (m_strFileNames.contains(" ")) {
         m_strFileNames.push_back(" ");
         QString tmp;
+        int m = 0;
         for(int i = 0;  i < m_strFileNames.size(); ++i) {
             if (m_strFileNames.at(i) != ' ') {
                 tmp.append(m_strFileNames.at(i));
+                ++m;
             }
             else {
-                m_strListNames.append(tmp);
-                tmp.clear();
+                if (m >= 1) {
+                    m_strListNames.append(tmp);
+                    tmp.clear();
+                    m = 0;
+                }
             }
         }
-        for (int j = 0; j < m_strListNames.size(); ++j)
-            if (m_strListNames.at(j).size() == 0)
-                m_strListNames.removeAt(j);
     }
-    qDebug() << m_strListNames;
+    else
+        m_strListNames.append(m_strFileNames);
 }
 
 void filesSearchEngine::process()
 {
-    QStringList nameFilter;
-    int starCnt = 0;
-    if (!m_strFileNames.isEmpty()) {
-        if (m_strFileNames.contains("*")) {
-            //если есть звёзды то считаем их
-            for (int i = 0; i < m_strFileNames.size(); ++i)
-                if (m_strFileNames.at(i) == '*')
-                    ++starCnt;
-            //если количество звёзд равно 1 то создаём фильтр
-            if (starCnt == 1 && m_strFileNames.at(0) == '*') {
-                nameFilter.append(m_strFileNames);
-                m_strFileNames.clear();
-            }
-            //если количество звёзд > 1;
-            else if (starCnt == 2 && m_strFileNames == "*.*") {
-                m_strFileNames.clear();
-            }
-        }
-    }
-    QString _upper = m_strFileNames.toUpper();
-    QString _lower = m_strFileNames.toLower();
+    for (int i = 0; i < m_strListNames.size(); ++i) {
+        m_strFileNames.clear();
+        m_strFileNames = m_strListNames.at(i);
 
-    QDirIterator it(m_dirPath, nameFilter, QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
-    while (it.hasNext()) {
-        it.next();
-        if (m_threadStop)
-            break;
-        emit currentSearchPatch(it.filePath());
-        if (it.fileName().contains(m_strFileNames)
-                || it.fileName().contains(_upper)
-                || it.fileName().contains(_lower))
-        {
-            emit foundFilePatch(it.filePath());
+        QStringList nameFilter;
+        int starCnt = 0;
+        if (!m_strFileNames.isEmpty()) {
+            if (m_strFileNames.contains("*")) {
+                //if have stars,count it
+                for (int i = 0; i < m_strFileNames.size(); ++i)
+                    if (m_strFileNames.at(i) == '*')
+                        ++starCnt;
+                //if number of stars = 1
+                if (starCnt == 1 && m_strFileNames.at(0) == '*') {
+                    nameFilter.append(m_strFileNames);
+                    m_strFileNames.clear();
+                }
+                //if number of stars > 1;
+                else if (starCnt == 2 && m_strFileNames == "*.*") {
+                    m_strFileNames.clear();
+                }
+            }
         }
-        else if (m_strFileNames.isEmpty())
-        {
-            emit foundFilePatch(it.filePath());
+        QString _upper = m_strFileNames.toUpper();
+        QString _lower = m_strFileNames.toLower();
+
+        QDirIterator it(m_dirPath, nameFilter, QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+        while (it.hasNext()) {
+            it.next();
+            if (m_threadStop)
+                break;
+            emit currentSearchPatch(it.filePath());
+            if (it.fileName().contains(m_strFileNames)
+                    || it.fileName().contains(_upper)
+                    || it.fileName().contains(_lower))
+            {
+                emit foundFilePatch(it.filePath());
+            }
+            else if (m_strFileNames.isEmpty())
+            {
+                emit foundFilePatch(it.filePath());
+            }
         }
+        emit currentSearchPatch(":");
+        emit finished();
     }
-    emit currentSearchPatch(":");
-    emit finished();
 }
 
 
