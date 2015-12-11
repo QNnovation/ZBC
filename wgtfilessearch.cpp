@@ -29,7 +29,9 @@ wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(p
     else
         m_dirPath = path;
 
-    m_optionsSizeBool = true;
+    m_optionsSizeBool = false;
+    m_optionsDateBool = false;
+    m_optionsWithTextBool = false;
 
     m_searchFileLbl = new QLabel(tr("Files:"), this);
     m_pathToFileLbl = new QLabel(tr("Path:"), this);
@@ -41,8 +43,6 @@ wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(p
     m_withTextEdit = new QLineEdit(this);
 
     m_withTextOption = new QCheckBox(this);
-    m_caseSensOption = new QCheckBox(tr("Case sensitive"), this);
-    m_wholeWordsOption = new QCheckBox(tr("Only whole words"), this);
 
     //general tab
     m_upGridLayout = new QGridLayout(this);
@@ -58,27 +58,25 @@ wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(p
     m_upGridLayout->addWidget(m_withTextLbl, 3, 0);
     m_upGridLayout->addWidget(m_withTextEdit, 3, 1);
     m_upGridLayout->addWidget(m_withTextOption, 3, 2);
-    m_upGridLayout->addWidget(m_caseSensOption, 4, 0);
-    m_upGridLayout->addWidget(m_wholeWordsOption, 5, 0);
 
     //options tab
     //data options
     m_optionsDateLbl = new QLabel(tr("Date: "), this);
     m_optionsDateCBox = new QCheckBox(this);
     m_optionsFromLbl = new QLabel(tr("From: "));
-    m_optionsCalendar1 = new QCalendarWidget(this);
-    m_optionsCalendar1->setEnabled(false);
+    m_optionsCalendar_1 = new QCalendarWidget(this);
+    m_optionsCalendar_1->setEnabled(false);
     m_optionsToLbl = new QLabel(tr("To: "));
-    m_optionsCalendar2 = new QCalendarWidget(this);
-    m_optionsCalendar2->setEnabled(false);
+    m_optionsCalendar_2 = new QCalendarWidget(this);
+    m_optionsCalendar_2->setEnabled(false);
 
     m_optionsHLayout_1 = new QHBoxLayout();
     m_optionsHLayout_1->addWidget(m_optionsDateLbl);
     m_optionsHLayout_1->addWidget(m_optionsDateCBox);
     m_optionsHLayout_1->addWidget(m_optionsFromLbl);
-    m_optionsHLayout_1->addWidget(m_optionsCalendar1);
+    m_optionsHLayout_1->addWidget(m_optionsCalendar_1);
     m_optionsHLayout_1->addWidget(m_optionsToLbl);
-    m_optionsHLayout_1->addWidget(m_optionsCalendar2);
+    m_optionsHLayout_1->addWidget(m_optionsCalendar_2);
     //size options
     m_optionsSizeLbl = new QLabel(tr("Size: "), this);
     m_optionsSizeCBox = new QCheckBox(this);
@@ -88,8 +86,6 @@ wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(p
     optionsEqual << "=" << "<" << ">";
     m_optionsEqual->addItems(optionsEqual);
     m_optionsSizeLEdit = new QLineEdit(this);
-    //QRegExp validator("[0-9]{75}[0-9]{1}");
-    //m_optionsSizeLEdit->setValidator(new QRegExpValidator(validator, this));
     m_optionsSizeLEdit->setEnabled(false);
     m_optionsParams = new QComboBox(this);
     QStringList optionsParams;
@@ -163,22 +159,20 @@ wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(p
 
     //states on form create
     m_withTextEdit->setEnabled(false);
-    m_caseSensOption->setEnabled(false);
-    m_wholeWordsOption->setEnabled(false);
 
     //connect
     connect(m_btnCancel, &QPushButton::clicked, this, &QDialog::close);
-    connect(m_withTextOption, &QCheckBox::toggled, this, &wgtFilesSearch::withTextOptionSlot);
     connect(m_btnSearch, &QPushButton::pressed, this, &wgtFilesSearch::startSearchFiles);
     connect(m_btnStop, &QPushButton::pressed, this, &wgtFilesSearch::stopSearchFiles);
-    connect (m_foundFileList, &QListWidget::itemDoubleClicked, this, &wgtFilesSearch::listOfFilesClicked);
-    connect(m_optionsDateCBox, QCheckBox::toggled, this, &wgtFilesSearch::setOptions);
-    connect(m_optionsSizeCBox, QCheckBox::toggled, this, &wgtFilesSearch::setOptions);
-
+    connect(m_foundFileList, &QListWidget::itemDoubleClicked, this, &wgtFilesSearch::listOfFilesClicked);
+    connect(m_optionsDateCBox, &QCheckBox::released, this, &wgtFilesSearch::setOptions);
+    connect(m_optionsSizeCBox, &QCheckBox::released, this, &wgtFilesSearch::setOptions);
+    connect(m_withTextOption, QCheckBox::released, this, &wgtFilesSearch::setOptions);
 }
 
 void wgtFilesSearch::startSearchFiles()
 {
+    m_btnStop->setEnabled(true);
     m_foundFileList->clear();
     //thread
     m_fileSearchThread = new QThread();
@@ -218,10 +212,9 @@ void wgtFilesSearch::startSearchFiles()
 
 void wgtFilesSearch::stopSearchFiles()
 {
-    m_fileSearchThread->quit();
-    m_fileSearchThread->wait();
-    delete m_fileSearchThread;
+    m_searchEngine->setStop();
     m_btnSearch->setEnabled(true);
+    m_btnStop->setEnabled(false);
 }
 
 void wgtFilesSearch::addItemToStrList(QString data)
@@ -235,7 +228,21 @@ void wgtFilesSearch::resultToList()
     for (int i = 0; i < m_foundFileList->count(); ++i) {
         filesPaths.append(m_foundFileList->item(i)->text());
     }
-    //file size options enable
+    //file date option is enable
+    if (m_optionsDateBool) {
+        for (int m = 0; m < filesPaths.size(); ++m) {
+            QDateTime dateTime_1(m_optionsCalendar_1->selectedDate());
+            QDateTime dateTime_2(m_optionsCalendar_2->selectedDate());
+            if ((QFileInfo(filesPaths.at(m)).created() > dateTime_1) &&
+                    (QFileInfo(filesPaths.at(m)).created() < dateTime_2))
+                tmpSList.append(filesPaths.at(m));
+        }
+        filesPaths.clear();
+        filesPaths.append(tmpSList);
+        tmpSList.clear();
+
+    }
+    //file size options is enable
     double optionSizeOfOFile = m_optionsSizeLEdit->text().toDouble();
     QChar optionsSign = m_optionsParams->currentText().at(0);
     int bytesToKlMbGb = 0;
@@ -264,7 +271,28 @@ void wgtFilesSearch::resultToList()
             }
         }
         filesPaths.clear();
-        filesPaths = tmpSList;
+        filesPaths.append(tmpSList);
+        tmpSList.clear();
+    }
+    //search text in file enabled
+    if (m_optionsWithTextBool) {
+        for (int n = 0; n < filesPaths.size(); ++n) {
+            if (QFileInfo(filesPaths.at(n)).isFile()) {
+                QFile inputFile(filesPaths.at(n));
+                if (!inputFile.open(QIODevice::ReadOnly | QIODevice::Text))
+                    qDebug() << "Could not open the input file (FileSearch) \n "<< filesPaths.at(n);
+                else {
+                    while(!inputFile.atEnd()) {
+                        QString buf = inputFile.readLine();
+                        if (buf.contains(m_withTextEdit->text()))
+                            tmpSList.append(filesPaths.at(n));
+                    }
+                    inputFile.close();
+                }
+            }
+        }
+        filesPaths.clear();
+        filesPaths.append(tmpSList);
         tmpSList.clear();
     }
 
@@ -291,22 +319,23 @@ void wgtFilesSearch::enableBtn()
 
 wgtFilesSearch::~wgtFilesSearch()
 {
-    qDebug() << "~wgtFilesSearch";
+
 }
 
 void wgtFilesSearch::setOptions()
 {
+    //options tab
     //date of file
     if (m_optionsDateCBox->isChecked())
     {
-        m_optionsCalendar1->setEnabled(true);
-        m_optionsCalendar2->setEnabled(true);
-        m_optionsSizeBool = true;
+        m_optionsCalendar_1->setEnabled(true);
+        m_optionsCalendar_2->setEnabled(true);
+        m_optionsDateBool = true;
     }
     else {
-        m_optionsCalendar1->setEnabled(false);
-        m_optionsCalendar2->setEnabled(false);
-        m_optionsSizeBool = false;
+        m_optionsCalendar_1->setEnabled(false);
+        m_optionsCalendar_2->setEnabled(false);
+        m_optionsDateBool = false;
     }
     //size of file
     if (m_optionsSizeCBox->isChecked()) {
@@ -321,18 +350,20 @@ void wgtFilesSearch::setOptions()
         m_optionsParams->setEnabled(false);
         m_optionsSizeBool = false;
     }
-}
-
-void wgtFilesSearch::withTextOptionSlot(bool state)
-{
-    m_withTextEdit->setEnabled(state);
-    m_caseSensOption->setEnabled(state);
-    m_wholeWordsOption->setEnabled(state);
+    //main tab
+    if (m_withTextOption->isChecked()) {
+        m_optionsWithTextBool = true;
+        m_withTextEdit->setEnabled(true);
+    }
+    else {
+        m_optionsWithTextBool = false;
+        m_withTextEdit->setEnabled(false);
+    }
 }
 
 void wgtFilesSearch::listOfFilesClicked()
 {
-    emit(m_foundFileList->currentItem()->text());
+    emit foundFileClicked(m_foundFileList->currentItem()->text());
 }
 
 //filesearch engine implementation
@@ -345,56 +376,83 @@ void filesSearchEngine::loadSearchData(const QString &files, const QString &path
 {
     m_strFileNames = files;
     m_dirPath = path;
+
+    if (m_strFileNames.contains(" ")) {
+        m_strFileNames.push_back(" ");
+        QString tmp;
+        int m = 0;
+        for(int i = 0;  i < m_strFileNames.size(); ++i) {
+            if (m_strFileNames.at(i) != ' ') {
+                tmp.append(m_strFileNames.at(i));
+                ++m;
+            }
+            else {
+                if (m >= 1) {
+                    m_strListNames.append(tmp);
+                    tmp.clear();
+                    m = 0;
+                }
+            }
+        }
+    }
+    else
+        m_strListNames.append(m_strFileNames);
 }
 
 void filesSearchEngine::process()
 {
-    QStringList nameFilter;
-    int starCnt = 0;
-    if (!m_strFileNames.isEmpty()) {
-        if (m_strFileNames.contains("*")) {
-            //если есть звёзды то считаем их
-            for (int i = 0; i < m_strFileNames.size(); ++i)
-                if (m_strFileNames.at(i) == '*')
-                    ++starCnt;
-            //если количество звёзд равно 1 то создаём фильтр
-            if (starCnt == 1 && m_strFileNames.at(0) == '*') {
-                nameFilter.append(m_strFileNames);
-                m_strFileNames.clear();
-            }
-            //если количество звёзд > 1;
-            else if (starCnt == 2 && m_strFileNames == "*.*") {
-                m_strFileNames.clear();
-            }
-        }
-    }
-    QString _upper = m_strFileNames.toUpper();
-    QString _lower = m_strFileNames.toLower();
+    for (int i = 0; i < m_strListNames.size(); ++i) {
+        m_strFileNames.clear();
+        m_strFileNames = m_strListNames.at(i);
 
-    QDirIterator it(m_dirPath, nameFilter, QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
-    while (it.hasNext()) {
-        it.next();
+        QStringList nameFilter;
+        int starCnt = 0;
+        if (!m_strFileNames.isEmpty()) {
+            if (m_strFileNames.contains("*")) {
+                //if have stars,count it
+                for (int i = 0; i < m_strFileNames.size(); ++i)
+                    if (m_strFileNames.at(i) == '*')
+                        ++starCnt;
+                //if number of stars = 1
+                if (starCnt == 1 && m_strFileNames.at(0) == '*') {
+                    nameFilter.append(m_strFileNames);
+                    m_strFileNames.clear();
+                }
+                //if number of stars > 1;
+                else if (starCnt == 2 && m_strFileNames == "*.*") {
+                    m_strFileNames.clear();
+                }
+            }
+        }
+        QString _upper = m_strFileNames.toUpper();
+        QString _lower = m_strFileNames.toLower();
 
-        emit currentSearchPatch(it.filePath());
-        if (it.fileName().contains(m_strFileNames)
-                || it.fileName().contains(_upper)
-                || it.fileName().contains(_lower))
-        {
-            emit foundFilePatch(it.filePath());
+        QDirIterator it(m_dirPath, nameFilter, QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+        while (it.hasNext()) {
+            it.next();
+            if (m_threadStop)
+                break;
+            emit currentSearchPatch(it.filePath());
+            if (it.fileName().contains(m_strFileNames)
+                    || it.fileName().contains(_upper)
+                    || it.fileName().contains(_lower))
+            {
+                emit foundFilePatch(it.filePath());
+            }
+            else if (m_strFileNames.isEmpty())
+            {
+                emit foundFilePatch(it.filePath());
+            }
         }
-        else if (m_strFileNames.isEmpty())
-        {
-            emit foundFilePatch(it.filePath());
-        }
+        emit currentSearchPatch(":");
+        emit finished();
     }
-    emit currentSearchPatch(":");
-    emit finished();
 }
 
 
 filesSearchEngine::~filesSearchEngine()
 {
-    qDebug() << "~filesSearchEngine";
+
 }
 
 

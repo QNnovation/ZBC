@@ -1,4 +1,4 @@
-#include <QDebug>
+//#include <QDebug>
 
 #include "zbc_drivebuttonswidget.h"
 #include "zbc_sideframe.h"
@@ -14,7 +14,9 @@
 #include <QMessageBox>
 #include <QModelIndex>
 #include <QPushButton>
+#include <QSettings>
 #include <QSortFilterProxyModel>
+#include <QStorageInfo>
 #include <QUrl>
 
 
@@ -49,22 +51,42 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
     for( QFileInfo file : QDir::drives() ){
         lstDrives.push_back(file.filePath().left(2) + QDir::separator());
     }
-    ZBC_DriveButtonsWidget* pdrvButtons    = new ZBC_DriveButtonsWidget(lstDrives, this);
+    ZBC_DriveButtonsWidget* pwgtButtons    = new ZBC_DriveButtonsWidget(lstDrives, this);
 
-//ComboBox as View
-    QComboBox*  pcbxVolumes         = new QComboBox(this);
+//Frame for Combobox and Labels with info about current volume
+    QFrame* pwgtCombobox       = new QFrame(this);
+    pwgtCombobox->setFrameStyle(QFrame::Box | QFrame::Sunken);
+
+    //ComboBox as View
+    QComboBox*  pcbxVolumes         = new QComboBox(pwgtCombobox);
     pcbxVolumes->setFocusPolicy(Qt::NoFocus);
     for (QString sDrive : lstDrives)
-        pcbxVolumes->addItem(QIcon(":/buttons/drives/resource/logicaldrive.ico"), sDrive);
+        pcbxVolumes->addItem(ZBC_DriveButtonsWidget::getIcon(sDrive.utf16()), sDrive);
     pcbxVolumes->setCurrentIndex(lstDrives.indexOf(path.left(3)));
     pcbxVolumes->setMaximumSize(pcbxVolumes->sizeHint());
 
+    //Label for Volume info
+    QLabel* plblVolInfo     = new QLabel(pwgtCombobox);
+    plblVolInfo->setText( "<b>" +
+                          QString("[") +
+                          ((QStorageInfo(pcbxVolumes->currentText()).displayName().length() == 3) ?
+                               "_none_" : QStorageInfo(pcbxVolumes->currentText()).displayName()) +
+                          QString("] ") +
+                          formatedSize(QStorageInfo(pcbxVolumes->currentText()).bytesFree() / 1024) +
+                          QString(" k of ") +
+                          formatedSize(QStorageInfo(pcbxVolumes->currentText()).bytesTotal() / 1024) +
+                          QString(" k free") +
+                          "</b>" );
+
+    //Layout
+    QHBoxLayout* phblCombobox       = new QHBoxLayout;
+    phblCombobox->setMargin(0);
+    phblCombobox->addWidget(pcbxVolumes);
+    phblCombobox->addWidget(plblVolInfo);
+    pwgtCombobox->setLayout(phblCombobox);
+
 //Current path
     m_sCurPath = QDir::toNativeSeparators(pfsmModel->rootPath());
-    m_lstPathHistory.push_front(m_sCurPath);
-    m_iterPathHistory = m_lstPathHistory.constBegin();
-//    qDebug() << "CTR: " << m_lstPathHistory;
-//    qDebug() << *m_iterPathHistory;
 
 //LineEdit with current path
     ZBC_LineEdit* pledCurPath      = new ZBC_LineEdit(this);
@@ -81,12 +103,12 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 
 //Layout
     QGridLayout* pgrdLayout = new QGridLayout(this);
-    pgrdLayout->setMargin(5);
-    pgrdLayout->addWidget(pcbxVolumes, 0, 0);
-    pgrdLayout->addWidget(pdrvButtons, 0, 1);
-    pgrdLayout->addWidget(pledCurPath,1, 0, 1, 20);
-    pgrdLayout->addWidget(ptreeView, 2, 0, 20, 20);
-    pgrdLayout->addWidget(plblDirInfo, 22, 0, 1, 20);
+    pgrdLayout->setMargin(1);
+    pgrdLayout->addWidget(pwgtButtons, 0, 0);
+    pgrdLayout->addWidget(pwgtCombobox, 1, 0, 1, 20);
+    pgrdLayout->addWidget(pledCurPath,2, 0, 1, 20);
+    pgrdLayout->addWidget(ptreeView, 3, 0, 20, 20);
+    pgrdLayout->addWidget(plblDirInfo, 23, 0, 1, 20);
     this->setLayout(pgrdLayout);
 
 //Style
@@ -104,12 +126,19 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                     sCurDisk = _sPath.right(3);
                     sCurDisk.remove(')');
                 }
+                plblVolInfo->setText( "<b>" +
+                                      QString("[") +
+                                      ((QStorageInfo(pcbxVolumes->currentText()).displayName().length() == 3) ?
+                                           "_none_" : QStorageInfo(pcbxVolumes->currentText()).displayName()) +
+                                      QString("] ") +
+                                      formatedSize(QStorageInfo(pcbxVolumes->currentText()).bytesFree() / 1024) +
+                                      QString(" k of ") +
+                                      formatedSize(QStorageInfo(pcbxVolumes->currentText()).bytesTotal() / 1024) +
+                                      QString(" k free") +
+                                      "</b>" );
                 m_sCurPath = sCurDisk;
                 m_lstPathHistory.push_front(m_sCurPath);
                 m_iterPathHistory = m_lstPathHistory.constBegin();
-//                qDebug() << "CBX: " << m_lstPathHistory;
-//                qDebug() << *m_iterPathHistory;
-
                 pledCurPath->setText(m_sCurPath);
                 ptreeView->setRootIndex(psfpModel->mapFromSource(pfsmModel->index(sCurDisk)));
                 setTextForLblDirInfo(plblDirInfo);
@@ -117,17 +146,24 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
             });
 
 //Drive buttons clicked
-    connect(pdrvButtons,
+    connect(pwgtButtons,
             &ZBC_DriveButtonsWidget::clicked,
             [=](QString sDrvPath){
                 m_sCurPath = sDrvPath;
                 m_lstPathHistory.push_front(m_sCurPath);
                 m_iterPathHistory = m_lstPathHistory.constBegin();
-//                qDebug() << "DRV: " << m_lstPathHistory;
-//                qDebug() << *m_iterPathHistory;
-
                 pledCurPath->setText(m_sCurPath);
                 pcbxVolumes->setCurrentIndex(lstDrives.indexOf(sDrvPath));
+                plblVolInfo->setText( "<b>" +
+                                      QString("[") +
+                                      ((QStorageInfo(pcbxVolumes->currentText()).displayName().length() == 3) ?
+                                           "_none_" : QStorageInfo(pcbxVolumes->currentText()).displayName()) +
+                                      QString("] ") +
+                                      formatedSize(QStorageInfo(pcbxVolumes->currentText()).bytesFree() / 1024) +
+                                      QString(" k of ") +
+                                      formatedSize(QStorageInfo(pcbxVolumes->currentText()).bytesTotal() / 1024) +
+                                      QString(" k free") +
+                                      "</b>" );
                 ptreeView->setRootIndex(psfpModel->mapFromSource(pfsmModel->index(pledCurPath->text())));
                 setTextForLblDirInfo(plblDirInfo);
             });
@@ -146,10 +182,6 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                                                            psfpModel->mapToSource(ptreeView->rootIndex())) );
                 m_lstPathHistory.push_front(m_sCurPath);
                 m_iterPathHistory = m_lstPathHistory.constBegin();
-//                qDebug() << "LED: " << m_lstPathHistory;
-//                qDebug() << *m_iterPathHistory;
-
-
                 stlSelectedItems.clear();
                 setTextForLblDirInfo(plblDirInfo);
                 emit Active();
@@ -175,9 +207,6 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                         m_sCurPath = QDir::toNativeSeparators( pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex())) );
                         m_lstPathHistory.push_front(m_sCurPath);
                         m_iterPathHistory = m_lstPathHistory.constBegin();
-//                        qDebug() << "TRV: " << m_lstPathHistory;
-//                        qDebug() << *m_iterPathHistory;
-
                         pledCurPath->setText(m_sCurPath);
                         stlSelectedItems.clear();
                         setTextForLblDirInfo(plblDirInfo);
@@ -222,8 +251,6 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                     pledCurPath->setText(m_sCurPath);
                     stlSelectedItems.clear();
                     setTextForLblDirInfo(plblDirInfo);
-//                    qDebug() << "Back" << m_lstPathHistory;
-//                    qDebug() << *m_iterPathHistory;
                 }
             });
 
@@ -231,14 +258,12 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
     connect(this,
             &ZBC_SideFrame::goForward,
             [=](){
-                if( m_iterPathHistory != m_lstPathHistory.constBegin() && --m_iterPathHistory != m_lstPathHistory.constBegin() ){
-                    ptreeView->setRootIndex(QModelIndex( psfpModel->mapFromSource(pfsmModel->index(*m_iterPathHistory))));
+                if( m_iterPathHistory != m_lstPathHistory.constBegin()){
+                    ptreeView->setRootIndex(QModelIndex( psfpModel->mapFromSource(pfsmModel->index(*--m_iterPathHistory))));
                     m_sCurPath = QDir::toNativeSeparators( pfsmModel->filePath( psfpModel->mapToSource(ptreeView->rootIndex())) );
                     pledCurPath->setText(m_sCurPath);
                     stlSelectedItems.clear();
                     setTextForLblDirInfo(plblDirInfo);
-//                    qDebug() << "Forward" << m_lstPathHistory;
-//                    qDebug() << *m_iterPathHistory;
                 }
             });
 }
@@ -307,8 +332,7 @@ qint64 ZBC_SideFrame::getSizeOfFiles(QHash<QString, int> _hash) const
         iter.next();
         sz += iter.value();
     }
-
-    return sz;
+return sz;
 }
 
 
@@ -345,23 +369,110 @@ qint64 ZBC_SideFrame::getSizeOfSelectedFiles( bool retSum )
 }
 
 
-//
+//Set text for label with info about files and dirs
 void ZBC_SideFrame::setTextForLblDirInfo(QLabel * plbl)
 {
     setListOfItemsInDir();
-    plbl->setText(QString::number(getSizeOfSelectedFiles())
-                         + QLatin1String(" k/ ")
-                         + QString::number(getSizeOfFiles(m_hashFiles))
-                         + QLatin1String(" k in ")
-                         + QString::number(getSizeOfSelectedFiles(false))
-                         + QLatin1String("/")
-                         + QString::number(m_hashFiles.size())
-                         + QLatin1String(" files, ")
-                         + QString::number(QSet<QString>::fromList(stlSelectedItems).intersect(m_setDirs).size())
-                         + QLatin1String("/")
-                         + QString::number(m_setDirs.size())
-                         + QLatin1String(" dirs"));
+    plbl->setText("<b>" +
+                  QString::number(getSizeOfSelectedFiles()) +
+                  QLatin1String(" k/ ")+
+                  QString::number(getSizeOfFiles(m_hashFiles)) +
+                  QLatin1String(" k in ") +
+                  QString::number(getSizeOfSelectedFiles(false)) +
+                  QLatin1String("/") +
+                  QString::number(m_hashFiles.size()) +
+                  QLatin1String(" files, ") +
+                  QString::number(QSet<QString>::fromList(stlSelectedItems).intersect(m_setDirs).size()) +
+                  QLatin1String("/") +
+                  QString::number(m_setDirs.size()) +
+                  QLatin1String(" dirs") +
+                  "</b>");
 
     m_hashFiles.clear();
     m_setDirs.clear();
+}
+
+
+//Save list of pathes history before close
+void ZBC_SideFrame::savePathHistory(const QString& _sSide)
+{
+    QSettings Settings;
+    if ( _sSide == "Left" ) {
+        Settings.beginGroup("/Settings");
+        Settings.beginGroup("/CentralWidget");
+        Settings.beginGroup("/Left");
+        Settings.remove("");
+
+        for (int i = 0; i != m_lstPathHistory.size(); ++i)
+            Settings.setValue("Path" + QString::number(i), m_lstPathHistory.at(i));
+
+        Settings.endGroup();
+        Settings.endGroup();
+        Settings.endGroup();
+    }
+    else if ( _sSide == "Right" ){
+        Settings.beginGroup("/Settings");
+        Settings.beginGroup("/CentralWidget");
+        Settings.beginGroup("/Right");
+        Settings.remove("");
+
+        for (int i = 0; i != m_lstPathHistory.size(); ++i)
+            Settings.setValue("Path" + QString::number(i), m_lstPathHistory.at(i));
+
+        Settings.endGroup();
+        Settings.endGroup();
+        Settings.endGroup();
+    }
+}
+
+
+//Set list of path history at start
+void ZBC_SideFrame::setPathHistory(const QString& _sSide)
+{
+    QSettings Settings;
+    if ( _sSide == "Left" ){
+        Settings.beginGroup("/Settings");
+        Settings.beginGroup("/CentralWidget");
+        Settings.beginGroup("/Left");
+
+        for( QString sPath : Settings.allKeys() ){
+            m_lstPathHistory.push_back( Settings.value(sPath).toString() );
+        }
+
+        Settings.endGroup();
+        Settings.endGroup();
+        Settings.endGroup();
+    }
+    else if ( _sSide == "Right" ){
+        Settings.beginGroup("/Settings");
+        Settings.beginGroup("/CentralWidget");
+        Settings.beginGroup("/Right");
+
+        for( QString sPath : Settings.allKeys() ){
+            m_lstPathHistory.push_back( Settings.value(sPath).toString() );
+        }
+
+        Settings.endGroup();
+        Settings.endGroup();
+        Settings.endGroup();
+    }
+    m_iterPathHistory = m_lstPathHistory.constBegin();
+}
+
+
+//Format string with volume info for output
+QString ZBC_SideFrame::formatedSize(int _nSize) const
+{
+    QString sSize = QString::number(_nSize);
+    QString outStr{};
+
+    for( int j = 0, i = sSize.length() - 1; i >= 0; ++j , --i ){
+        if( (j % 3) != 0 )
+            outStr.push_front(sSize.at(i));
+        else{
+            outStr.push_front(" ");
+            outStr.push_front(sSize.at(i));
+        }
+    }
+return outStr;
 }

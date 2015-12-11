@@ -11,6 +11,9 @@ public:
 
 protected:
     virtual void closeEvent(QCloseEvent* pe) override;
+
+signals:
+    void mainWindowClose();
 };
 
 #endif // ZBC_MAINWINDOW_H

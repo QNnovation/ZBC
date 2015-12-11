@@ -30,7 +30,6 @@ public:
     ~wgtFilesSearch();
 
 private slots:
-    void withTextOptionSlot(bool);
     void startSearchFiles();
     void stopSearchFiles();
     void listOfFilesClicked();
@@ -38,6 +37,9 @@ private slots:
     void resultToList();
     void enableBtn();
     void setOptions();
+
+signals:
+    void foundFileClicked(QString);
 
 private:
     //GUI start
@@ -61,8 +63,6 @@ private:
     QLineEdit *m_optionsSizeLEdit;
 
     QCheckBox *m_withTextOption;
-    QCheckBox *m_caseSensOption;
-    QCheckBox *m_wholeWordsOption;
     QCheckBox *m_optionsDateCBox;
     QCheckBox *m_optionsSizeCBox;
 
@@ -75,8 +75,8 @@ private:
     QWidget *m_topWidget;
 
     //calendars for options tab
-    QCalendarWidget *m_optionsCalendar1;
-    QCalendarWidget *m_optionsCalendar2;
+    QCalendarWidget *m_optionsCalendar_1;
+    QCalendarWidget *m_optionsCalendar_2;
 
     //layouts
     QGridLayout *m_upGridLayout;
@@ -103,6 +103,8 @@ private:
 
     //options tab variables
     bool m_optionsSizeBool;
+    bool m_optionsDateBool;
+    bool m_optionsWithTextBool;
 };
 
 #endif // WGTFILESSEARCH_H
@@ -118,12 +120,6 @@ public:
     void setStop() { m_threadStop = true; }
     ~filesSearchEngine();
 
-    //bool thread_Pause;
-    // bool thread_Break;
-    //bool Stop();
-    //QMutex sync;
-    //QWaitCondition pauseCond;
-
 public slots:
     void process();
 
@@ -135,4 +131,5 @@ signals:
 private:
     QString m_strFileNames;
     QString m_dirPath;
+    QStringList m_strListNames;
 };

@@ -32,16 +32,17 @@ private:
     qint64 getSizeOfFiles(QHash<QString, int>) const;
     qint64 getSizeOfSelectedFiles( bool retSum = true );
     void setTextForLblDirInfo(QLabel*);
+    QString formatedSize(int) const;
 
 signals:
     void Active();
     void DirChanged(const QString&);
     void goBack();
     void goForward();
-//    void backAtEnd();
 
 public slots:
-//    void setCurPath(const QString&);
+    void savePathHistory(const QString&);
+    void setPathHistory(const QString&);
 
 };
 

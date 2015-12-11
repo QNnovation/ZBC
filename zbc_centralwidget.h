@@ -21,6 +21,7 @@ protected:
 signals:
     void goBack();
     void goForward();
+    void mainWindowClose();
 };
 
 #endif // ZBC_CENTRALWIDGET_H
