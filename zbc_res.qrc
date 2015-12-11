@@ -15,5 +15,9 @@
     </qresource>
     <qresource prefix="/buttons/drives">
         <file>resource/logicaldrive.ico</file>
+        <file>resource/usbdrive.ico</file>
+        <file>resource/cddrive.ico</file>
+        <file>resource/networkdrive.ico</file>
+        <file>resource/unknowndrive.ico</file>
     </qresource>
 </RCC>
