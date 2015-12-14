@@ -86,6 +86,9 @@ wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(p
     optionsEqual << "=" << "<" << ">";
     m_optionsEqual->addItems(optionsEqual);
     m_optionsSizeLEdit = new QLineEdit(this);
+    QRegExp rx("[0-9]\\d{0,75}");
+    QValidator *validator = new QRegExpValidator(rx, this);
+    m_optionsSizeLEdit->setValidator(validator);
     m_optionsSizeLEdit->setEnabled(false);
     m_optionsParams = new QComboBox(this);
     QStringList optionsParams;
