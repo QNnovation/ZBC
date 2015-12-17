@@ -17,7 +17,6 @@ class QListWidget;
 class QString;
 class QThread;
 class filesSearchEngine;
-class QListView;
 class QCalendarWidget;
 class QComboBox;
 
@@ -37,69 +36,71 @@ private slots:
     void resultToList();
     void enableBtn();
     void setOptions();
+    bool viewFile();
+    void newSearch();
 
 signals:
     void foundFileClicked(QString);
 
 private:
     //GUI start
-    QLabel *m_searchFileLbl;
-    QLabel *m_pathToFileLbl;
-    QLabel *m_withTextLbl;
-    QLabel *m_searchPathLbl;
-    QLabel *m_optionsDateLbl;
-    QLabel *m_optionsFromLbl;
-    QLabel *m_optionsToLbl;
-    QLabel *m_optionsSizeLbl;
-    QLabel *m_optionsNote;
+    QLabel *m_pSearchFileLbl;
+    QLabel *m_pPathToFileLbl;
+    QLabel *m_pWithTextLbl;
+    QLabel *m_pSearchPathLbl;
+    QLabel *m_pOptionsDateLbl;
+    QLabel *m_pOptionsFromLbl;
+    QLabel *m_pOptionsToLbl;
+    QLabel *m_pOptionsSizeLbl;
+    QLabel *m_pOptionsNote;
 
     //combo box
-    QComboBox *m_optionsEqual;
-    QComboBox *m_optionsParams;
+    QComboBox *m_pOptionsEqual;
+    QComboBox *m_pOptionsParams;
 
-    QLineEdit *m_searchFileEdit;
-    QLineEdit *m_pathToFileEdit;
-    QLineEdit *m_withTextEdit;
-    QLineEdit *m_optionsSizeLEdit;
+    QLineEdit *m_pSearchFileEdit;
+    QLineEdit *m_pPathToFileEdit;
+    QLineEdit *m_pWithTextEdit;
+    QLineEdit *m_pOptionsSizeLEdit;
 
-    QCheckBox *m_withTextOption;
-    QCheckBox *m_optionsDateCBox;
-    QCheckBox *m_optionsSizeCBox;
+    QCheckBox *m_pWithTextOption;
+    QCheckBox *m_pOptionsDateCBox;
+    QCheckBox *m_pOptionsSizeCBox;
 
-    QTabWidget *m_tabWgt;
-    QListWidget *m_foundFileList;
+    QTabWidget *m_pTabWgt;
+    QListWidget *m_pFoundFileList;
 
     //tab pages
-    QWidget *m_generalTab;
-    QWidget *m_optionsTab;
-    QWidget *m_topWidget;
+    QWidget *m_pGeneralTab;
+    QWidget *m_pOptionsTab;
+    QWidget *m_pTopWidget;
 
     //calendars for options tab
-    QCalendarWidget *m_optionsCalendar_1;
-    QCalendarWidget *m_optionsCalendar_2;
+    QCalendarWidget *m_pOptionsCalendar_1;
+    QCalendarWidget *m_pOptionsCalendar_2;
 
     //layouts
-    QGridLayout *m_upGridLayout;
-    QHBoxLayout *m_optionsHLayout_1;
-    QHBoxLayout *m_optionsHLayout_2;
-    QVBoxLayout *m_optionsVBox;
-    QHBoxLayout *m_upTopLayout;
-    QVBoxLayout *m_rightBtnLayout;
-    QVBoxLayout *m_mainBoxLayout;
-    QHBoxLayout *m_bottomBtnLayout;
+    QGridLayout *m_pUpGridLayout;
+    QHBoxLayout *m_pOptionsHLayout_1;
+    QHBoxLayout *m_pOptionsHLayout_2;
+    QVBoxLayout *m_pOptionsVBox;
+    QHBoxLayout *m_pUpTopLayout;
+    QVBoxLayout *m_pRightBtnLayout;
+    QVBoxLayout *m_pMainBoxLayout;
+    QHBoxLayout *m_pBottomBtnLayout;
 
     //buttons
-    QPushButton *m_btnSearch;
-    QPushButton *m_btnStop;
-    QPushButton *m_btnCancel;
-    QPushButton *m_btnViewFile;
-    QPushButton *m_btnGotoFile;
-    QPushButton *m_btnNewSearch;
+    QPushButton *m_pBtnSearch;
+    QPushButton *m_pBtnStop;
+    QPushButton *m_pBtnCancel;
+    QPushButton *m_pBtnViewFile;
+    QPushButton *m_pBtnGotoFile;
+    QPushButton *m_pBtnNewSearch;
     //GUI end
 
     QString m_dirPath;
-    QThread *m_fileSearchThread;
-    filesSearchEngine *m_searchEngine;
+    QThread *m_pFileSearchThread;
+    filesSearchEngine *m_pSearchEngine;
 
     //options tab variables
     bool m_optionsSizeBool;

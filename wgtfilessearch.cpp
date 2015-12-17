@@ -1,4 +1,5 @@
 #include "wgtfilessearch.h"
+#include "wgttextview.h"
 
 #include <QTabWidget>
 #include <QLabel>
@@ -16,6 +17,8 @@
 #include <QFileInfo>
 #include <QCalendarWidget>
 #include <QComboBox>
+#include <QMessageBox>
+#include <QListWidgetItem>
 
 wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(parent)
 {
@@ -33,209 +36,219 @@ wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(p
     m_optionsDateBool = false;
     m_optionsWithTextBool = false;
 
-    m_searchFileLbl = new QLabel(tr("Files:"), this);
-    m_pathToFileLbl = new QLabel(tr("Path:"), this);
-    m_searchFileEdit = new QLineEdit(this);
-    m_pathToFileEdit = new QLineEdit(this);
-    m_pathToFileEdit->setText(m_dirPath);
+    m_pSearchFileLbl = new QLabel(tr("Files:"), this);
+    m_pPathToFileLbl = new QLabel(tr("Path:"), this);
+    m_pSearchFileEdit = new QLineEdit(this);
+    m_pPathToFileEdit = new QLineEdit(this);
+    m_pPathToFileEdit->setText(m_dirPath);
 
-    m_withTextLbl = new QLabel(tr("With text:"), this);
-    m_withTextEdit = new QLineEdit(this);
+    m_pWithTextLbl = new QLabel(tr("With text:"), this);
+    m_pWithTextEdit = new QLineEdit(this);
 
-    m_withTextOption = new QCheckBox(this);
+    m_pWithTextOption = new QCheckBox(this);
 
     //general tab
-    m_upGridLayout = new QGridLayout(this);
-    m_upGridLayout->addWidget(m_searchFileLbl, 0, 0);
-    m_upGridLayout->addWidget(m_searchFileEdit, 0, 1);
-    m_upGridLayout->addWidget(m_pathToFileLbl, 1, 0);
-    m_upGridLayout->addWidget(m_pathToFileEdit, 1, 1);
+    m_pUpGridLayout = new QGridLayout(this);
+    m_pUpGridLayout->addWidget(m_pSearchFileLbl, 0, 0);
+    m_pUpGridLayout->addWidget(m_pSearchFileEdit, 0, 1);
+    m_pUpGridLayout->addWidget(m_pPathToFileLbl, 1, 0);
+    m_pUpGridLayout->addWidget(m_pPathToFileEdit, 1, 1);
 
     QFrame *lineOnWgt = new QFrame(this);
     lineOnWgt->setFrameStyle(QFrame::HLine | QFrame::Raised);
-    m_upGridLayout->addWidget(lineOnWgt, 2, 0, 1, 4);
+    m_pUpGridLayout->addWidget(lineOnWgt, 2, 0, 1, 4);
 
-    m_upGridLayout->addWidget(m_withTextLbl, 3, 0);
-    m_upGridLayout->addWidget(m_withTextEdit, 3, 1);
-    m_upGridLayout->addWidget(m_withTextOption, 3, 2);
+    m_pUpGridLayout->addWidget(m_pWithTextLbl, 3, 0);
+    m_pUpGridLayout->addWidget(m_pWithTextEdit, 3, 1);
+    m_pUpGridLayout->addWidget(m_pWithTextOption, 3, 2);
 
     //options tab
     //data options
-    m_optionsDateLbl = new QLabel(tr("Date: "), this);
-    m_optionsDateCBox = new QCheckBox(this);
-    m_optionsFromLbl = new QLabel(tr("From: "));
-    m_optionsCalendar_1 = new QCalendarWidget(this);
-    m_optionsCalendar_1->setEnabled(false);
-    m_optionsToLbl = new QLabel(tr("To: "));
-    m_optionsCalendar_2 = new QCalendarWidget(this);
-    m_optionsCalendar_2->setEnabled(false);
+    m_pOptionsDateLbl = new QLabel(tr("Date: "), this);
+    m_pOptionsDateCBox = new QCheckBox(this);
+    m_pOptionsFromLbl = new QLabel(tr("From: "));
+    m_pOptionsCalendar_1 = new QCalendarWidget(this);
+    m_pOptionsCalendar_1->setEnabled(false);
+    m_pOptionsToLbl = new QLabel(tr("To: "));
+    m_pOptionsCalendar_2 = new QCalendarWidget(this);
+    m_pOptionsCalendar_2->setEnabled(false);
 
-    m_optionsHLayout_1 = new QHBoxLayout();
-    m_optionsHLayout_1->addWidget(m_optionsDateLbl);
-    m_optionsHLayout_1->addWidget(m_optionsDateCBox);
-    m_optionsHLayout_1->addWidget(m_optionsFromLbl);
-    m_optionsHLayout_1->addWidget(m_optionsCalendar_1);
-    m_optionsHLayout_1->addWidget(m_optionsToLbl);
-    m_optionsHLayout_1->addWidget(m_optionsCalendar_2);
+    m_pOptionsHLayout_1 = new QHBoxLayout();
+    m_pOptionsHLayout_1->addWidget(m_pOptionsDateLbl);
+    m_pOptionsHLayout_1->addWidget(m_pOptionsDateCBox);
+    m_pOptionsHLayout_1->addWidget(m_pOptionsFromLbl);
+    m_pOptionsHLayout_1->addWidget(m_pOptionsCalendar_1);
+    m_pOptionsHLayout_1->addWidget(m_pOptionsToLbl);
+    m_pOptionsHLayout_1->addWidget(m_pOptionsCalendar_2);
     //size options
-    m_optionsSizeLbl = new QLabel(tr("Size: "), this);
-    m_optionsSizeCBox = new QCheckBox(this);
-    m_optionsEqual = new QComboBox(this);
-    m_optionsEqual->setEnabled(false);
+    m_pOptionsSizeLbl = new QLabel(tr("Size: "), this);
+    m_pOptionsSizeCBox = new QCheckBox(this);
+    m_pOptionsEqual = new QComboBox(this);
+    m_pOptionsEqual->setEnabled(false);
     QStringList optionsEqual;
     optionsEqual << "=" << "<" << ">";
-    m_optionsEqual->addItems(optionsEqual);
-    m_optionsSizeLEdit = new QLineEdit(this);
+    m_pOptionsEqual->addItems(optionsEqual);
+    m_pOptionsSizeLEdit = new QLineEdit(this);
     QRegExp rx("[0-9]\\d{0,75}");
     QValidator *validator = new QRegExpValidator(rx, this);
-    m_optionsSizeLEdit->setValidator(validator);
-    m_optionsSizeLEdit->setEnabled(false);
-    m_optionsParams = new QComboBox(this);
+    m_pOptionsSizeLEdit->setValidator(validator);
+    m_pOptionsSizeLEdit->setEnabled(false);
+    m_pOptionsParams = new QComboBox(this);
     QStringList optionsParams;
     optionsParams << "By" << "Kb" << "Mb" << "Gb";
-    m_optionsParams->addItems(optionsParams);
-    m_optionsParams->setEnabled(false);
+    m_pOptionsParams->addItems(optionsParams);
+    m_pOptionsParams->setEnabled(false);
 
-    m_optionsHLayout_2 = new QHBoxLayout();
-    m_optionsHLayout_2->addWidget(m_optionsSizeLbl);
-    m_optionsHLayout_2->addWidget(m_optionsSizeCBox);
-    m_optionsHLayout_2->addWidget(m_optionsEqual);
-    m_optionsHLayout_2->addWidget(m_optionsSizeLEdit);
-    m_optionsHLayout_2->addWidget(m_optionsParams);
+    m_pOptionsHLayout_2 = new QHBoxLayout();
+    m_pOptionsHLayout_2->addWidget(m_pOptionsSizeLbl);
+    m_pOptionsHLayout_2->addWidget(m_pOptionsSizeCBox);
+    m_pOptionsHLayout_2->addWidget(m_pOptionsEqual);
+    m_pOptionsHLayout_2->addWidget(m_pOptionsSizeLEdit);
+    m_pOptionsHLayout_2->addWidget(m_pOptionsParams);
 
-    m_optionsNote = new QLabel(tr("[ = work's only with bytes ]"), this);
+    m_pOptionsNote = new QLabel(tr("[ = work's only with bytes ]"), this);
 
-    m_optionsVBox = new QVBoxLayout();
-    m_optionsVBox->addLayout(m_optionsHLayout_1);
-    m_optionsVBox->addLayout(m_optionsHLayout_2);
-    m_optionsVBox->addWidget(m_optionsNote);
+    m_pOptionsVBox = new QVBoxLayout();
+    m_pOptionsVBox->addLayout(m_pOptionsHLayout_1);
+    m_pOptionsVBox->addLayout(m_pOptionsHLayout_2);
+    m_pOptionsVBox->addWidget(m_pOptionsNote);
     //tab pages
-    m_generalTab = new QWidget(this);
-    m_generalTab->setLayout(m_upGridLayout);
-    m_optionsTab = new QWidget(this);
-    m_optionsTab->setLayout(m_optionsVBox);
+    m_pGeneralTab = new QWidget(this);
+    m_pGeneralTab->setLayout(m_pUpGridLayout);
+    m_pOptionsTab = new QWidget(this);
+    m_pOptionsTab->setLayout(m_pOptionsVBox);
 
     //tab
-    m_topWidget = new QWidget(this);
-    m_topWidget->setFixedHeight(250);
+    m_pTopWidget = new QWidget(this);
+    m_pTopWidget->setFixedHeight(250);
 
-    m_tabWgt = new QTabWidget(this);
-    m_tabWgt->addTab(m_generalTab, QString(tr("General")));
-    m_tabWgt->addTab(m_optionsTab, QString(tr("Options")));
+    m_pTabWgt = new QTabWidget(this);
+    m_pTabWgt->addTab(m_pGeneralTab, QString(tr("General")));
+    m_pTabWgt->addTab(m_pOptionsTab, QString(tr("Options")));
 
-    m_upTopLayout = new QHBoxLayout(m_topWidget);
-    m_upTopLayout->addWidget(m_tabWgt);
+    m_pUpTopLayout = new QHBoxLayout(m_pTopWidget);
+    m_pUpTopLayout->addWidget(m_pTabWgt);
 
-    m_rightBtnLayout = new QVBoxLayout();
-    m_btnSearch = new QPushButton(tr("Search"), this);
-    m_btnStop = new QPushButton(tr("Stop"), this);
-    m_btnStop->setEnabled(false);
-    m_btnCancel = new QPushButton(tr("Cancel"), this);
-    m_rightBtnLayout->addSpacing(20);
-    m_rightBtnLayout->addWidget(m_btnSearch);
-    m_rightBtnLayout->addWidget(m_btnStop);
-    m_rightBtnLayout->addWidget(m_btnCancel);
-    m_rightBtnLayout->addStretch();
-    m_upTopLayout->addLayout(m_rightBtnLayout);
+    m_pRightBtnLayout = new QVBoxLayout();
+    m_pBtnSearch = new QPushButton(tr("Search"), this);
+    m_pBtnStop = new QPushButton(tr("Stop"), this);
+    m_pBtnStop->setEnabled(false);
+    m_pBtnCancel = new QPushButton(tr("Cancel"), this);
+    m_pRightBtnLayout->addSpacing(20);
+    m_pRightBtnLayout->addWidget(m_pBtnSearch);
+    m_pRightBtnLayout->addWidget(m_pBtnStop);
+    m_pRightBtnLayout->addWidget(m_pBtnCancel);
+    m_pRightBtnLayout->addStretch();
+    m_pUpTopLayout->addLayout(m_pRightBtnLayout);
 
-    m_mainBoxLayout = new QVBoxLayout(this);
-    m_foundFileList = new QListWidget(this);
-    m_foundFileList->setUniformItemSizes(true);
+    m_pMainBoxLayout = new QVBoxLayout(this);
+    m_pFoundFileList = new QListWidget(this);
+    m_pFoundFileList->setUniformItemSizes(true);
 
-    m_mainBoxLayout->addWidget(m_topWidget);
-    m_searchPathLbl = new QLabel(tr(":"), this);
+    m_pMainBoxLayout->addWidget(m_pTopWidget);
+    m_pSearchPathLbl = new QLabel(tr(":"), this);
 
-    m_mainBoxLayout->addWidget(m_foundFileList);
+    m_pMainBoxLayout->addWidget(m_pFoundFileList);
 
-    m_bottomBtnLayout = new QHBoxLayout();
-    m_btnViewFile = new QPushButton(tr("View"), this);
-    m_btnGotoFile = new QPushButton(tr("Go to file"), this);
-    m_btnNewSearch = new QPushButton(tr("New Search"), this);
-    m_bottomBtnLayout->addWidget(m_btnViewFile);
-    m_bottomBtnLayout->addWidget(m_btnGotoFile);
-    m_bottomBtnLayout->addWidget(m_btnNewSearch);
+    m_pBottomBtnLayout = new QHBoxLayout();
+    m_pBtnViewFile = new QPushButton(tr("View"), this);
+    m_pBtnGotoFile = new QPushButton(tr("Go to file"), this);
+    m_pBtnNewSearch = new QPushButton(tr("New Search"), this);
+    m_pBottomBtnLayout->addWidget(m_pBtnViewFile);
+    m_pBottomBtnLayout->addWidget(m_pBtnGotoFile);
+    m_pBottomBtnLayout->addWidget(m_pBtnNewSearch);
 
-    m_mainBoxLayout->addLayout(m_bottomBtnLayout);
-    m_mainBoxLayout->addWidget(m_searchPathLbl);
+    m_pBtnNewSearch->setEnabled(false);
+    m_pBtnViewFile->setEnabled(false);
+    m_pBtnGotoFile->setEnabled(false);
 
-    setLayout(m_mainBoxLayout);
+    m_pMainBoxLayout->addLayout(m_pBottomBtnLayout);
+    m_pMainBoxLayout->addWidget(m_pSearchPathLbl);
+
+    setLayout(m_pMainBoxLayout);
 
     //states on form create
-    m_withTextEdit->setEnabled(false);
+    m_pWithTextEdit->setEnabled(false);
 
     //connect
-    connect(m_btnCancel, &QPushButton::clicked, this, &QDialog::close);
-    connect(m_btnSearch, &QPushButton::pressed, this, &wgtFilesSearch::startSearchFiles);
-    connect(m_btnStop, &QPushButton::pressed, this, &wgtFilesSearch::stopSearchFiles);
-    connect(m_foundFileList, &QListWidget::itemDoubleClicked, this, &wgtFilesSearch::listOfFilesClicked);
-    connect(m_optionsDateCBox, &QCheckBox::released, this, &wgtFilesSearch::setOptions);
-    connect(m_optionsSizeCBox, &QCheckBox::released, this, &wgtFilesSearch::setOptions);
-    connect(m_withTextOption, QCheckBox::released, this, &wgtFilesSearch::setOptions);
+    connect(m_pBtnCancel, &QPushButton::clicked, this, &QDialog::close);
+    connect(m_pBtnSearch, &QPushButton::pressed, this, &wgtFilesSearch::startSearchFiles);
+    connect(m_pBtnStop, &QPushButton::pressed, this, &wgtFilesSearch::stopSearchFiles);
+    connect(m_pFoundFileList, &QListWidget::itemDoubleClicked, this, &wgtFilesSearch::listOfFilesClicked);
+    connect(m_pOptionsDateCBox, &QCheckBox::released, this, &wgtFilesSearch::setOptions);
+    connect(m_pOptionsSizeCBox, &QCheckBox::released, this, &wgtFilesSearch::setOptions);
+    connect(m_pWithTextOption, QCheckBox::released, this, &wgtFilesSearch::setOptions);
+    connect(m_pBtnViewFile, &QPushButton::clicked, this, &wgtFilesSearch::viewFile);
+    connect(m_pBtnNewSearch, &QPushButton::clicked, this, &wgtFilesSearch::newSearch);
 }
 
 void wgtFilesSearch::startSearchFiles()
 {
-    m_btnStop->setEnabled(true);
-    m_foundFileList->clear();
+    m_pBtnStop->setEnabled(true);
+
+    m_pBtnNewSearch->setEnabled(false);
+    m_pBtnViewFile->setEnabled(false);
+    m_pBtnGotoFile->setEnabled(false);
+
+    m_pFoundFileList->clear();
     //thread
-    m_fileSearchThread = new QThread();
-    m_searchEngine = new filesSearchEngine();           //<<search class
-    m_searchEngine->moveToThread(m_fileSearchThread);
+    m_pFileSearchThread = new QThread();
+    m_pSearchEngine = new filesSearchEngine();           //<<search class
+    m_pSearchEngine->moveToThread(m_pFileSearchThread);
 
     //start class in thread
-    connect(m_fileSearchThread, &QThread::started,
-            m_searchEngine, &filesSearchEngine::process);
+    connect(m_pFileSearchThread, &QThread::started,
+            m_pSearchEngine, &filesSearchEngine::process);
 
     //close thread
-    connect(m_searchEngine, &filesSearchEngine::finished,
-            m_fileSearchThread, QThread::quit);
+    connect(m_pSearchEngine, &filesSearchEngine::finished,
+            m_pFileSearchThread, QThread::quit);
 
     //delete class after work
-    connect(m_searchEngine, &filesSearchEngine::finished,
-            m_searchEngine, &filesSearchEngine::deleteLater);
+    connect(m_pSearchEngine, &filesSearchEngine::finished,
+            m_pSearchEngine, &filesSearchEngine::deleteLater);
 
     //delete thread after work
-    connect(m_fileSearchThread, &QThread::finished,
-            m_fileSearchThread, &QThread::deleteLater);
+    connect(m_pFileSearchThread, &QThread::finished,
+            m_pFileSearchThread, &QThread::deleteLater);
 
     //data from thread
-    connect(m_searchEngine, &filesSearchEngine::currentSearchPatch,
-            m_searchPathLbl, &QLabel::setText);
-    connect(m_searchEngine, &filesSearchEngine::foundFilePatch,
+    connect(m_pSearchEngine, &filesSearchEngine::currentSearchPatch,
+            m_pSearchPathLbl, &QLabel::setText);
+    connect(m_pSearchEngine, &filesSearchEngine::foundFilePatch,
             this, &wgtFilesSearch::addItemToStrList);
-    connect(m_fileSearchThread, &QThread::finished,
+    connect(m_pFileSearchThread, &QThread::finished,
             this, &wgtFilesSearch::enableBtn);
 
-    m_searchEngine->loadSearchData(m_searchFileEdit->text(), m_pathToFileEdit->text());
-    m_fileSearchThread->start();
-    m_btnSearch->setEnabled(false);
-    m_btnStop->setEnabled(true);
-    m_searchPathLbl->resize(width(), 10);
+    m_pSearchEngine->loadSearchData(m_pSearchFileEdit->text(), m_pPathToFileEdit->text());
+    m_pFileSearchThread->start();
+    m_pBtnSearch->setEnabled(false);
+    m_pSearchPathLbl->resize(width(), 10);
 }
 
 void wgtFilesSearch::stopSearchFiles()
 {
-    m_searchEngine->setStop();
-    m_btnSearch->setEnabled(true);
-    m_btnStop->setEnabled(false);
+    m_pSearchEngine->setStop();
+    m_pBtnSearch->setEnabled(true);
+    m_pBtnStop->setEnabled(false);
 }
 
 void wgtFilesSearch::addItemToStrList(QString data)
 {
-    m_foundFileList->addItem(data);
+    m_pFoundFileList->addItem(data);
 }
 
 void wgtFilesSearch::resultToList()
 {
     QStringList filesPaths, tmpSList;
-    for (int i = 0; i < m_foundFileList->count(); ++i) {
-        filesPaths.append(m_foundFileList->item(i)->text());
+    for (int i = 0; i < m_pFoundFileList->count(); ++i) {
+        filesPaths.append(m_pFoundFileList->item(i)->text());
     }
     //file date option is enable
     if (m_optionsDateBool) {
         for (int m = 0; m < filesPaths.size(); ++m) {
-            QDateTime dateTime_1(m_optionsCalendar_1->selectedDate());
-            QDateTime dateTime_2(m_optionsCalendar_2->selectedDate());
+            QDateTime dateTime_1(m_pOptionsCalendar_1->selectedDate());
+            QDateTime dateTime_2(m_pOptionsCalendar_2->selectedDate());
             if ((QFileInfo(filesPaths.at(m)).created() > dateTime_1) &&
                     (QFileInfo(filesPaths.at(m)).created() < dateTime_2))
                 tmpSList.append(filesPaths.at(m));
@@ -246,8 +259,8 @@ void wgtFilesSearch::resultToList()
 
     }
     //file size options is enable
-    double optionSizeOfOFile = m_optionsSizeLEdit->text().toDouble();
-    QChar optionsSign = m_optionsParams->currentText().at(0);
+    double optionSizeOfOFile = m_pOptionsSizeLEdit->text().toDouble();
+    QChar optionsSign = m_pOptionsParams->currentText().at(0);
     int bytesToKlMbGb = 0;
     if (optionsSign == 'B')
         bytesToKlMbGb = 1;
@@ -260,15 +273,15 @@ void wgtFilesSearch::resultToList()
 
     if (m_optionsSizeBool) {
         for (int k = 0; k < filesPaths.size(); ++ k) {
-            if (m_optionsEqual->currentText() == "=") {
+            if (m_pOptionsEqual->currentText() == "=") {
                 if (QFileInfo(filesPaths.at(k)).size() == (optionSizeOfOFile * bytesToKlMbGb))
                     tmpSList.append(filesPaths.at(k));
             }
-            else if (m_optionsEqual->currentText() == "<") {
+            else if (m_pOptionsEqual->currentText() == "<") {
                 if (QFileInfo(filesPaths.at(k)).size() < (optionSizeOfOFile * bytesToKlMbGb))
                     tmpSList.append(filesPaths.at(k));
             }
-            else if (m_optionsEqual->currentText() == ">") {
+            else if (m_pOptionsEqual->currentText() == ">") {
                 if (QFileInfo(filesPaths.at(k)).size() > (optionSizeOfOFile * bytesToKlMbGb))
                     tmpSList.append(filesPaths.at(k));
             }
@@ -287,7 +300,7 @@ void wgtFilesSearch::resultToList()
                 else {
                     while(!inputFile.atEnd()) {
                         QString buf = inputFile.readLine();
-                        if (buf.contains(m_withTextEdit->text()))
+                        if (buf.contains(m_pWithTextEdit->text()))
                             tmpSList.append(filesPaths.at(n));
                     }
                     inputFile.close();
@@ -307,16 +320,20 @@ void wgtFilesSearch::resultToList()
             ++fls;
     }
     QString total = "[ Files: " + QString::number(fls) + " Directory: " + QString::number(dry) + " ]";
-    m_foundFileList->clear();
-    m_foundFileList->addItem(total);
+    m_pFoundFileList->clear();
+    m_pFoundFileList->addItem(total);
     for (int k = 0; k < filesPaths.size(); ++k) {
-        m_foundFileList->addItem(filesPaths.at(k));
+        m_pFoundFileList->addItem(filesPaths.at(k));
     }
+    m_pFoundFileList->setCurrentRow(0);
 }
 
 void wgtFilesSearch::enableBtn()
 {
-    m_btnSearch->setEnabled(true);
+    m_pBtnSearch->setEnabled(true);
+    m_pBtnViewFile->setEnabled(true);
+    m_pBtnGotoFile->setEnabled(true);
+    m_pBtnNewSearch->setEnabled(true);
     resultToList();
 }
 
@@ -329,44 +346,65 @@ void wgtFilesSearch::setOptions()
 {
     //options tab
     //date of file
-    if (m_optionsDateCBox->isChecked())
+    if (m_pOptionsDateCBox->isChecked())
     {
-        m_optionsCalendar_1->setEnabled(true);
-        m_optionsCalendar_2->setEnabled(true);
+        m_pOptionsCalendar_1->setEnabled(true);
+        m_pOptionsCalendar_2->setEnabled(true);
         m_optionsDateBool = true;
     }
     else {
-        m_optionsCalendar_1->setEnabled(false);
-        m_optionsCalendar_2->setEnabled(false);
+        m_pOptionsCalendar_1->setEnabled(false);
+        m_pOptionsCalendar_2->setEnabled(false);
         m_optionsDateBool = false;
     }
     //size of file
-    if (m_optionsSizeCBox->isChecked()) {
-        m_optionsEqual->setEnabled(true);
-        m_optionsSizeLEdit->setEnabled(true);
-        m_optionsParams->setEnabled(true);
+    if (m_pOptionsSizeCBox->isChecked()) {
+        m_pOptionsEqual->setEnabled(true);
+        m_pOptionsSizeLEdit->setEnabled(true);
+        m_pOptionsParams->setEnabled(true);
         m_optionsSizeBool = true;
     }
     else {
-        m_optionsEqual->setEnabled(false);
-        m_optionsSizeLEdit->setEnabled(false);
-        m_optionsParams->setEnabled(false);
+        m_pOptionsEqual->setEnabled(false);
+        m_pOptionsSizeLEdit->setEnabled(false);
+        m_pOptionsParams->setEnabled(false);
         m_optionsSizeBool = false;
     }
     //main tab
-    if (m_withTextOption->isChecked()) {
+    if (m_pWithTextOption->isChecked()) {
         m_optionsWithTextBool = true;
-        m_withTextEdit->setEnabled(true);
+        m_pWithTextEdit->setEnabled(true);
     }
     else {
         m_optionsWithTextBool = false;
-        m_withTextEdit->setEnabled(false);
+        m_pWithTextEdit->setEnabled(false);
     }
+}
+
+bool wgtFilesSearch::viewFile()
+{
+    QString pathToFile(m_pFoundFileList->currentItem()->text());
+    qDebug() <<": "<< pathToFile;
+    if (QFileInfo(pathToFile).isFile()) {
+        wgtTextView *textViewer = new wgtTextView(this);
+        textViewer->loadFile(pathToFile);
+        textViewer->show();
+        return true;
+    }
+    else
+        return false;
+}
+
+void wgtFilesSearch::newSearch()
+{
+    m_pFoundFileList->clear();
+    m_pFoundFileList->addItem(tr("[ Ready ]"));
+    m_pFoundFileList->setCurrentRow(0);
 }
 
 void wgtFilesSearch::listOfFilesClicked()
 {
-    emit foundFileClicked(m_foundFileList->currentItem()->text());
+    emit foundFileClicked(m_pFoundFileList->currentItem()->text());
 }
 
 //filesearch engine implementation
