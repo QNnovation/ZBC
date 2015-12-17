@@ -1,5 +1,6 @@
 #include "wgtfilessearch.h"
 #include "wgttextview.h"
+#include "zbc_styles.h"
 
 #include <QTabWidget>
 #include <QLabel>
@@ -19,6 +20,7 @@
 #include <QComboBox>
 #include <QMessageBox>
 #include <QListWidgetItem>
+#include <QApplication>
 
 wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(parent)
 {
@@ -26,6 +28,8 @@ wgtFilesSearch::wgtFilesSearch(const QString &path, QWidget *parent) : QDialog(p
     this->setWindowTitle("File search");
     this->setModal(true);
     this->setWindowFlags(windowFlags()|Qt::WindowMaximizeButtonHint | Qt::WindowMinimizeButtonHint);
+
+    QApplication::setStyle(new ZBC_SimpleStyle);
 
     if (path.isEmpty())
         return;
@@ -334,6 +338,7 @@ void wgtFilesSearch::enableBtn()
     m_pBtnViewFile->setEnabled(true);
     m_pBtnGotoFile->setEnabled(true);
     m_pBtnNewSearch->setEnabled(true);
+    m_pBtnStop->setEnabled(false);
     resultToList();
 }
 
@@ -384,7 +389,6 @@ void wgtFilesSearch::setOptions()
 bool wgtFilesSearch::viewFile()
 {
     QString pathToFile(m_pFoundFileList->currentItem()->text());
-    qDebug() <<": "<< pathToFile;
     if (QFileInfo(pathToFile).isFile()) {
         wgtTextView *textViewer = new wgtTextView(this);
         textViewer->loadFile(pathToFile);
