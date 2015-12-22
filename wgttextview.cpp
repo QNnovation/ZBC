@@ -290,7 +290,7 @@ void wgtTextView::updateRecentFileAction()
             m_recentFileAction[j]->setText(text);
             m_recentFileAction[j]->setData(m_lastOpenFiles[j]);
             if (!m_rwMode)
-            m_recentFileAction[j]->setVisible(true);
+                m_recentFileAction[j]->setVisible(true);
         } else {
             m_recentFileAction[j]->setVisible(false);
         }
