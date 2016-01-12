@@ -1,7 +1,8 @@
 #ifndef ZBC_TREEVIEW_H
 #define ZBC_TREEVIEW_H
 
-#include<QTreeView>
+#include <QTreeView>
+#include <QItemDelegate>
 
 class ZBC_TreeView : public QTreeView
 {
@@ -14,6 +15,15 @@ protected:
 
 signals:
     void Active();
+};
+
+class ZBC_ItemDelegate : public QItemDelegate
+{
+    Q_OBJECT
+public:
+    explicit ZBC_ItemDelegate(QObject* pobj = 0) : QItemDelegate(pobj){}
+
+    virtual void paint(QPainter*, const QStyleOptionViewItem&, const QModelIndex&) const override;
 };
 
 #endif // ZBC_TREEVIEW_H
