@@ -12,6 +12,7 @@ ZBC_TreeView::ZBC_TreeView(QWidget* pwgt) : QTreeView(pwgt)
     setSelectionMode(QAbstractItemView::ExtendedSelection);
     setEditTriggers(QTreeView::NoEditTriggers);
     setItemDelegate(new ZBC_ItemDelegate(this));
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
 
 
@@ -27,6 +28,20 @@ ZBC_TreeView::ZBC_TreeView(QWidget* pwgt) : QTreeView(pwgt)
                                          const QStyleOptionViewItem& option,
                                          const QModelIndex& index) const
 {
+    switch (index.column()){
+    case 0:
+        break;
+    case 1:
+        break;
+    case 2:
+        break;
+    case 3:
+
+        break;
+    default:
+        break;
+    }
+
     if (index.row() % 2 != 0){
         QRect rect = option.rect;
         QBrush brush(Qt::lightGray);

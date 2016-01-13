@@ -23,6 +23,7 @@ class ZBC_ItemDelegate : public QItemDelegate
 public:
     explicit ZBC_ItemDelegate(QObject* pobj = 0) : QItemDelegate(pobj){}
 
+protected:
     virtual void paint(QPainter*, const QStyleOptionViewItem&, const QModelIndex&) const override;
 };
 

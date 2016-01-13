@@ -24,7 +24,8 @@ HEADERS += \
     zbc_mainwindow.h \
     zbc_lineedit.h \
     zbc_drivebuttonswidget.h \
-    zbc_styles.h
+    zbc_styles.h \
+    zbc_filesystemmodel.h
     zbc_newfolder.h
 
 SOURCES += \
@@ -41,7 +42,8 @@ SOURCES += \
     zbc_mainwindow.cpp \
     zbc_lineedit.cpp \
     zbc_drivebuttonswidget.cpp \
-    zbc_styles.cpp
+    zbc_styles.cpp \
+    zbc_filesystemmodel.cpp
 
 RESOURCES += \
     zbc_res.qrc
