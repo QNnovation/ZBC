@@ -1,6 +1,9 @@
+#include <QDebug>
+
 #include "zbc_treeview.h"
 
 #include <QPainter>
+#include <QHeaderView>
 
 
 //C-tor
@@ -13,13 +16,40 @@ ZBC_TreeView::ZBC_TreeView(QWidget* pwgt) : QTreeView(pwgt)
     setEditTriggers(QTreeView::NoEditTriggers);
     setItemDelegate(new ZBC_ItemDelegate(this));
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    QFont curFont = this->font();
+    curFont.setBold(true);
+    setFont(curFont);
 }
 
 
-/*virtual*/void ZBC_TreeView::focusInEvent(QFocusEvent *pe)
+void ZBC_TreeView::setColumnWidth(int c, int w)
+{
+    QTreeView::setColumnWidth(c, w);
+}
+
+
+void ZBC_TreeView::setColumnWidth()
+{
+    this->header()->setStretchLastSection(false);
+    this->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    this->header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+    this->header()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
+    this->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+}
+
+
+/*virtual*/void ZBC_TreeView::focusInEvent(QFocusEvent* pe)
 {
     emit Active();
     QTreeView::focusInEvent(pe);
+}
+
+
+/*virtual*/void ZBC_TreeView::resizeEvent(QResizeEvent* pe)
+{
+    setColumnWidth();
+    QTreeView::resizeEvent(pe);
 }
 
 
@@ -28,20 +58,6 @@ ZBC_TreeView::ZBC_TreeView(QWidget* pwgt) : QTreeView(pwgt)
                                          const QStyleOptionViewItem& option,
                                          const QModelIndex& index) const
 {
-    switch (index.column()){
-    case 0:
-        break;
-    case 1:
-        break;
-    case 2:
-        break;
-    case 3:
-
-        break;
-    default:
-        break;
-    }
-
     if (index.row() % 2 != 0){
         QRect rect = option.rect;
         QBrush brush(Qt::lightGray);

@@ -49,7 +49,6 @@ ZBC_CentralWidgetPrivate::ZBC_CentralWidgetPrivate(ZBC_CentralWidget* parent) :
 //Widgets
 //Splitter
     m_psplCentral = new QSplitter(Qt::Horizontal, q);
-    m_psplCentral->setChildrenCollapsible(false);
 
 //Settings
     m_psettings                 = new QSettings(this);

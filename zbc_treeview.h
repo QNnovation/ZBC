@@ -9,9 +9,12 @@ class ZBC_TreeView : public QTreeView
     Q_OBJECT
 public:
     explicit ZBC_TreeView(QWidget* pwgt = 0);
+    void setColumnWidth(int, int);
+    void setColumnWidth();
 
 protected:
     virtual void focusInEvent(QFocusEvent *event) override;
+    virtual void resizeEvent(QResizeEvent*) override;
 
 signals:
     void Active();

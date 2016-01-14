@@ -1,4 +1,4 @@
-//#include <QDebug>
+#include <QDebug>
 
 #include "zbc_drivebuttonswidget.h"
 #include "zbc_filesystemmodel.h"
@@ -29,7 +29,6 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
     qt_ntfs_permission_lookup++;
 
 //Model
-//    QFileSystemModel* pfsmModel             = new QFileSystemModel(this);
     ZBC_FileSystemModel* pfsmModel          = new ZBC_FileSystemModel(this);
     pfsmModel->setFilter(QDir::NoDot | QDir::AllEntries | QDir::System);
     pfsmModel->setRootPath(path);
@@ -47,14 +46,7 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
     ptreeView->setSortingEnabled(true);
     ptreeView->sortByColumn(0, Qt::AscendingOrder);
     ptreeView->setRootIndex( psfpModel->mapFromSource(pfsmModel->index(path)) );
-/*
-    ptreeView->resizeColumnToContents(0);
-    ptreeView->resizeColumnToContents(1);
-    ptreeView->resizeColumnToContents(2);
-    ptreeView->resizeColumnToContents(3);
-*/
-
-
+    ptreeView->setColumnWidth();
 
 //Buttons with Drives
     QStringList     lstDrives;
