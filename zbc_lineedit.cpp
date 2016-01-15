@@ -1,5 +1,8 @@
+#include <QDebug>
+
 #include "zbc_lineedit.h"
 
+#include <QFontMetrics>
 #include <QKeyEvent>
 
 
@@ -8,6 +11,9 @@ ZBC_LineEdit::ZBC_LineEdit(QWidget* pwgt) : QLineEdit(pwgt)
 {
     m_pltBackground.setColor(QPalette::Base, QColor(192, 192, 192));
     this->setPalette(m_pltBackground);
+    QFont curFont = this->font();
+    curFont.setBold(true);
+    this->setFont(curFont);
 }
 
 
@@ -50,4 +56,30 @@ void ZBC_LineEdit::keyPressEvent(QKeyEvent *pe)
     }
 
     QLineEdit::keyPressEvent(pe);
+}
+
+
+//Get mouse position and calculate it's posituin under text
+/*virtual*/ void ZBC_LineEdit::mouseMoveEvent(QMouseEvent *pe)
+{
+    QFontMetrics fm(this->font());
+    if ( pe->x() <= fm.width(this->text()) ){
+        QStringList folders = this->text().split("\\");
+        qDebug() << folders;
+        QList< QPair<QString, int> > lstPair;
+        int tmpLength = 0;
+        int slashLength = fm.width("\\");
+        for( QString str : folders ){
+            lstPair.push_back( QPair<QString, int>(str, tmpLength += (fm.width(str)) + slashLength) );
+        }
+        lstPair.last().second -= slashLength;
+        qDebug() << fm.width(this->text());
+        qDebug() << pe->x();
+        qDebug() << lstPair;
+    }
+    else{
+        qDebug() << "Out";
+    }
+
+    QLineEdit::mouseMoveEvent(pe);
 }

@@ -20,6 +20,7 @@ protected:
     virtual void mouseDoubleClickEvent(QMouseEvent* pe) override;
     virtual void focusOutEvent(QFocusEvent* pe) override;
     virtual void keyPressEvent(QKeyEvent* pe) override;
+    virtual void mouseMoveEvent(QMouseEvent* pe) override;
 
 signals:
     void pressedEnter(QString);
