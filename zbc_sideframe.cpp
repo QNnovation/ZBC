@@ -170,6 +170,27 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
                 setTextForLblDirInfo(plblDirInfo);
             });
 
+//Click on LineEdit under text
+    connect(pledCurPath,
+            &ZBC_LineEdit::mouseClicked,
+            [=](QString newVal){
+//                qDebug() << newVal;
+                QDir tmpDir(newVal);
+                if (tmpDir.exists()){
+                    ptreeView->setRootIndex(QModelIndex( psfpModel->mapFromSource(
+                                                             pfsmModel->index(newVal))));
+                    m_sCurPath = QDir::toNativeSeparators( pfsmModel->filePath(
+                                                               psfpModel->mapToSource(ptreeView->rootIndex())) );
+                    m_lstPathHistory.push_front(m_sCurPath);
+                    m_iterPathHistory = m_lstPathHistory.constBegin();
+                    stlSelectedItems.clear();
+                    pledCurPath->setText(m_sCurPath);
+                    setTextForLblDirInfo(plblDirInfo);
+                    emit Active();
+                }
+        });
+
+
 //Enter pressed on LineEdit with current path
     connect(pledCurPath,
             &ZBC_LineEdit::pressedEnter,
