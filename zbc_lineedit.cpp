@@ -4,11 +4,14 @@
 
 #include <QFontMetrics>
 #include <QKeyEvent>
-#include <QPair>
+//#include <QPair>
+#include <QPainter>
 
 //C-tor
 ZBC_LineEdit::ZBC_LineEdit(QWidget* pwgt) : QLineEdit(pwgt)
 {
+    m_Iter = 0;
+    m_strText = this->text();
     m_pltBackground.setColor(QPalette::Base, QColor(192, 192, 192));
     this->setPalette(m_pltBackground);
     QFont curFont = this->font();
@@ -63,50 +66,59 @@ void ZBC_LineEdit::keyPressEvent(QKeyEvent *pe)
 /*virtual*/ void ZBC_LineEdit::mouseMoveEvent(QMouseEvent *pe)
 {
     QFontMetrics fm(this->font());
+// IF cursor under the text
     if ( pe->x() <= fm.width(this->text()) ){
+
+//Fill new list with folders
         QStringList folders = this->text().split("\\");
 //        qDebug() << folders;
-        QList< QPair<QString, int> > lstPair;
+
+//Fill new list of pairs with full path of parent folders and it length in pexels
+//        QList< QPair<QString, int> > lstPair;
+        m_lstPair.clear();
         int tmpLength = 0;
         int slashLength = fm.width("\\");
         for( QString str : folders ){
-            lstPair.push_back( QPair<QString, int>(str, tmpLength += (fm.width(str)) + slashLength) );
+//            lstPair.push_back( QPair<QString, int>(str, tmpLength += (fm.width(str)) + slashLength) );
+            m_lstPair.push_back( QPair<QString, int>(str, tmpLength += (fm.width(str)) + slashLength) );
         }
-        lstPair.last().second -= slashLength;
+//        lstPair.last().second -= slashLength;
+        m_lstPair.last().second -= slashLength;
+
 //        qDebug() << fm.width(this->text());
 //        qDebug() << pe->x();
-//        qDebug() << lstPair;
+//        qDebug() << m_lstPair;
 
+//Get full path of folder under mouse and set true to attribute m_bOverText for repaint widget
         int startX = 0;
-        for( QList< QPair<QString, int> >::const_iterator topIter = lstPair.begin();
-             topIter != lstPair.end();
+        for( clstpair_Iter topIter = m_lstPair.begin();
+//        for( QList< QPair<QString, int> >::const_iterator topIter = lstPair.begin();
+//             topIter != lstPair.end();
+             topIter != m_lstPair.end();
              ++topIter){
             if((pe->x() > startX) && ( pe->x() <= topIter->second )){
 //                qDebug() << topIter->first;
                 m_strTargetDir = QString();
-                for( QList< QPair<QString, int> >::const_iterator it = lstPair.begin();
+//                for( QList< QPair<QString, int> >::const_iterator it = lstPair.begin();
+                for( clstpair_Iter it = m_lstPair.begin();
                      it != topIter;
                      ++it){
                     m_strTargetDir += it->first;
                     m_strTargetDir += "\\";
                 }
-/*                this->setText(targetDir+
-                              "<I> "+
-                              topIter->first+
-                              "</I>");
-*/
                 m_strTargetDir += topIter->first;
                 m_bOverText = true;
-                qDebug() << m_strTargetDir;
-
+                m_Iter = topIter;
+                this->repaint();
+//                qDebug() << m_strTargetDir;
             }
             startX = topIter->second;
         }
-
     }
     else{
         m_bOverText = false;
-        qDebug() << "Out";
+        this->repaint();
+//        qDebug() << "Out";
     }
 
     QLineEdit::mouseMoveEvent(pe);
@@ -117,7 +129,7 @@ void ZBC_LineEdit::keyPressEvent(QKeyEvent *pe)
 /*virtual*/ void ZBC_LineEdit::mousePressEvent(QMouseEvent *pe)
 {
     if (m_bOverText){
-        qDebug() << m_strTargetDir;
+//        qDebug() << m_strTargetDir;
         emit mouseClicked(m_strTargetDir);
     }
 
@@ -125,6 +137,31 @@ void ZBC_LineEdit::keyPressEvent(QKeyEvent *pe)
 }
 
 
+//HighLight text under mouse
+/*virtual*/ void ZBC_LineEdit::paintEvent(QPaintEvent *pe)
+{
+/*
+    if (m_bOverText){
+        m_rect = pe->rect();
+        m_pltBackground = this->palette();
+        m_strPath = this->text();
+
+
+        QBrush brush(Qt::red);
+        QPainter painter(this);
+
+        painter.setBrush(brush);
+        painter.drawRect(m_rect);
+
+        qDebug() << "paintEvent";
+    }
+    else{
+        this->setPalette(m_pltBackground);
+        this->setText(m_strText);
+    }
+*/
+    QLineEdit::paintEvent(pe);
+}
 
 
 
