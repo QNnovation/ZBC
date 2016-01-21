@@ -2,8 +2,6 @@
 #define ZBC_LINEEDIT_H
 
 #include <QLineEdit>
-//#include <QPair>
-//#include <QList>
 
 typedef QList< QPair<QString, int> > lstPair;
 typedef QList< QPair<QString, int> >::const_iterator clstpair_Iter ;
@@ -14,7 +12,7 @@ class ZBC_LineEdit : public QLineEdit
 
 private:
     QPalette                        m_pltBackground;
-    QRect                           m_rect;
+    QTextCharFormat                 defaultFormat;
     QString                         m_strText;
 
 
@@ -22,7 +20,7 @@ private:
     QString                         m_strTargetDir;
     bool                            m_bOverText;
     lstPair                         m_lstPair;
-    clstpair_Iter                   m_Iter;
+//    clstpair_Iter                   m_Iter;
 
 public:
     explicit ZBC_LineEdit(QWidget* pwgt);
@@ -33,7 +31,9 @@ protected:
     virtual void keyPressEvent(QKeyEvent* pe) override;
     virtual void mouseMoveEvent(QMouseEvent* pe) override;
     virtual void mousePressEvent(QMouseEvent* pe) override;
-    virtual void paintEvent(QPaintEvent* pe) override;
+
+    void highlightText(const QStringList&);
+    void unHightlightText();
 
 signals:
     void pressedEnter(QString);
