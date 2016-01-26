@@ -11,7 +11,7 @@
 //C-tor
 ZBC_LineEdit::ZBC_LineEdit(QWidget* pwgt) : QLineEdit(pwgt)
 {
-//    m_Iter = 0;
+    this->setReadOnly(true);
     m_strText = this->text();
     m_pltBackground.setColor(QPalette::Base, QColor(192, 192, 192));
     this->setPalette(m_pltBackground);
@@ -19,11 +19,12 @@ ZBC_LineEdit::ZBC_LineEdit(QWidget* pwgt) : QLineEdit(pwgt)
     curFont.setBold(true);
     defaultFormat = QTextCharFormat();
     this->setFont(curFont);
+    this->installEventFilter(this);
 }
 
 
-//
-void ZBC_LineEdit::mouseDoubleClickEvent(QMouseEvent *pe)
+//Override for enable input
+/*virtual*/ void ZBC_LineEdit::mouseDoubleClickEvent(QMouseEvent *pe)
 {
     this->setReadOnly(false);
     m_pltBackground.setColor(QPalette::Base, QColor(255, 255, 255));
@@ -35,8 +36,8 @@ void ZBC_LineEdit::mouseDoubleClickEvent(QMouseEvent *pe)
 }
 
 
-//Focus out
-void ZBC_LineEdit::focusOutEvent(QFocusEvent *pe)
+//Override for processing unfinished input
+/*virtual*/ void ZBC_LineEdit::focusOutEvent(QFocusEvent *pe)
 {
     if (!this->isReadOnly()){
         this->setReadOnly(true);
@@ -109,7 +110,6 @@ void ZBC_LineEdit::keyPressEvent(QKeyEvent *pe)
                         strLastPart += strSlash;
                 }
                 lststrHighlight.push_back(strLastPart);
-                qDebug() << lststrHighlight;
                 highlightText(lststrHighlight);
             }
             startX = topIter->second;
@@ -136,6 +136,40 @@ void ZBC_LineEdit::keyPressEvent(QKeyEvent *pe)
 
 
 //
+//Approach got there http://www.prog.org.ru/topic_8514_0.html
+/*virtual*/ void ZBC_LineEdit::inputMethodEvent(QInputMethodEvent *pe)
+{
+    bool wasReadOnly = isReadOnly();
+    if(wasReadOnly){
+        setReadOnly(false);
+        setCursor(defaultCursor);
+    }
+
+    QLineEdit::inputMethodEvent(pe);
+
+    setReadOnly(wasReadOnly);
+}
+
+
+//
+//Approach got there http://www.prog.org.ru/topic_8514_0.html
+static void testh(const QList<QTextLayout::FormatRange>& lst, QLineEdit* led)
+{
+    QList<QInputMethodEvent::Attribute> attributes;
+    for(QTextLayout::FormatRange formatRange : lst){
+        QInputMethodEvent::AttributeType type = QInputMethodEvent::TextFormat;
+        int start = formatRange.start - led->cursorPosition();
+        int length = formatRange.length;
+        QVariant value = formatRange.format;
+        attributes.append(QInputMethodEvent::Attribute(type, start, length, value));
+    }
+
+    QInputMethodEvent event(QString(), attributes);
+    QCoreApplication::sendEvent(led, &event);
+}
+
+
+//
 void ZBC_LineEdit::highlightText(const QStringList& lst)
 {
     QList<QTextLayout::FormatRange> lstFormats{};
@@ -148,8 +182,8 @@ void ZBC_LineEdit::highlightText(const QStringList& lst)
 
     QTextCharFormat textCharFormat;
     textCharFormat.setFontWeight(QFont::Bold);
-    textCharFormat.setForeground(Qt::red);
-    textCharFormat.setBackground(Qt::yellow);
+    textCharFormat.setForeground(Qt::darkBlue);
+    textCharFormat.setFontUnderline(true);
     formatRange.start = lst.at(0).length();
     formatRange.length = lst.at(1).length();
     formatRange.format = textCharFormat;
@@ -160,20 +194,9 @@ void ZBC_LineEdit::highlightText(const QStringList& lst)
     formatRange.format = defaultFormat;
     lstFormats.push_back(formatRange);
 
-    QList<QInputMethodEvent::Attribute> attributes;
-    for(QTextLayout::FormatRange formatRange : lstFormats){
-        QInputMethodEvent::AttributeType type = QInputMethodEvent::TextFormat;
-        int start = formatRange.start;// - this->cursorPosition();
-        int length = formatRange.length;
-        QVariant value = formatRange.format;
-        attributes.append(QInputMethodEvent::Attribute(type, start, length, value));
-    }
-
-    QInputMethodEvent event(QString(), attributes);
-    QCoreApplication::sendEvent(this, &event);
-
-    qDebug() << "highlightText";
+    testh(lstFormats, this);
 }
+
 
 
 //
@@ -190,8 +213,7 @@ void ZBC_LineEdit::unHightlightText()
     QList<QInputMethodEvent::Attribute> attributes;
     for(QTextLayout::FormatRange formatRange : lstFormats){
         QInputMethodEvent::AttributeType type = QInputMethodEvent::TextFormat;
-//        int start = formatRange.start - this->cursorPosition();
-        int start = formatRange.start;
+        int start = formatRange.start - this->cursorPosition();
         int length = formatRange.length;
         QVariant value = formatRange.format;
         attributes.append(QInputMethodEvent::Attribute(type, start, length, value));
@@ -199,11 +221,19 @@ void ZBC_LineEdit::unHightlightText()
 
     QInputMethodEvent event(QString(), attributes);
     QCoreApplication::sendEvent(this, &event);
-
-    qDebug() << "unHightlightText";
 }
 
 
+//Overrride for get mouse leave event and set default QTextCharFormat
+/*virtual*/ bool ZBC_LineEdit::eventFilter(QObject *pobj, QEvent *pe)
+{
+    if (pe->type() == QEvent::Leave){
+        unHightlightText();
+        m_bOverText = false;
+    }
+
+    return QLineEdit::eventFilter(pobj, pe);
+}
 
 
 

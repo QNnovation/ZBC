@@ -92,7 +92,7 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
 
 //LineEdit with current path
     ZBC_LineEdit* pledCurPath      = new ZBC_LineEdit(this);
-    pledCurPath->setReadOnly(true);
+//    pledCurPath->setReadOnly(true);
 //    pledCurPath->setFocusPolicy(Qt::NoFocus);
     pledCurPath->setText(this->m_sCurPath);
 

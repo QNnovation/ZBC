@@ -13,6 +13,7 @@ class ZBC_LineEdit : public QLineEdit
 private:
     QPalette                        m_pltBackground;
     QTextCharFormat                 defaultFormat;
+    QCursor                         defaultCursor;
     QString                         m_strText;
 
 
@@ -31,6 +32,9 @@ protected:
     virtual void keyPressEvent(QKeyEvent* pe) override;
     virtual void mouseMoveEvent(QMouseEvent* pe) override;
     virtual void mousePressEvent(QMouseEvent* pe) override;
+    virtual void inputMethodEvent(QInputMethodEvent* pe) override;
+    virtual bool eventFilter(QObject* pobj, QEvent* pe) override;
+
 
     void highlightText(const QStringList&);
     void unHightlightText();
