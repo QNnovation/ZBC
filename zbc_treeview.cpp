@@ -1,5 +1,3 @@
-#include <QDebug>
-
 #include "zbc_treeview.h"
 
 #include <QPainter>

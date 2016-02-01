@@ -15,13 +15,10 @@ private:
     QTextCharFormat                 defaultFormat;
     QCursor                         defaultCursor;
     QString                         m_strText;
-
-
     QString                         m_strPath;
     QString                         m_strTargetDir;
     bool                            m_bOverText;
     lstPair                         m_lstPair;
-//    clstpair_Iter                   m_Iter;
 
 public:
     explicit ZBC_LineEdit(QWidget* pwgt);
@@ -34,7 +31,6 @@ protected:
     virtual void mousePressEvent(QMouseEvent* pe) override;
     virtual void inputMethodEvent(QInputMethodEvent* pe) override;
     virtual bool eventFilter(QObject* pobj, QEvent* pe) override;
-
 
     void highlightText(const QStringList&);
     void unHightlightText();

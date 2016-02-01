@@ -1,5 +1,3 @@
-#include <QDebug>
-
 #include "zbc_drivebuttonswidget.h"
 #include "zbc_filesystemmodel.h"
 #include "zbc_sideframe.h"
@@ -174,7 +172,6 @@ ZBC_SideFrame::ZBC_SideFrame(const QString path, QWidget *pwgt) : QFrame(pwgt)
     connect(pledCurPath,
             &ZBC_LineEdit::mouseClicked,
             [=](QString newVal){
-//                qDebug() << newVal;
                 QDir tmpDir(newVal);
                 if (tmpDir.exists()){
                     ptreeView->setRootIndex(QModelIndex( psfpModel->mapFromSource(

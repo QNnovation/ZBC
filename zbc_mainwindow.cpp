@@ -1,5 +1,3 @@
-//#include <QDebug>
-
 #include "zbc_styles.h"
 #include "zbc_mainwindow.h"
 #include "zbc_centralwidget.h"
@@ -157,16 +155,6 @@ ZBC_MainWindow::ZBC_MainWindow(QWidget* pwgt) : QMainWindow(pwgt)
                     pprcCmd->startDetached("taskmgr.exe");
                 });
 
-//Run regedit.exe !!! Doesn't work!!!
-/*
-        connect(pactRegedit,
-                &QAction::triggered,
-                [=](){
-                    QProcess* pprcCmd   = new QProcess(this);
-                    pprcCmd->startDetached("regedit.exe");
-                    qDebug() << "regedit.exe";
-                });
-*/
 
         connect(this,
                 &ZBC_MainWindow::mainWindowClose,

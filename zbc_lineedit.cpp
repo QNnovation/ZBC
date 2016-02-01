@@ -1,5 +1,3 @@
-#include <QDebug>
-
 #include "zbc_lineedit.h"
 
 #include <QCoreApplication>
@@ -153,23 +151,21 @@ void ZBC_LineEdit::keyPressEvent(QKeyEvent *pe)
 
 //
 //Approach got there http://www.prog.org.ru/topic_8514_0.html
-static void testh(const QList<QTextLayout::FormatRange>& lst, QLineEdit* led)
+static void highlightEvent(const QList<QTextLayout::FormatRange>& lst, QLineEdit* led)
 {
     QList<QInputMethodEvent::Attribute> attributes;
-    for(QTextLayout::FormatRange formatRange : lst){
-        QInputMethodEvent::AttributeType type = QInputMethodEvent::TextFormat;
-        int start = formatRange.start - led->cursorPosition();
-        int length = formatRange.length;
-        QVariant value = formatRange.format;
-        attributes.append(QInputMethodEvent::Attribute(type, start, length, value));
-    }
+    for(QTextLayout::FormatRange formatRange : lst)
+        attributes.append(QInputMethodEvent::Attribute(QInputMethodEvent::TextFormat,
+                                                       formatRange.start - led->cursorPosition(),
+                                                       formatRange.length,
+                                                       QVariant(formatRange.format)));
 
     QInputMethodEvent event(QString(), attributes);
     QCoreApplication::sendEvent(led, &event);
 }
 
 
-//
+//Highlight text under mouse
 void ZBC_LineEdit::highlightText(const QStringList& lst)
 {
     QList<QTextLayout::FormatRange> lstFormats{};
@@ -194,12 +190,11 @@ void ZBC_LineEdit::highlightText(const QStringList& lst)
     formatRange.format = defaultFormat;
     lstFormats.push_back(formatRange);
 
-    testh(lstFormats, this);
+    highlightEvent(lstFormats, this);
 }
 
 
-
-//
+//Disable highlighting text
 void ZBC_LineEdit::unHightlightText()
 {
     QList<QTextLayout::FormatRange> lstFormats{};
@@ -210,17 +205,7 @@ void ZBC_LineEdit::unHightlightText()
     formatRange.format = defaultFormat;
     lstFormats.push_back(formatRange);
 
-    QList<QInputMethodEvent::Attribute> attributes;
-    for(QTextLayout::FormatRange formatRange : lstFormats){
-        QInputMethodEvent::AttributeType type = QInputMethodEvent::TextFormat;
-        int start = formatRange.start - this->cursorPosition();
-        int length = formatRange.length;
-        QVariant value = formatRange.format;
-        attributes.append(QInputMethodEvent::Attribute(type, start, length, value));
-    }
-
-    QInputMethodEvent event(QString(), attributes);
-    QCoreApplication::sendEvent(this, &event);
+    highlightEvent(lstFormats, this);
 }
 
 
